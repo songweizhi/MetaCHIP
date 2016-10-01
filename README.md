@@ -24,6 +24,9 @@ Dependencies:
 + [FastTree 2.1.9](http://www.microbesonline.org/fasttree/)
 + [AnGST](https://github.com/almlab/angst)
 + [Ranger-DTL 1.0](http://compbio.mit.edu/ranger-dtl/)
++ [Prokka](http://www.vicbioinformatics.com/software.prokka.shtml)
++ [PhyloSift](https://phylosift.wordpress.com)
+
 
 Prepare input files:
 ---
@@ -44,11 +47,7 @@ Prepare input files:
 
         [DEPENDENCIES]
         programs_for_HGT_prediction = Ranger-DTL AnGST
-        path_to_muscle_executable = /Users/weizhisong/Softwares/Muscle/muscle
-        path_to_phyml_executable = /Users/weizhisong/Softwares/PhyML/PhyML_mac
-        path_to_fasttree_executable = /Users/weizhisong/Softwares/FastTree/FastTree
         path_to_AnGST_executable = /Users/weizhisong/Softwares/angst/angst_lib/AnGST.py
-        path_to_clustalo_executable = /Users/weizhisong/Softwares/Clustal_Omega/clustalo
         path_to_Ranger_executable = /Users/weizhisong/Softwares/Ranger-DTL/ranger-dtl-U.mac
         path_to_gblocks_executable = /Users/weizhisong/Softwares/Gblocks/Gblocks_0.91b/Gblocks
         path_to_alignment_filter_script = /Users/weizhisong/Softwares/Gblocks/alignment_filter.py
@@ -93,8 +92,16 @@ Prepare input files:
 How to run it:
 ---
 
-+ MetaCHIP is a python3 pipeline!
-+ All input files must be placed in working directory!
++ MetaCHIP scripts are implemented in python3, please use python3 instead of python.
++ All input files need to be placed in working directory!
+
+        # modules need to be loaded first
+        module load python/3.4.3
+        module load blast+/2.2.31
+        module load muscle/3.8.31
+        module load phyml/20120412
+        module load fasttree/2.1.7
+        module load clustalo/1.2.2
 
         # first:
         python3 MetaCHIP.py
