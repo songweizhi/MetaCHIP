@@ -87,7 +87,7 @@ Prepare input files:
         # 3. Add your genomes at the end of the names.dmp and nodes.dmp files according to their formats.
 
         # 4. Compress customized taxonomy database.
-        tar - names.dmp nodes.dmp
+        tar -czf names.dmp nodes.dmp merged.dmp
 
 How to run it:
 ---

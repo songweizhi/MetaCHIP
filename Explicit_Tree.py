@@ -13,7 +13,7 @@ from lib.Bin_record_class import BinRecord
 ############################################## Read in configuration file ##############################################
 
 config = configparser.ConfigParser()
-config.read('/Users/weizhisong/Desktop/working_directory/config.txt')
+config.read('/Users/songweizhi/Desktop/working_directory/config.txt')
 working_directory = config['FILES_AND_PARAMETERS']['working_directory']
 ffn_file = config['FILES_AND_PARAMETERS']['ffn_file']
 grouping_file = config['FILES_AND_PARAMETERS']['grouping_file']

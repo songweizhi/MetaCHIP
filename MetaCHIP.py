@@ -13,7 +13,7 @@ from lib.act_ploter import get_gbk_blast_act
 ############################################## Read in configuration file ##############################################
 
 config = configparser.ConfigParser()
-config.read('/Users/weizhisong/Desktop/working_directory/config.txt')
+config.read('/Users/songweizhi/Desktop/working_directory/config.txt')
 working_directory = config['FILES_AND_PARAMETERS']['working_directory']
 
 inputs_folder_name = config['FILES_AND_PARAMETERS']['inputs_folder_name']
