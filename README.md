@@ -11,18 +11,15 @@ Dependencies:
 ---
 
 + [BioPython](https://github.com/biopython/biopython.github.io/)
-+ [ETE3](http://etetoolkit.org) (requires [PyQt4](https://www.riverbankcomputing.com/software/pyqt/download), Please see the manual in "doc" for how to install it on Mac).
++ [ETE3](http://etetoolkit.org)
 + [Numpy](http://www.numpy.org)
 + [SciPy](https://www.scipy.org)
 + [Matplotlib](http://matplotlib.org)
 + [Pillow 3.3.1](https://pypi.python.org/pypi/Pillow/3.3.1)
 + [ReportLab](http://www.reportlab.com)
-+ [Muscle 3.8.31](http://www.drive5.com/muscle/)
 + [Clustal Omega 1.2.3](http://www.clustal.org/omega/)
 + [Gblocks 0.91b](http://molevol.cmima.csic.es/castresana/Gblocks.html)
-+ [Phyml 3.0](http://www.atgc-montpellier.fr/phyml/binaries.php)
 + [FastTree 2.1.9](http://www.microbesonline.org/fasttree/)
-+ [AnGST](https://github.com/almlab/angst)
 + [Ranger-DTL 1.0](http://compbio.mit.edu/ranger-dtl/)
 + [Prokka](http://www.vicbioinformatics.com/software.prokka.shtml)
 + [PhyloSift](https://phylosift.wordpress.com)

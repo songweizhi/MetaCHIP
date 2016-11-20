@@ -33,9 +33,6 @@ programs_for_HGT_prediction = config['DEPENDENCIES']['programs_for_HGT_predictio
 pwd_AnGST_exe = config['DEPENDENCIES']['path_to_AnGST_executable']
 pwd_ranger_exe = config['DEPENDENCIES']['path_to_Ranger_executable']
 
-########################################################################################################################
-
-
 ############################################### Define folder/file name ################################################
 
 wd = working_directory
