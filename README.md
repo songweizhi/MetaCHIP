@@ -3,7 +3,7 @@ MetaCHIP (Community level Hgt Identification Pipeline)
 
 This pipeline was developed to identify HGTs at community level by the combination of best Blast matches and explicit phylogenetic methods.
 
-+ Author: Weizhi Song (weizhi.song@student.unsw.edu.au)
++ Author: Weizhi Song (songwz03@gmail.com)
 
 + Affiliation: The Centre for Marine Bio-Innovation (CMB), The University of  New South Wales, Sydney, Australia
 

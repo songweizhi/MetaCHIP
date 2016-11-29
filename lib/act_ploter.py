@@ -14,7 +14,7 @@ def set_contig_track_features(gene_contig, name_group_dict, candidate_list, feat
         if feature.type == "CDS":
             # define label color
             if feature.qualifiers['locus_tag'][0] in candidate_list:
-                label_color = colors.red
+                label_color = colors.blue
             else:
                 label_color = colors.black
             # change gene name
