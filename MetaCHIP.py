@@ -13,7 +13,7 @@ from lib.act_ploter import get_gbk_blast_act
 ############################################## Read in configuration file ##############################################
 
 config = configparser.ConfigParser()
-config.read('/Users/songweizhi/Desktop/working_directory/config.txt')
+config.read('/Users/songweizhi/Desktop/MetaCHIP_wd/simulated_dataset/original/config.txt')
 working_directory = config['FILES_AND_PARAMETERS']['working_directory']
 
 inputs_folder_name = config['FILES_AND_PARAMETERS']['inputs_folder_name']
@@ -41,8 +41,9 @@ def get_all_identity_list(blast_results, genome_list, alignment_length_cutoff, c
     all_identities = []
     counted_match = []
     n = 1
+    float("{0:.2f}".format(total_match_number/1000))
     for match in matches:
-        stdout.write('\r%s blast matches detected in total, filtering the %sth' % (total_match_number, n))
+        stdout.write('\r%s x 1000 blast matches detected in total, filtering the %s x 1000th' % (float("{0:.2f}".format(total_match_number/1000)), float("{0:.2f}".format(n/1000))))
         match_split = match.strip().split('\t')
         query = match_split[0]
         subject = match_split[1]
@@ -52,8 +53,9 @@ def get_all_identity_list(blast_results, genome_list, alignment_length_cutoff, c
         subject_len = int(match_split[13])
         query_split = query.split('_')
         subject_split = subject.split('_')
-        query_bin_name = '%s_%s' % (query_split[0], query_split[1])
-        subject_bin_name = '%s_%s' % (subject_split[0], subject_split[1])
+        query_bin_name = '_'.join(query_split[:-1])
+        subject_bin_name = '_'.join(subject_split[:-1])
+
         coverage_q = float("{0:.2f}".format(float(align_len)*100/float(query_len)))
         coverage_s = float("{0:.2f}".format(float(align_len)*100/float(subject_len)))
         query_name_subject_name = '%s_%s' % (query, subject)
@@ -78,6 +80,7 @@ def get_all_identity_list(blast_results, genome_list, alignment_length_cutoff, c
         else:
             pass
         n += 1
+
     out_temp.close()
     return all_identities
 
@@ -207,7 +210,6 @@ for each_bin in grouping:
     name_to_group_number_dict[bin_name] = bin_group_number
     name_to_group_dict[bin_name] = bin_group
 
-
 ####################################################### Main code ######################################################
 sleep(1.5)
 print('Plotting overall identity distribution')
@@ -215,6 +217,7 @@ print('Plotting overall identity distribution')
 # get qualified identities after alignment length and coverage filter (self-match excluded)
 all_identities = get_all_identity_list(path_to_blast_results, genome_name_list, align_len_cutoff, cover_cutoff, pwd_qual_iden_file)
 
+# print('debug!!!>_<!!!')
 
 # plot overall identity distribution
 all_identities_plot_title = 'All_vs_All'
@@ -244,8 +247,8 @@ for each_identity in qualified_identities:
     identity = float(each_identity_split[2])
     query_split = query.split('_')
     subject_split = subject.split('_')
-    query_genome_name = '%s_%s' % (query_split[0], query_split[1])
-    subject_genome_name = '%s_%s' % (subject_split[0], subject_split[1])
+    query_genome_name = '_'.join(query_split[:-1])
+    subject_genome_name = '_'.join(subject_split[:-1])
     query_group = name_to_group_number_dict[query_genome_name].split('_')[0]
     subject_group = name_to_group_number_dict[subject_genome_name].split('_')[0]
     paired_group_list = [query_group, subject_group]
@@ -309,10 +312,10 @@ for qualified_identity in qualified_identities_no_cutoff:
     qualified_identity_split = qualified_identity.strip().split('\t')
     query = qualified_identity_split[0]
     query_split = query.split('_')
-    query_bin = '%s_%s' % (query_split[0], query_split[1])
+    query_bin = '_'.join(query_split[:-1])
     subject = qualified_identity_split[1]
     subject_split = subject.split('_')
-    subject_bin = '%s_%s' % (subject_split[0], subject_split[1])
+    subject_bin = '_'.join(subject_split[:-1])
     identity = float(qualified_identity_split[2])
     file_write = '%s|%s\t%s|%s|%s\n' % (name_to_group_number_dict[query_bin], query, name_to_group_number_dict[subject_bin], subject, str(identity))
     qualified_matches_with_group.write(file_write)
@@ -344,16 +347,38 @@ for match in matches:
         if gene not in all_candidates_genes:
             all_candidates_genes.append(gene)
 
+# print('!!!!!!')
+# print(all_candidates_genes)
+# print(len(all_candidates_genes))
+# print('!!!!!!')
+
 # get subset of combined gbk file
 gbk_subset = open(pwd_gbk_subset_file, 'w')
 records = SeqIO.parse(path_to_gbk_file, 'genbank')
+records_recorded = []
+
+
+
+
+
 for record in records:
-        for gene_f in record.features:
-            if 'locus_tag' in gene_f.qualifiers:
-                for gene_r in all_candidates_genes:
-                    if gene_r in gene_f.qualifiers["locus_tag"]:
+    record_id = record.id
+    for gene_f in record.features:
+        if 'locus_tag' in gene_f.qualifiers:
+            #print(gene_f.qualifiers["locus_tag"])
+            for gene_r in all_candidates_genes:
+                if gene_r in gene_f.qualifiers["locus_tag"]:
+                    if record_id not in records_recorded:
                         SeqIO.write(record, gbk_subset, 'genbank')
+                        records_recorded.append(record_id)
+                    else:
+                        pass
+
 gbk_subset.close()
+
+
+
+
 
 # create folder to hold ACT output
 os.makedirs(pwd_op_act_folder)

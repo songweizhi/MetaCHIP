@@ -3,10 +3,17 @@ from Bio.Graphics import GenomeDiagram
 from Bio.Graphics.GenomeDiagram import test_GenomeDiagram, Diagram
 from reportlab.lib import colors
 from reportlab.lib.units import cm
-
+# test_GenomeDiagram.py (https://github.com/biopython/biopython/blob/master/Tests/test_GenomeDiagram.py)
+# download test_GenomeDiagram.py and copy it to folder "Bio/Graphics/GenomeDiagram/".
 # /Library/Frameworks/Python.framework/Versions/3.4/lib/python3.4/site-packages/Bio/Graphics/GenomeDiagram/
 
-contig = SeqIO.read('/Users/weizhisong/Desktop/working_directory/output_75%_200bp_80%_gbk/amphiroa_bin24_00031___caulerpa_bin21_01365/caulerpa_bin21_01365.gbk', "genbank")
+contig = SeqIO.read('/Users/songweizhi/Desktop/test.gbk', "genbank")
+
+
+
+
+
+
 
 diagram = GenomeDiagram.Diagram()
 
@@ -44,7 +51,13 @@ gc_content_set = gc_content_track.new_set(type = "graph")
 feature_set = gene_content_track.new_set(type = 'feature')
 
 step = len(contig)//500
-gc_content_set.new_graph(test_GenomeDiagram.apply_to_window(contig.seq, step, test_GenomeDiagram.calc_gc_content, step), 'GC content', style= 'bar', color=colors.lightgreen, altcolor=colors.darkseagreen)
+gc_content_set.new_graph(test_GenomeDiagram.apply_to_window(contig.seq,
+                                                            step,
+                                                            test_GenomeDiagram.calc_gc_content, step),
+                         'GC content',
+                         style= 'bar',
+                         color=colors.lightgreen,
+                         altcolor=colors.darkseagreen)
 
 
 # add features to feature set
@@ -67,4 +80,4 @@ diagram.draw(format = 'linear',
              pagesize=(50 * cm, 20 * cm),
              fragments = 1)
 
-diagram.write('/Users/weizhisong/Desktop/test_1.eps', 'EPS')
+diagram.write('/Users/songweizhi/Desktop/test_1.eps', 'EPS')

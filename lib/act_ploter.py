@@ -17,10 +17,12 @@ def set_contig_track_features(gene_contig, name_group_dict, candidate_list, feat
                 label_color = colors.blue
             else:
                 label_color = colors.black
+
             # change gene name
             bin_name_gbk_split = feature.qualifiers['locus_tag'][0].split('_')
-            bin_name_gbk = bin_name_gbk_split[0] + '_' + bin_name_gbk_split[1]
-            feature.qualifiers['locus_tag'][0] = name_group_dict[bin_name_gbk] + '_' + bin_name_gbk_split[2]
+            bin_name_gbk = '_'.join(bin_name_gbk_split[:-1])
+            feature.qualifiers['locus_tag'][0] = name_group_dict[bin_name_gbk] + '_' + bin_name_gbk_split[-1]
+
             # strands
             if feature.location.strand == 1:
                 label_angle = 45
