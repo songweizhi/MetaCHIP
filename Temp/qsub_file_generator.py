@@ -5,12 +5,12 @@ __author__ = 'weizhisong'
 ###################################### CONFIGURATION ######################################
 
 nodes_number = 1
-ppn_number = 12
-memory = 80
-walltime_needed = '3:59:00'
+ppn_number = 1
+memory = 30
+walltime_needed = '05:59:00'
 email = 'weizhi.song@student.unsw.edu.au'
-modules_needed = ['bowtie/2.2.4']
-output_folder = '/Users/weizhisong/Desktop/qsub_files/'
+modules_needed = ['']
+output_folder = '/Users/songweizhi/Desktop/qsub_files/'
 
 ###########################################################################################
 
@@ -32,7 +32,8 @@ line_4 = '#PBS -l walltime=' + walltime_needed + '\n'
 line_5 = '#PBS -j oe\n'
 line_6 = '#PBS -M ' + email + '\n'
 line_7 = '#PBS -m ae'
-line_8 = '\n\ncd $PBS_O_WORDIR\n'
+#line_8 = '\n\ncd $PBS_O_WORDIR\n'
+line_8 = '\n\ncd /srv/scratch/z5095773/BP_genomes\n'
 header = line_1 + line_2 + line_3 + line_4 + line_5 + line_6 + line_7 + line_8
 
 # Prepare module lines
@@ -42,14 +43,14 @@ for module in modules_needed:
 
 ################################################################
 
-matches = open('/Users/weizhisong/Desktop/unitig_list.txt', 'r')
-for unitig in matches:
-    unitig = unitig.strip()
-    unitig_name = unitig[:-4]
-    part_1 = 'bowtie2 -x /srv/scratch/z5039045/PacBio/index_files/' + unitig_name
-    part_2 = ' -f /srv/scratch/z3452659/ThomasPacBio-Nov15/data/2015-12-03.PacBioAssemblies/SON1053.SP16554.defaultsettings/SON1053.SP16554.hcq.preassembly.fasta'
-    part_3 = ' -S /srv/scratch/z5039045/PacBio/sam_files/' + unitig_name
-    output_file = open(output_folder + 'qsub_' + unitig_name + '.sh', 'w')
-    output_file.write(header + module_lines + part_1 + part_2 + part_3)
-    print('qdel ' + 'qsub_' + unitig_name + '.sh')
-    output_file.close()
+matches = open('/Users/songweizhi/Desktop/access.txt', 'r')
+n = 0
+for each in matches:
+    each = each.strip()
+    handle = open('/Users/songweizhi/Desktop/qsub_files/qsub_%s.sh' % each, 'w')
+    handle.write(header)
+    #handle.write(module_lines)
+    handle.write('/srv/scratch/lanlab/sratoolkit.2.8.1-2-ubuntu64/bin/fastq-dump --gzip --split-files %s' % each)
+    handle.close()
+    n += 1
+print(n)

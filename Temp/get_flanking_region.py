@@ -54,9 +54,9 @@ def plot_gbk(pwd_gbk_file, pwd_plot_file):
 def get_flanking_region(input_gbk_file, HGT_candidate, flanking_length):
 
     wd, gbk_file = os.path.split(input_gbk_file)
-    gbk_file_name, gbk_file_ext = os.path.splitext(gbk_file)
     new_gbk_file = '%s/%s_%sbp_temp.gbk' % (wd, HGT_candidate, flanking_length)
     new_gbk_final_file = '%s/%s_%sbp.gbk' % (wd, HGT_candidate, flanking_length)
+    new_fasta_final_file = '%s/%s_%sbp.fasta' % (wd, HGT_candidate, flanking_length)
     output_plot = '%s/%s_%sbp.eps' % (wd, HGT_candidate, flanking_length)
 
 
@@ -77,12 +77,10 @@ def get_flanking_region(input_gbk_file, HGT_candidate, flanking_length):
                     new_start = gene.location.start - flanking_length
                     if new_start < 0:
                         new_start = 0
-                    #print('New start: %s' % new_start)
                     # get new end point
                     new_end = gene.location.end + flanking_length
                     if new_end > contig_length:
                         new_end = contig_length
-                    #print('New end: %s' % new_end)
 
 
     # get genes within flanking region
@@ -121,6 +119,7 @@ def get_flanking_region(input_gbk_file, HGT_candidate, flanking_length):
     # remove sequences not in flanking region
     new_gbk_full_length = SeqIO.parse(new_gbk_file, "genbank")
     new_gbk_final = open(new_gbk_final_file, 'w')
+    new_fasta_final = open(new_fasta_final_file, 'w')
     for record in new_gbk_full_length:
         # get new sequence
         new_seq = record.seq[new_start:new_end]
@@ -167,7 +166,11 @@ def get_flanking_region(input_gbk_file, HGT_candidate, flanking_length):
                 new_record_features_2.append(gene)
         new_record.features = new_record_features_2
         SeqIO.write(new_record, new_gbk_final, 'genbank')
+        SeqIO.write(new_record, new_fasta_final, 'fasta')
+
+
     new_gbk_final.close()
+    new_fasta_final.close()
 
     os.system('rm %s' % new_gbk_file)
 
