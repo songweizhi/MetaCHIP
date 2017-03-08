@@ -514,7 +514,8 @@ def get_gbk_blast_act(candidates_file, gbk_file, flanking_length, name_to_group_
     n = 1
     for match in matches:
         match = match.strip()
-        genes = sorted(match.split('\t'))
+        #genes = sorted(match.split('\t'))
+        genes = match.split('\t')
         folder_name = '___'.join(genes)
         stdout.write("\rProcessing %dth of %d HGT candidates: %s" % (n, total, folder_name))
         os.mkdir('%s/%s' % (path_to_output_act_folder, folder_name))
@@ -542,8 +543,6 @@ def get_gbk_blast_act(candidates_file, gbk_file, flanking_length, name_to_group_
 
         # Run Blast
         prefix_c = '%s/%s' % (path_to_output_act_folder, folder_name)
-        #query_c = '%s/%s.fasta' % (prefix_c, genes[0])
-        #subject_c = '%s/%s.fasta' % (prefix_c, genes[1])
         output_c = '%s/%s.txt' % (prefix_c, folder_name)
         query_c = '%s/%s_%sbp.fasta' % (prefix_c, genes[0], flanking_length)
         subject_c = '%s/%s_%sbp.fasta' % (prefix_c, genes[1], flanking_length)
@@ -663,6 +662,48 @@ def get_gbk_blast_act(candidates_file, gbk_file, flanking_length, name_to_group_
         n += 1
 
 
+def add_direction(input_file, output_file):
+    input = open(input_file)
+    output = open(output_file, 'w')
+
+    # get overall list
+    overall = []
+    for each in input:
+        overall.append(each.strip())
+
+    # get overlap list
+    tmp_list = []
+    overlap_list = []
+    for each in overall:
+        each_split = each.split('\t')
+        each_reverse = '%s\t%s' % (each_split[1], each_split[0])
+        tmp_list.append(each)
+        if each_reverse in tmp_list:
+            overlap_list.append(each)
+
+    # get non-overlap list
+    non_overlap_list = []
+    for each in overall:
+        each_split = each.split('\t')
+        each_reverse = '%s\t%s' % (each_split[1], each_split[0])
+        if (each not in overlap_list) and (each_reverse not in overlap_list):
+            non_overlap_list.append(each)
+
+    # get output
+    for each in non_overlap_list:
+        each_split = each.split('\t')
+        each_split_0 = each.split('\t')[0]
+        each_split_1 = each.split('\t')[1]
+        each_split_0_bin = each_split_0.split('_')[0]
+        each_split_1_bin = each_split_1.split('_')[0]
+        output.write('%s\t%s<-%s\n' % (each, each_split_0_bin, each_split_1_bin))
+
+    for each in overlap_list:
+        output.write('%s\tN/A\n' % each)
+
+    output.close()
+
+
 ############################################## Read in configuration file ##############################################
 
 parser = argparse.ArgumentParser()
@@ -695,36 +736,38 @@ op_prefix_iden_0 = 'output_al' + str(align_len_cutoff) + 'bp_c' + str(cover_cuto
 op_folder = op_prefix
 wd = working_directory
 
-iden_distrib_plot_folder =              'Identity_distribution_images'
-qual_idens_file =                       'qualified_identities.txt'
-qual_idens_file_gg =                    'qualified_identities_gg.txt'
-qual_idens_file_gg_sorted =             'qualified_identities_gg_sorted.txt'
-unploted_groups_file =                  'unploted_groups.txt'
-qual_idens_with_group_filename =        'qualified_identities_with_group.txt'
-qual_idens_with_group_sorted_filename = 'qualified_identities_with_group_sorted.txt'
-subjects_in_one_line_filename =         'subjects_in_one_line.txt'
-group_pair_iden_cutoff_file_name =      'Identity_cutoff.txt'
-op_candidates_with_group_file_name =    'HGT_candidates_with_group.txt'
-op_candidates_only_gene_file_name =     'HGT_candidates.txt'
-gbk_subset_file =                       'combined_subset.gbk'
-op_act_folder_name =                    'ACT_images'
+iden_distrib_plot_folder =                          'Identity_distribution_images'
+qual_idens_file =                                   'qualified_identities.txt'
+qual_idens_file_gg =                                'qualified_identities_gg.txt'
+qual_idens_file_gg_sorted =                         'qualified_identities_gg_sorted.txt'
+unploted_groups_file =                              'unploted_groups.txt'
+qual_idens_with_group_filename =                    'qualified_identities_with_group.txt'
+qual_idens_with_group_sorted_filename =             'qualified_identities_with_group_sorted.txt'
+subjects_in_one_line_filename =                     'subjects_in_one_line.txt'
+group_pair_iden_cutoff_file_name =                  'Identity_cutoff.txt'
+op_candidates_with_group_file_name =                'HGT_candidates_with_group.txt'
+op_candidates_only_gene_file_name =                 'HGT_candidates.txt'
+op_candidates_only_gene_file_name_with_direction =  'HGT_candidates_with_direction.txt'
+gbk_subset_file =                                   'combined_subset.gbk'
+op_act_folder_name =                                'ACT_images'
 
-pwd_iden_distrib_plot_folder =      '%s/%s/%s'    % (wd, op_folder, iden_distrib_plot_folder)
-pwd_qual_iden_file =                '%s/%s/%s'    % (wd, op_folder, qual_idens_file)
-pwd_qual_iden_file_gg =             '%s/%s/%s'    % (wd, op_folder, qual_idens_file_gg)
-pwd_qual_iden_file_gg_sorted =      '%s/%s/%s'    % (wd, op_folder, qual_idens_file_gg_sorted)
-pwd_unploted_groups_file =          '%s/%s/%s/%s' % (wd, op_folder, iden_distrib_plot_folder, unploted_groups_file)
-pwd_qual_idens_with_group =         '%s/%s/%s'    % (wd, op_folder, qual_idens_with_group_filename)
-pwd_qual_idens_with_group_sorted =  '%s/%s/%s'    % (wd, op_folder, qual_idens_with_group_sorted_filename)
-pwd_subjects_in_one_line =          '%s/%s/%s'    % (wd, op_folder, subjects_in_one_line_filename)
-pwd_group_pair_iden_cutoff_file =   '%s/%s/%s'    % (wd, op_folder, group_pair_iden_cutoff_file_name)
-pwd_op_candidates_with_group_file = '%s/%s/%s'    % (wd, op_folder, op_candidates_with_group_file_name)
-pwd_op_candidates_only_gene_file =  '%s/%s/%s'    % (wd, op_folder, op_candidates_only_gene_file_name)
-pwd_gbk_subset_file =               '%s/%s/%s'    % (wd, op_folder, gbk_subset_file)
-pwd_op_act_folder =                 '%s/%s/%s'    % (wd, op_folder, op_act_folder_name)
-path_to_grouping_file =             '%s/%s'       % (wd, grouping_file)
-path_to_blast_results =             '%s/%s'       % (wd, blast_results)
-path_to_gbk_file =                  '%s/%s'       % (wd, gbk_file_name)
+pwd_iden_distrib_plot_folder =                      '%s/%s/%s'    % (wd, op_folder, iden_distrib_plot_folder)
+pwd_qual_iden_file =                                '%s/%s/%s'    % (wd, op_folder, qual_idens_file)
+pwd_qual_iden_file_gg =                             '%s/%s/%s'    % (wd, op_folder, qual_idens_file_gg)
+pwd_qual_iden_file_gg_sorted =                      '%s/%s/%s'    % (wd, op_folder, qual_idens_file_gg_sorted)
+pwd_unploted_groups_file =                          '%s/%s/%s/%s' % (wd, op_folder, iden_distrib_plot_folder, unploted_groups_file)
+pwd_qual_idens_with_group =                         '%s/%s/%s'    % (wd, op_folder, qual_idens_with_group_filename)
+pwd_qual_idens_with_group_sorted =                  '%s/%s/%s'    % (wd, op_folder, qual_idens_with_group_sorted_filename)
+pwd_subjects_in_one_line =                          '%s/%s/%s'    % (wd, op_folder, subjects_in_one_line_filename)
+pwd_group_pair_iden_cutoff_file =                   '%s/%s/%s'    % (wd, op_folder, group_pair_iden_cutoff_file_name)
+pwd_op_candidates_with_group_file =                 '%s/%s/%s'    % (wd, op_folder, op_candidates_with_group_file_name)
+pwd_op_candidates_only_gene_file =                  '%s/%s/%s'    % (wd, op_folder, op_candidates_only_gene_file_name)
+pwd_op_candidates_only_gene_file_with_direction =   '%s/%s/%s'    % (wd, op_folder, op_candidates_only_gene_file_name_with_direction)
+pwd_gbk_subset_file =                               '%s/%s/%s'    % (wd, op_folder, gbk_subset_file)
+pwd_op_act_folder =                                 '%s/%s/%s'    % (wd, op_folder, op_act_folder_name)
+path_to_grouping_file =                             '%s/%s'       % (wd, grouping_file)
+path_to_blast_results =                             '%s/%s'       % (wd, blast_results)
+path_to_gbk_file =                                  '%s/%s'       % (wd, gbk_file_name)
 
 ########################################################################################################################
 
@@ -866,6 +909,9 @@ get_candidates(pwd_subjects_in_one_line, pwd_op_candidates_with_group_file, pwd_
 
 sleep(1.5)
 print('Get HGT candidates finished and exported to %s and %s' % (op_candidates_with_group_file_name, op_candidates_only_gene_file_name))
+
+# add direction to output file
+add_direction(pwd_op_candidates_only_gene_file, pwd_op_candidates_only_gene_file_with_direction)
 
 
 #################################################### Get ACT images ####################################################

@@ -21,6 +21,7 @@ wd = os.getcwd()
 pwd_genome_folder = '%s/%s' % (wd, genome_folder)
 pwd_abundance_file = '%s/%s' % (wd, abundance_file)
 pwd_GemSIM_wd = '%s/%s' % (wd, GemSIM_wd)
+pwd_qsub_file_folder = '%s/qsub_files' % wd
 
 ###################################### Prepare qsub file header ######################################
 
@@ -51,7 +52,7 @@ number_of_replicates = len(combined_abundance_list[0]) - 1
 
 n = 1
 while n <= number_of_replicates:
-    pwd_qsub_qc_file = '%s/%s/%s/qsub_QC_%s_%s.sh' % (wd, GemSIM_wd, 'qsub_files', prefix, n)
+    pwd_qsub_qc_file = '%s/qsub_QC_%s_%s.sh' % (pwd_qsub_file_folder, prefix, n)
     qsub_qc_handle = open(pwd_qsub_qc_file, 'w')
     pwd_current_replicate_wd = '%s/replicate%s_wd' % (pwd_GemSIM_wd, n)
     fastq_file_R1 = '%s_%s_fir.fastq' % (prefix, n)
@@ -77,7 +78,7 @@ while n <= number_of_replicates:
     qsub_qc_handle.close()
 
     current_wd = os.getcwd()
-    os.chdir('%s/qsub_files' % pwd_GemSIM_wd)
+    os.chdir(pwd_qsub_file_folder)
     os.system('qsub %s' % pwd_qsub_qc_file)
     os.chdir(current_wd)
     n += 1

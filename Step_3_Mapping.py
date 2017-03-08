@@ -20,6 +20,7 @@ maxk = 100
 step = 20
 pwd_select_contig_pl = '/srv/scratch/z5039045/Scripts/select_contig.pl'
 pwd_get_fasta_stats_pl = '/srv/scratch/z5039045/Scripts/get_fasta_stats.pl'
+pwd_bowtie2_build = '/share/apps/bowtie/2.2.9/bowtie2-build'
 min_contig_length = 2500
 
 wd = os.getcwd()
@@ -87,7 +88,6 @@ pwd_combined_R1_fastq_file_name = '%s/%s' % (pwd_IDBA_UD_wd, combined_R1_fastq_f
 pwd_combined_R2_fastq_file_name = '%s/%s' % (pwd_IDBA_UD_wd, combined_R2_fastq_file_name)
 pwd_combined_BP_fasta_file_name = '%s/%s' % (pwd_IDBA_UD_wd, combined_BP_fasta_file_name)
 
-
 idba_ud_output_scaffold = 'scaffold.fa'
 idba_ud_output_scaffold_filtered = 'scaffold_k%s-%s_lt%s.fa' % (mink, maxk, min_contig_length)
 idba_ud_output_scaffold_filtered_no_extension = 'scaffold_k%s-%s_lt%s' % (mink, maxk, min_contig_length)
@@ -97,8 +97,7 @@ pwd_idba_ud_output_scaffold_filtered_no_extension = '%s/%s' % (pwd_Mapping_wd, i
 
 os.system('perl %s -m %s %s %s' % (pwd_select_contig_pl, min_contig_length, pwd_scaffold, pwd_idba_ud_output_scaffold_filtered))
 os.system('perl %s -T %s > %s.txt' % (pwd_get_fasta_stats_pl, pwd_idba_ud_output_scaffold_filtered, pwd_idba_ud_output_scaffold_filtered))
-os.system('module load %s' % 'bowtie/2.2.9')
-os.system('bowtie2-build -f %s %s' % (pwd_idba_ud_output_scaffold_filtered, pwd_idba_ud_output_scaffold_filtered_no_extension))
+os.system('%s -f %s %s' % (pwd_bowtie2_build, pwd_idba_ud_output_scaffold_filtered, pwd_idba_ud_output_scaffold_filtered_no_extension))
 
 n = 1
 while n <= number_of_replicates:
@@ -118,10 +117,8 @@ while n <= number_of_replicates:
     qsub_mapping_file_handle.write('samtools sort %s %s\n' % (pwd_bam_file, pwd_bam_file_sorted))
     qsub_mapping_file_handle.write('samtools index %s.bam\n' % pwd_bam_file_sorted)
     qsub_mapping_file_handle.close()
-
     current_wd = os.getcwd()
     os.chdir('%s/qsub_files' % wd)
     os.system('qsub %s' % pwd_qsub_mapping_file)
     os.chdir(current_wd)
-
     n += 1

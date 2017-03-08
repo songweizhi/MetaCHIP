@@ -57,7 +57,7 @@ line_8 = 'cd ' + working_directory
 header = line_1 + line_2 + line_3 + line_4 + line_5 + line_6 + line_7 + line_8
 
 qsub_blastn_file_name = 'qsub_blastn_combined_ffn.sh'
-blast_qsub_out = open('./' + qsub_blastn_file_name, 'w')
+blast_qsub_out = open('./qsub_files/' + qsub_blastn_file_name, 'w')
 blast_qsub_out.write(header + '\n\n')
 blast_qsub_out.write('module load %s\n' % blast_module)
 blast_parameters = '-evalue 1e-5 -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen" -task blastn'
