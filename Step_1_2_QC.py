@@ -1,24 +1,33 @@
 import os
+import argparse
+import configparser
 
 ###################################### CONFIGURATION ######################################
 
-nodes_number = 1
-ppn_number = 3
-memory = 30
-walltime_needed = '00:59:00'
-email = 'weizhi.song@student.unsw.edu.au'
-modules_needed = ['java/8u91', 'fastqc/0.10.1']
-genome_folder = 'input_genomes'
-abundance_file = 'abundance.txt'
-GemSIM_wd = '1_GemSIM'
-prefix = 'replicate'
+parser = argparse.ArgumentParser()
+config = configparser.ConfigParser()
 
-pwd_trimmomatic_executable = '/share/apps/trimmomatic/0.33/trimmomatic-0.33.jar'
-trimmomatic_parameters = 'ILLUMINACLIP:/share/apps/trimmomatic/0.33/adapters/TruSeq3-PE-2.fa:2:30:10:6:true LEADING:30 TRAILING:30 SLIDINGWINDOW:6:30 MINLEN:50'
+parser.add_argument('-cfg',
+                    required=True,
+                    help='path to configuration file')
+
+args = vars(parser.parse_args())
+pwd_cfg_file = args['cfg']
+config.read(pwd_cfg_file)
+
+nodes_number = int(config['STEP_1_2']['qsub_nodes_1_2'])
+ppn_number = int(config['STEP_1_2']['qsub_ppn_1_2'])
+memory = int(config['STEP_1_2']['qsub_memory_1_2'])
+walltime_needed = config['STEP_1_2']['qsub_walltime_1_2']
+email = config['GENERAL']['qsub_email']
+modules_needed = config['STEP_1_2']['qsub_modules_1_2']
+abundance_file = config['GENERAL']['abundance_file']
+GemSIM_wd = config['GENERAL']['GemSIM_wd']
+prefix = config['STEP_1_1']['prefix']
+pwd_trimmomatic_executable = config['STEP_1_2']['pwd_trimmomatic_executable']
+trimmomatic_parameters = config['STEP_1_2']['trimmomatic_parameters']
 
 wd = os.getcwd()
-#wd = '/Users/songweizhi/Desktop/one_step'
-pwd_genome_folder = '%s/%s' % (wd, genome_folder)
 pwd_abundance_file = '%s/%s' % (wd, abundance_file)
 pwd_GemSIM_wd = '%s/%s' % (wd, GemSIM_wd)
 pwd_qsub_file_folder = '%s/qsub_files' % wd
@@ -36,8 +45,9 @@ line_7 = '#PBS -m ae\n\n'
 header = line_1 + line_2 + line_3 + line_4 + line_5 + line_6 + line_7
 
 # Prepare module lines
+modules_needed_split = modules_needed.split(',')
 module_lines = ''
-for module in modules_needed:
+for module in modules_needed_split:
     module_lines += 'module load ' + module + '\n'
 
 ######################################## Prepare input files ########################################

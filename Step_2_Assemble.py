@@ -1,27 +1,40 @@
 import os
 import shutil
+import argparse
+import configparser
 
 ###################################### CONFIGURATION ######################################
 
-nodes_number = 1
-ppn_number = 3
-memory = 30
-walltime_needed = '02:59:00'
-email = 'weizhi.song@student.unsw.edu.au'
-modules_needed = ['idba/1.1.1']
-genome_folder = 'input_genomes'
-abundance_file = 'abundance.txt'
-GemSIM_wd = '1_GemSIM'
-IDBA_UD_wd = '2_IDBA_UD'
-prefix = 'replicate'
-mink = 20
-maxk = 100
-step = 20
+parser = argparse.ArgumentParser()
+config = configparser.ConfigParser()
 
+parser.add_argument('-cfg',
+                    required=True,
+                    help='path to configuration file')
 
-#wd = os.getcwd()
-wd = '/Users/songweizhi/Desktop/one_step'
-pwd_genome_folder = '%s/%s' % (wd, genome_folder)
+parser.add_argument('-qsub',
+                    action="store_true",
+                    help='submit job script to the queue')
+
+args = vars(parser.parse_args())
+pwd_cfg_file = args['cfg']
+config.read(pwd_cfg_file)
+
+nodes_number = int(config['STEP_2_ASSEMBLE']['qsub_nodes_2'])
+ppn_number = int(config['STEP_2_ASSEMBLE']['qsub_ppn_2'])
+memory = int(config['STEP_2_ASSEMBLE']['qsub_memory_2'])
+walltime_needed = config['STEP_2_ASSEMBLE']['qsub_walltime_2']
+email = config['GENERAL']['qsub_email']
+modules_needed = config['STEP_2_ASSEMBLE']['qsub_modules_2']
+abundance_file = config['GENERAL']['abundance_file']
+GemSIM_wd = config['GENERAL']['GemSIM_wd']
+IDBA_UD_wd = config['GENERAL']['IDBA_UD_wd']
+prefix = config['STEP_1_1']['prefix']
+mink = int(config['STEP_2_ASSEMBLE']['idba_ud_mink'])
+maxk = int(config['STEP_2_ASSEMBLE']['idba_ud_maxk'])
+step = int(config['STEP_2_ASSEMBLE']['idba_ud_step'])
+
+wd = os.getcwd()
 pwd_abundance_file = '%s/%s' % (wd, abundance_file)
 pwd_GemSIM_wd = '%s/%s' % (wd, GemSIM_wd)
 pwd_IDBA_UD_wd = '%s/%s' % (wd, IDBA_UD_wd)
@@ -39,8 +52,9 @@ line_7 = '#PBS -m ae\n\n'
 header = line_1 + line_2 + line_3 + line_4 + line_5 + line_6 + line_7
 
 # Prepare module lines
+modules_needed_split = modules_needed.split(',')
 module_lines = ''
-for module in modules_needed:
+for module in modules_needed_split:
     module_lines += 'module load ' + module + '\n'
 
 ######################################## Prepare input files ########################################
@@ -100,7 +114,9 @@ qsub_idba_ud_file_handle.write('idba_ud --pre_correction --num_threads %s --mink
                                                                                                                                                  maxk))
 
 qsub_idba_ud_file_handle.close()
-current_wd = os.getcwd()
-os.chdir('%s/qsub_files' % wd)
-os.system('qsub %s' % pwd_qsub_idba_ud_file)
-os.chdir(current_wd)
+
+if args['qsub'] == True:
+    current_wd = os.getcwd()
+    os.chdir('%s/qsub_files' % wd)
+    os.system('qsub %s' % pwd_qsub_idba_ud_file)
+    os.chdir(current_wd)

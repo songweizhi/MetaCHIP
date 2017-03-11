@@ -656,9 +656,9 @@ def get_gbk_blast_act(candidates_file, gbk_file, flanking_length, name_to_group_
                          end = max_len)
 
             diagram.write('%s/%s.eps' % (path_to_output_act_folder, folder_name), "EPS")
-            shutil.rmtree('%s/%s' % (path_to_output_act_folder, folder_name), ignore_errors=True)
-            if os.path.isdir('%s/%s' % (path_to_output_act_folder, folder_name)):
-                shutil.rmtree('%s/%s' % (path_to_output_act_folder, folder_name), ignore_errors=True)
+            # shutil.rmtree('%s/%s' % (path_to_output_act_folder, folder_name), ignore_errors=True)
+            # if os.path.isdir('%s/%s' % (path_to_output_act_folder, folder_name)):
+            #     shutil.rmtree('%s/%s' % (path_to_output_act_folder, folder_name), ignore_errors=True)
         n += 1
 
 
@@ -961,13 +961,13 @@ gene_gc_content_dict = get_gbk_blast_act(pwd_op_candidates_only_gene_file, pwd_g
 sleep(1.5)
 print('\nRemove temporary files... ')
 # remove temporary files
-os.remove(pwd_qual_iden_file)
-os.remove(pwd_qual_iden_file_gg)
-os.remove(pwd_qual_iden_file_gg_sorted)
-os.remove(pwd_qual_idens_with_group)
-os.remove(pwd_qual_idens_with_group_sorted)
-os.remove(pwd_subjects_in_one_line)
-os.remove(pwd_gbk_subset_file)
+# os.remove(pwd_qual_iden_file)
+# os.remove(pwd_qual_iden_file_gg)
+# os.remove(pwd_qual_iden_file_gg_sorted)
+# os.remove(pwd_qual_idens_with_group)
+# os.remove(pwd_qual_idens_with_group_sorted)
+# os.remove(pwd_subjects_in_one_line)
+# os.remove(pwd_gbk_subset_file)
 
 sleep(1.5)
 print('All done, enjoy!')
