@@ -1,6 +1,7 @@
 import os
 import shutil
-
+import argparse
+import configparser
 
 usage = """
 
@@ -19,7 +20,7 @@ usage = """
 
 ####################################################### Configuration ##################################################
 
-working_directory = '/srv/scratch/z5039045/MetaCHIP'
+working_directory = os.getcwd()
 path_to_makeblastdb_executable = '/share/apps/blast+/2.2.31/bin/makeblastdb'
 blast_module = 'blast+/2.2.31'
 

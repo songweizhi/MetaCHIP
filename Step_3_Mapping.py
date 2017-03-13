@@ -5,29 +5,37 @@ import configparser
 
 ###################################### CONFIGURATION ######################################
 
-nodes_number = 1
-ppn_number = 3
-memory = 30
-walltime_needed = '02:59:00'
-email = 'weizhi.song@student.unsw.edu.au'
-modules_needed = ['bowtie/2.2.9', 'samtools/1.2']
-genome_folder = 'input_genomes'
-abundance_file = 'abundance.txt'
-GemSIM_wd = '1_GemSIM'
-IDBA_UD_wd = '2_IDBA_UD'
-Mapping_wd = '3_Mapping'
-prefix = 'replicate'
-mink = 20
-maxk = 100
-step = 20
-pwd_select_contig_pl = '/srv/scratch/z5039045/Scripts/select_contig.pl'
-pwd_get_fasta_stats_pl = '/srv/scratch/z5039045/Scripts/get_fasta_stats.pl'
-pwd_bowtie2_build = '/share/apps/bowtie/2.2.9/bowtie2-build'
-min_contig_length = 2500
+parser = argparse.ArgumentParser()
+config = configparser.ConfigParser()
+
+parser.add_argument('-cfg',
+                    required=True,
+                    help='path to configuration file')
+
+args = vars(parser.parse_args())
+pwd_cfg_file = args['cfg']
+config.read(pwd_cfg_file)
+
+nodes_number = int(config['GENERAL']['qsub_nodes'])
+ppn_number = int(config['GENERAL']['qsub_ppn'])
+memory = int(config['STEP_3_MAPPING']['qsub_memory_3'])
+walltime_needed = config['STEP_3_MAPPING']['qsub_walltime_3']
+email = config['GENERAL']['qsub_email']
+modules_needed = config['STEP_3_MAPPING']['qsub_modules_3']
+abundance_file = config['GENERAL']['abundance_file']
+GemSIM_wd = config['GENERAL']['GemSIM_wd']
+IDBA_UD_wd = config['GENERAL']['IDBA_UD_wd']
+Mapping_wd = config['GENERAL']['Mapping_wd']
+prefix = config['GENERAL']['prefix']
+mink = int(config['STEP_2_ASSEMBLE']['idba_ud_mink'])
+maxk = int(config['STEP_2_ASSEMBLE']['idba_ud_maxk'])
+step = int(config['STEP_2_ASSEMBLE']['idba_ud_step'])
+pwd_select_contig_pl = config['STEP_3_MAPPING']['pwd_select_contig_pl']
+pwd_get_fasta_stats_pl = config['STEP_3_MAPPING']['pwd_get_fasta_stats_pl']
+pwd_bowtie2_build = config['STEP_3_MAPPING']['pwd_bowtie2_build']
+min_contig_length = int(config['STEP_3_MAPPING']['min_contig_length'])
 
 wd = os.getcwd()
-#wd = '/Users/songweizhi/Desktop/one_step'
-pwd_genome_folder = '%s/%s' % (wd, genome_folder)
 pwd_abundance_file = '%s/%s' % (wd, abundance_file)
 pwd_GemSIM_wd = '%s/%s' % (wd, GemSIM_wd)
 pwd_IDBA_UD_wd = '%s/%s' % (wd, IDBA_UD_wd)
@@ -46,8 +54,9 @@ line_7 = '#PBS -m ae\n\n'
 header = line_1 + line_2 + line_3 + line_4 + line_5 + line_6 + line_7
 
 # Prepare module lines
+modules_needed_split = modules_needed.split(',')
 module_lines = ''
-for module in modules_needed:
+for module in modules_needed_split:
     module_lines += 'module load ' + module + '\n'
 
 ######################################## Prepare input files ########################################

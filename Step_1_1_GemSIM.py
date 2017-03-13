@@ -16,19 +16,19 @@ args = vars(parser.parse_args())
 pwd_cfg_file = args['cfg']
 config.read(pwd_cfg_file)
 
-nodes_number = int(config['STEP_1_1']['qsub_nodes_1_1'])
-ppn_number = int(config['STEP_1_1']['qsub_ppn_1_1'])
-memory = int(config['STEP_1_1']['qsub_memory_1_1'])
-walltime_needed = config['STEP_1_1']['qsub_walltime_1_1']
+nodes_number = int(config['GENERAL']['qsub_nodes'])
+ppn_number = int(config['GENERAL']['qsub_ppn'])
+memory = int(config['STEP_1_1_GemSIM']['qsub_memory_1_1'])
+walltime_needed = config['STEP_1_1_GemSIM']['qsub_walltime_1_1']
 email = config['GENERAL']['qsub_email']
-modules_needed = config['STEP_1_1']['qsub_modules_1_1']
+modules_needed = config['STEP_1_1_GemSIM']['qsub_modules_1_1']
 genome_folder = config['GENERAL']['genome_folder']
 abundance_file = config['GENERAL']['abundance_file']
 GemSIM_wd = config['GENERAL']['GemSIM_wd']
-prefix = config['STEP_1_1']['prefix']
-pwd_GemReads_executable = config['STEP_1_1']['pwd_GemReads_executable']
-pwd_error_models = config['STEP_1_1']['pwd_error_models']
-GemReads_parameters = config['STEP_1_1']['GemReads_parameters']
+prefix = config['GENERAL']['prefix']
+pwd_GemReads_executable = config['STEP_1_1_GemSIM']['pwd_GemReads_executable']
+pwd_error_models = config['STEP_1_1_GemSIM']['pwd_error_models']
+GemReads_parameters = config['STEP_1_1_GemSIM']['GemReads_parameters']
 
 wd = os.getcwd()
 pwd_genome_folder = '%s/%s' % (wd, genome_folder)

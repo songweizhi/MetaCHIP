@@ -15,17 +15,17 @@ args = vars(parser.parse_args())
 pwd_cfg_file = args['cfg']
 config.read(pwd_cfg_file)
 
-nodes_number = int(config['STEP_1_2']['qsub_nodes_1_2'])
-ppn_number = int(config['STEP_1_2']['qsub_ppn_1_2'])
-memory = int(config['STEP_1_2']['qsub_memory_1_2'])
-walltime_needed = config['STEP_1_2']['qsub_walltime_1_2']
+nodes_number = int(config['GENERAL']['qsub_nodes'])
+ppn_number = int(config['GENERAL']['qsub_ppn'])
+memory = int(config['STEP_1_2_QC']['qsub_memory_1_2'])
+walltime_needed = config['STEP_1_2_QC']['qsub_walltime_1_2']
 email = config['GENERAL']['qsub_email']
-modules_needed = config['STEP_1_2']['qsub_modules_1_2']
+modules_needed = config['STEP_1_2_QC']['qsub_modules_1_2']
 abundance_file = config['GENERAL']['abundance_file']
 GemSIM_wd = config['GENERAL']['GemSIM_wd']
-prefix = config['STEP_1_1']['prefix']
-pwd_trimmomatic_executable = config['STEP_1_2']['pwd_trimmomatic_executable']
-trimmomatic_parameters = config['STEP_1_2']['trimmomatic_parameters']
+prefix = config['GENERAL']['prefix']
+pwd_trimmomatic_executable = config['STEP_1_2_QC']['pwd_trimmomatic_executable']
+trimmomatic_parameters = config['STEP_1_2_QC']['trimmomatic_parameters']
 
 wd = os.getcwd()
 pwd_abundance_file = '%s/%s' % (wd, abundance_file)

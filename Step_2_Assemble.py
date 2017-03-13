@@ -20,8 +20,8 @@ args = vars(parser.parse_args())
 pwd_cfg_file = args['cfg']
 config.read(pwd_cfg_file)
 
-nodes_number = int(config['STEP_2_ASSEMBLE']['qsub_nodes_2'])
-ppn_number = int(config['STEP_2_ASSEMBLE']['qsub_ppn_2'])
+nodes_number = int(config['GENERAL']['qsub_nodes'])
+ppn_number = int(config['GENERAL']['qsub_ppn'])
 memory = int(config['STEP_2_ASSEMBLE']['qsub_memory_2'])
 walltime_needed = config['STEP_2_ASSEMBLE']['qsub_walltime_2']
 email = config['GENERAL']['qsub_email']
@@ -29,7 +29,7 @@ modules_needed = config['STEP_2_ASSEMBLE']['qsub_modules_2']
 abundance_file = config['GENERAL']['abundance_file']
 GemSIM_wd = config['GENERAL']['GemSIM_wd']
 IDBA_UD_wd = config['GENERAL']['IDBA_UD_wd']
-prefix = config['STEP_1_1']['prefix']
+prefix = config['GENERAL']['prefix']
 mink = int(config['STEP_2_ASSEMBLE']['idba_ud_mink'])
 maxk = int(config['STEP_2_ASSEMBLE']['idba_ud_maxk'])
 step = int(config['STEP_2_ASSEMBLE']['idba_ud_step'])

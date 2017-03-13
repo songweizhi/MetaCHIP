@@ -5,30 +5,37 @@ import configparser
 
 ###################################### CONFIGURATION ######################################
 
-nodes_number = 1
-ppn_number = 3
-memory = 30
-walltime_needed = '02:59:00'
-email = 'weizhi.song@student.unsw.edu.au'
-modules_metabat = ['metabat/0.32.4']
-modules_mycc = ['intel/16.0.1.150', 'perl/5.20.1', 'python/2.7.10', 'cd-hit/4.6.4', 'prodigal/2.6.3', 'parallel/20160222', 'hmmer/3.1b2', 'barrnap/0.7', 'mycc/20150710']
+parser = argparse.ArgumentParser()
+config = configparser.ConfigParser()
 
-genome_folder = 'input_genomes'
-abundance_file = 'abundance.txt'
-GemSIM_wd = '1_GemSIM'
-IDBA_UD_wd = '2_IDBA_UD'
-Mapping_wd = '3_Mapping'
-Binning_wd = '4_Binning'
-prefix = 'replicate'
-mink = 20
-maxk = 100
-step = 20
-min_contig_length = 2500
-pwd_jgi_summarize_bam_contig_depths = '/share/apps/metabat/0.32.4/jgi_summarize_bam_contig_depths'
+parser.add_argument('-cfg',
+                    required=True,
+                    help='path to configuration file')
+
+args = vars(parser.parse_args())
+pwd_cfg_file = args['cfg']
+config.read(pwd_cfg_file)
+
+nodes_number = int(config['GENERAL']['qsub_nodes'])
+ppn_number = int(config['GENERAL']['qsub_ppn'])
+memory = int(config['STEP_4_BINNING']['qsub_memory_4'])
+walltime_needed = config['STEP_4_BINNING']['qsub_walltime_4']
+email = config['GENERAL']['qsub_email']
+GemSIM_wd = config['GENERAL']['GemSIM_wd']
+IDBA_UD_wd = config['GENERAL']['IDBA_UD_wd']
+Mapping_wd = config['GENERAL']['Mapping_wd']
+Binning_wd = config['GENERAL']['Binning_wd']
+abundance_file = config['GENERAL']['abundance_file']
+prefix = config['GENERAL']['prefix']
+mink = int(config['STEP_2_ASSEMBLE']['idba_ud_mink'])
+maxk = int(config['STEP_2_ASSEMBLE']['idba_ud_maxk'])
+step = int(config['STEP_2_ASSEMBLE']['idba_ud_step'])
+min_contig_length = int(config['STEP_3_MAPPING']['min_contig_length'])
+pwd_jgi_summarize_bam_contig_depths = config['STEP_4_BINNING']['pwd_jgi_summarize_bam_contig_depths']
+modules_metabat = config['STEP_4_BINNING']['qsub_modules_4_metabat']
+modules_mycc = config['STEP_4_BINNING']['qsub_modules_4_mycc']
 
 wd = os.getcwd()
-#wd = '/Users/songweizhi/Desktop/one_step'
-pwd_genome_folder = '%s/%s' % (wd, genome_folder)
 pwd_abundance_file = '%s/%s' % (wd, abundance_file)
 pwd_GemSIM_wd = '%s/%s' % (wd, GemSIM_wd)
 pwd_IDBA_UD_wd = '%s/%s' % (wd, IDBA_UD_wd)
@@ -49,12 +56,14 @@ line_7 = '#PBS -m ae\n\n'
 header = line_1 + line_2 + line_3 + line_4 + line_5 + line_6 + line_7
 
 # Prepare module lines
+modules_metabat_split = modules_metabat.split(',')
 metabat_module_lines = ''
-for module in modules_metabat:
+for module in modules_metabat_split:
     metabat_module_lines += 'module load ' + module + '\n'
 
+modules_mycc_split = modules_mycc.split(',')
 mycc_module_lines = ''
-for module in modules_mycc:
+for module in modules_mycc_split:
     mycc_module_lines += 'module load ' + module + '\n'
 
 ######################################## Prepare input files ########################################
@@ -139,6 +148,7 @@ qsub_metabat_file_handle.write('metabat -i %s -a %s -p %s -o %s/%s_MetaBAT/%s' %
 qsub_metabat_file_handle.close()
 qsub_mycc_file_handle.write(header)
 qsub_mycc_file_handle.write('module unload intel/11.1.080\n')
+qsub_mycc_file_handle.write('module unload python/3.5.2\n')
 qsub_mycc_file_handle.write(mycc_module_lines)
 qsub_mycc_file_handle.write('\ncd %s\n' % pwd_Binning_wd)
 qsub_mycc_file_handle.write('MyCC.py %s -a %s 56mer' % (pwd_idba_ud_output_scaffold_filtered, pwd_depth_file))

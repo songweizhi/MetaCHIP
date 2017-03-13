@@ -1,6 +1,8 @@
 import os
 import glob
 import shutil
+import argparse
+import configparser
 
 usage = """
 
@@ -16,17 +18,31 @@ usage = """
 
 ####################################################### Configuration ##################################################
 
-working_directory = '/srv/scratch/z5039045/MetaCHIP'
+parser = argparse.ArgumentParser()
+
+parser.add_argument('-bin_folder',
+                    required=False,
+                    default='.',
+                    help='first bin folder name')
+
+parser.add_argument('-bin_ext',
+                    required=True,
+                    help='bin_file_extension')
+
+args = vars(parser.parse_args())
+bin_folder = args['bin_folder']
+bin_ext = args['bin_ext']
+
 prokka_modules = ['perl/5.20.1', 'prokka/1.11', 'infernal/1.1.1', 'blast+/2.2.31', 'hmmer/3.1b2', 'prodigal/2.6.3', 'tbl2asn/25.3']
 
 ########################################################################################################################
 
 
-# forward to working directory
-os.chdir(working_directory)
+# get working directory
+working_directory = os.getcwd()
 
 # get genome name list
-genome_list = [os.path.basename(file_name) for file_name in glob.glob('./input_genomes/*.fa')]
+genome_list = [os.path.basename(file_name) for file_name in glob.glob('%s/*.%s' % (bin_folder, bin_ext))]
 print('%i genomes were found in total.' % len(genome_list))
 
 if os.path.isdir('prokka_output'):
@@ -63,11 +79,14 @@ for genome in genome_list:
     prokka_qsub_out.write(header + '\n\n')
     for module in prokka_modules:
         prokka_qsub_out.write('module load %s\n' % module)
-    prokka_qsub_out.write('prokka --force --metagenome --locustag %s --strain %s --outdir %s/prokka_output/%s %s/input_genomes/%s'
+    prokka_qsub_out.write('prokka --force --metagenome --locustag %s --strain %s --outdir %s/prokka_output/%s %s/%s'
                           % (genome_name, genome_name, working_directory, genome_name, working_directory, genome))
     prokka_qsub_out.close()
 
 # submit qsub files
 qsub_file_list = [os.path.basename(file_name) for file_name in glob.glob('./qsub_files/*.sh')]
+current_wd = os.getcwd()
+os.chdir('./qsub_files')
 for qsub_file in qsub_file_list:
     os.system('qsub ./qsub_files/%s' % qsub_file)
+os.chdir(current_wd)
