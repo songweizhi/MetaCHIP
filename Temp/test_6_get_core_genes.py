@@ -52,13 +52,11 @@ for match in matches:
     subject_split = subject.split('_')
     query_bin_name = '_'.join(query_split[:-1])
     subject_bin_name = '_'.join(subject_split[:-1])
-
     coverage_q = float("{0:.2f}".format(float(align_len) * 100 / float(query_len)))
     coverage_s = float("{0:.2f}".format(float(align_len) * 100 / float(subject_len)))
     if (coverage_q >= 80) and (coverage_s >= 80) and (identity >= 70) and (align_len >= 500):
         qualified_matches.write('%s\t%s\n' % (query, subject))
 qualified_matches.close()
-
 
 os.system('cat %s | sort > %s' % (pwd_qualified_matches, pwd_qualified_matches_sorted))
 
@@ -68,8 +66,6 @@ get_hits_group(pwd_qualified_matches_sorted, pwd_qualified_matches_sorted_one_li
 pwd_qualified_matches_sorted_one_line_handle = open(pwd_qualified_matches_sorted_one_line)
 pwd_qualified_matches_sorted_one_line_reorded_handle = open(pwd_qualified_matches_sorted_one_line_reorded, 'w')
 for each in pwd_qualified_matches_sorted_one_line_handle:
-    print(each)
-
     each_split = each.strip().split('\t')
     each_split_uniq = []
     for each in each_split:
@@ -101,3 +97,30 @@ for each in pwd_qualified_matches_sorted_one_line_reorded_sorted_uniq_handle:
         exported_group.append(each_split[0])
 pwd_qualified_core_genes_handle.close()
 
+
+########################################################################################################################
+
+transfers = open('%s/donor2recip.txt' % wd)
+
+selected = []
+chongfude = []
+for each in transfers:
+    each_split_n = each.strip().split('\t')
+    print(each_split_n[0])
+    if each_split_n[0] not in selected:
+        selected.append(each_split_n[0])
+    else:
+        chongfude.append(each_split_n[0])
+
+print(len(selected))
+print(chongfude)
+
+cores = open(pwd_qualified_core_genes)
+for each_core in cores:
+    each_core_split = each_core.strip().split('\t')
+    existed = 0
+    for each_gene in each_core_split:
+        if each_gene in selected:
+            existed = 1
+    if existed == 0:
+        print(each_core.strip())
