@@ -1,9 +1,7 @@
 from Bio import SeqIO
 
-
 path_to_gbk_file = '/Users/songweizhi/Desktop/AAM.gbk'
 candidates = ['AAM_00001', 'AAM_00002', 'AAM_03075', 'AAM_03456', 'AAM_03457']
-
 
 records = SeqIO.parse(path_to_gbk_file, 'genbank')
 candidates_flanking_ranges = []
@@ -45,43 +43,8 @@ for each_candidate in candidates_flanking_ranges:
     can_start = each_candidate[2]
     can_end = each_candidate[3]
 
-    # print(can_id)
-    # print(can_contig_id)
-    # print(can_start)
-    # print(can_end)
-
-print()
 
 records = SeqIO.parse(path_to_gbk_file, 'genbank')
 for record in records:
     print(record)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# # get subset of combined gbk file
-# # gbk_subset = open(pwd_gbk_subset_file, 'w')
-# records = SeqIO.parse(path_to_gbk_file, 'genbank')
-# records_recorded = []
-# for record in records:
-#     for gene_f in record.features:
-#         if 'locus_tag' in gene_f.qualifiers:
-#             #print(gene_f.qualifiers["locus_tag"])
-#             # for gene_r in all_candidates_genes:
-#             #     if gene_r in gene_f.qualifiers["locus_tag"]:
-#                 # SeqIO.write(record, gbk_subset, 'genbank')
-#             records_recorded.append(records_recorded)
-#
-# # gbk_subset.close()

@@ -20,3 +20,7 @@ for record in records:
                 print(each_gene)
     print(record.features)
     print(len(record.features))
+
+
+
+

@@ -20,18 +20,17 @@ usage = """
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('-bin_folder',
-                    required=False,
-                    default='.',
-                    help='first bin folder name')
-
-parser.add_argument('-bin_ext',
+parser.add_argument('-genome_folder',
                     required=True,
-                    help='bin_file_extension')
+                    help='folder name of input genomes')
+
+parser.add_argument('-genome_extension',
+                    required=True,
+                    help='genome_file_extension')
 
 args = vars(parser.parse_args())
-bin_folder = args['bin_folder']
-bin_ext = args['bin_ext']
+genome_folder = args['genome_folder']
+genome_extension = args['genome_extension']
 
 prokka_modules = ['perl/5.20.1', 'prokka/1.11', 'infernal/1.1.1', 'blast+/2.2.31', 'hmmer/3.1b2', 'prodigal/2.6.3', 'tbl2asn/25.3']
 
@@ -42,11 +41,13 @@ prokka_modules = ['perl/5.20.1', 'prokka/1.11', 'infernal/1.1.1', 'blast+/2.2.31
 working_directory = os.getcwd()
 
 # get genome name list
-genome_list = [os.path.basename(file_name) for file_name in glob.glob('%s/*.%s' % (bin_folder, bin_ext))]
+genome_list = [os.path.basename(file_name) for file_name in glob.glob('%s/%s/*.%s' % (working_directory, genome_folder, genome_extension))]
 print('%i genomes were found in total.' % len(genome_list))
 
 if os.path.isdir('prokka_output'):
     shutil.rmtree('prokka_output')
+    if os.path.isdir('prokka_output'):
+        shutil.rmtree('prokka_output')
     os.mkdir('./prokka_output')
 else:
     os.mkdir('./prokka_output')
@@ -79,8 +80,8 @@ for genome in genome_list:
     prokka_qsub_out.write(header + '\n\n')
     for module in prokka_modules:
         prokka_qsub_out.write('module load %s\n' % module)
-    prokka_qsub_out.write('prokka --force --metagenome --locustag %s --strain %s --outdir %s/prokka_output/%s %s/%s'
-                          % (genome_name, genome_name, working_directory, genome_name, working_directory, genome))
+    prokka_qsub_out.write('prokka --force --metagenome --locustag %s --strain %s --outdir %s/prokka_output/%s %s/%s/%s'
+                          % (genome_name, genome_name, working_directory, genome_name, working_directory, genome_folder, genome))
     prokka_qsub_out.close()
 
 # submit qsub files
@@ -88,5 +89,5 @@ qsub_file_list = [os.path.basename(file_name) for file_name in glob.glob('./qsub
 current_wd = os.getcwd()
 os.chdir('./qsub_files')
 for qsub_file in qsub_file_list:
-    os.system('qsub ./qsub_files/%s' % qsub_file)
+    os.system('qsub %s' % qsub_file)
 os.chdir(current_wd)
