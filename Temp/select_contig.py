@@ -14,3 +14,4 @@ for seq_record in SeqIO.parse('/Users/weizhisong/Desktop/000/combined_10.consens
     for candidate in candidate_list:
         if seq_record.id == candidate:
             SeqIO.write(seq_record, '/Users/weizhisong/Desktop/000/' + candidate + '.fasta', 'fasta')
+
