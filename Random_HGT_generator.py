@@ -25,6 +25,7 @@ def get_common_stop_sequence():
                                                      random_neg[1],
                                                      random_nc[3],
                                                      random_neg[2])
+    common_stop_sequence = 'TAGATAAATGATTAGTTAGTTA'
     return common_stop_sequence
 
 

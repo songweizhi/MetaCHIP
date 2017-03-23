@@ -23,4 +23,3 @@ def get_common_stop_sequence():
 
 a = get_common_stop_sequence()
 print(a)
-

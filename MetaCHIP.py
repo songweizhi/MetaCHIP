@@ -717,7 +717,6 @@ args = vars(parser.parse_args())
 pwd_cfg_file = args['cfg']
 
 config.read(pwd_cfg_file)
-working_directory = config['FILES_AND_PARAMETERS']['working_directory']
 grouping_file = config['FILES_AND_PARAMETERS']['grouping_file']
 cover_cutoff = int(config['FILES_AND_PARAMETERS']['cover_cutoff'])
 flanking_length = int(config['FILES_AND_PARAMETERS']['flanking_length'])
@@ -734,7 +733,7 @@ print('Define folder/file names and create output folder')
 op_prefix = 'output_ip' + str(identity_percentile) + '%_al' + str(align_len_cutoff) + 'bp_c' + str(cover_cutoff) + '%'
 op_prefix_iden_0 = 'output_al' + str(align_len_cutoff) + 'bp_c' + str(cover_cutoff) + '%'
 op_folder = op_prefix
-wd = working_directory
+wd = os.getcwd()
 
 iden_distrib_plot_folder =                          'Identity_distribution_images'
 qual_idens_file =                                   'qualified_identities.txt'

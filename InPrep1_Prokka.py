@@ -32,7 +32,7 @@ args = vars(parser.parse_args())
 genome_folder = args['genome_folder']
 genome_extension = args['genome_extension']
 
-prokka_modules = ['perl/5.20.1', 'prokka/1.11', 'infernal/1.1.1', 'blast+/2.2.31', 'hmmer/3.1b2', 'prodigal/2.6.3', 'tbl2asn/25.3']
+prokka_modules = ['perl/5.20.1', 'infernal/1.1.1', 'blast+/2.2.31', 'hmmer/3.1b2', 'prodigal/2.6.3', 'tbl2asn/25.3', 'prokka/1.12']
 
 ########################################################################################################################
 
@@ -54,8 +54,8 @@ else:
 
 # prepare prokka qsub file header
 line_1 = '#!/bin/bash\n'
-line_2 = '#PBS -l nodes=' + str(1) + ':ppn=' + str(12) + '\n'
-line_3 = '#PBS -l vmem=' + str(60) + 'gb\n'
+line_2 = '#PBS -l nodes=' + str(1) + ':ppn=' + str(1) + '\n'
+line_3 = '#PBS -l vmem=' + str(10) + 'gb\n'
 line_4 = '#PBS -l walltime=' +'00:59:00' + '\n'
 line_5 = '#PBS -j oe\n'
 line_6 = '#PBS -M ' + 'weizhi.song@student.unsw.edu.au' + '\n'
@@ -80,8 +80,8 @@ for genome in genome_list:
     prokka_qsub_out.write(header + '\n\n')
     for module in prokka_modules:
         prokka_qsub_out.write('module load %s\n' % module)
-    prokka_qsub_out.write('prokka --force --metagenome --locustag %s --strain %s --outdir %s/prokka_output/%s %s/%s/%s'
-                          % (genome_name, genome_name, working_directory, genome_name, working_directory, genome_folder, genome))
+    prokka_qsub_out.write('prokka --force --metagenome --prefix %s --locustag %s --strain %s --outdir %s/prokka_output/%s %s/%s/%s'
+                          % (genome_name, genome_name, genome_name, working_directory, genome_name, working_directory, genome_folder, genome))
     prokka_qsub_out.close()
 
 # submit qsub files
