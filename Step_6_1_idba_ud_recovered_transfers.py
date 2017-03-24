@@ -2,16 +2,16 @@ import os
 
 # specify input files
 wd = '/Users/songweizhi/Desktop/test'
-scaffold_file = 'scaffold_k20-100_lt2500_95.fa'
+scaffold_file = 'scaffold_no_bubble.fa'
 transfers_fasta = 'output_sequence_nc_95.fasta'
 
 
+# make blast database
 pwd_transfers_fasta = '%s/%s' % (wd, transfers_fasta)
 pwd_scaffold_file = '%s/%s' % (wd, scaffold_file)
 pwd_makeblastdb_exe = 'makeblastdb'
 pwd_blastn_exe = 'blastn'
 pwd_blast_result = '%s/blast_result.tab' % wd
-# make blast database
 os.system('%s -in %s -dbtype nucl -parse_seqids' % (pwd_makeblastdb_exe, pwd_scaffold_file))
 outfmt = '-outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen"'
 print('\nRunning Blast, be patient...')
@@ -19,7 +19,6 @@ os.system('%s -query %s -db %s -out %s %s' % (pwd_blastn_exe, pwd_transfers_fast
 
 
 blast_results = open(pwd_blast_result)
-
 recovered_transfers = []
 for match in blast_results:
     match_split = match.strip().split('\t')
