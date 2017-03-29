@@ -1,12 +1,30 @@
 import os
+import argparse
 
-# specify input files
-wd = '/Users/songweizhi/Desktop/test'
-scaffold_file = 'scaffold_no_bubble.fa'
-transfers_fasta = 'output_sequence_nc_95.fasta'
+
+parser = argparse.ArgumentParser()
+
+
+parser.add_argument('-a',
+                    required=True,
+                    help='Assemblies in multi-fasta format')
+
+parser.add_argument('-t',
+                    required=True,
+                    help='Sequences of transferred genes in multi-fasta format')
+
+args = vars(parser.parse_args())
+
+scaffold_file = args['a']
+transfers_fasta = args['t']
+
+#wd = '/Users/songweizhi/Desktop/new_core'
+#scaffold_file = 'scaffold_k20-124_lt2500.fa'
+#transfers_fasta = 'output_sequence_nc_70.fasta'
 
 
 # make blast database
+wd = os.getcwd()
 pwd_transfers_fasta = '%s/%s' % (wd, transfers_fasta)
 pwd_scaffold_file = '%s/%s' % (wd, scaffold_file)
 pwd_makeblastdb_exe = 'makeblastdb'
@@ -31,8 +49,8 @@ for match in blast_results:
     coverage_q = float("{0:.2f}".format(float(align_len) * 100 / float(query_len)))
     coverage_s = float("{0:.2f}".format(float(align_len) * 100 / float(subject_len)))
     if (identity >= 99) and (coverage_q >= 98):
-        print(match.strip())
+        #print(match.strip())
         if query not in recovered_transfers:
             recovered_transfers.append(query)
 
-print(len(recovered_transfers))
+print('Recovered transfers(identity >= 99 and coverage >= 98): %s' % len(recovered_transfers))

@@ -25,7 +25,7 @@ def get_common_stop_sequence():
                                                      random_neg[1],
                                                      random_nc[3],
                                                      random_neg[2])
-    common_stop_sequence = 'TAGATAAATGATTAGTTAGTTA'
+    common_stop_sequence = 'TAGATGAGTGATTAGTTAGTTA'
     return common_stop_sequence
 
 
@@ -86,9 +86,9 @@ parser.add_argument('-recipient_genome_folder',
                     required=True,
                     help='recipient genome folder')
 
-parser.add_argument('-combined_ffn_file',
+parser.add_argument('-sequences_file',
                     required=True,
-                    help='combined.ffn file')
+                    help='sequences file in fasta format')
 
 parser.add_argument('-recipient_genome_extension',
                     required=False,
@@ -100,7 +100,7 @@ args = vars(parser.parse_args())
 recipients_folder = args['recipient_genome_folder']
 if recipients_folder[-1] == '/':
     recipients_folder = recipients_folder[:-1]
-combined_ffn_file = args['combined_ffn_file']
+combined_ffn_file = args['sequences_file']
 transfer_profile_file = args['transfer_profile']
 
 #wd = '/Users/songweizhi/Desktop/GeneTransfer_wd'

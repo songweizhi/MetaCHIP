@@ -2,10 +2,12 @@ import os
 from Bio import SeqIO
 
 # specify input files
-wd = '/Users/songweizhi/Desktop/get_gene_correlations'
-MetaCHIP_output = 'HGT_candidates_GemSIM.txt'
-transfers_fasta = 'output_sequence_nc_90.fasta'
-combined_ffn = 'combined_GemSIM.ffn'
+wd = '/Users/songweizhi/Desktop/get_gene_correlations/100'
+MetaCHIP_output = 'HGT_candidates.txt'
+#transfers_fasta = 'output_sequence_nc_70.fasta'
+transfers_fasta = 'transferredGenes.fasta'
+
+combined_ffn = 'combined.ffn'
 
 
 GemSIM_hgts = open('%s/%s' % (wd, MetaCHIP_output))
@@ -52,7 +54,7 @@ for match in blast_results:
     subject_len = int(match_split[13])
     coverage_q = float("{0:.2f}".format(float(align_len) * 100 / float(query_len)))
     coverage_s = float("{0:.2f}".format(float(align_len) * 100 / float(subject_len)))
-    if (identity >= 99) and (coverage_q >= 90) and (coverage_s >= 90):
+    if (identity >= 99) and (coverage_q >= 98) and (coverage_s >= 98):
         if subject not in transfers_with_match:
             transfers_with_match.append(subject)
         n += 1
