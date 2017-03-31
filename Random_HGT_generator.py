@@ -100,12 +100,12 @@ args = vars(parser.parse_args())
 recipients_folder = args['recipient_genome_folder']
 if recipients_folder[-1] == '/':
     recipients_folder = recipients_folder[:-1]
-combined_ffn_file = args['sequences_file']
+sequences_file = args['sequences_file']
 transfer_profile_file = args['transfer_profile']
 
 #wd = '/Users/songweizhi/Desktop/GeneTransfer_wd'
 wd = os.getcwd()
-pwd_combined_ffn = '%s/%s' % (wd, combined_ffn_file)
+pwd_sequences_file = '%s/%s' % (wd, sequences_file)
 pwd_transfers = '%s/%s' % (wd, transfer_profile_file)
 pwd_recipients_folder = '%s/%s' % (wd, recipients_folder)
 recipients_genome_extension = 'fna'
@@ -130,7 +130,7 @@ for each in transfers:
     recipient_genome_nc = str(recipient_genome.seq)
 
     # read insert sequences into list
-    combined_ffn_handle = SeqIO.parse(pwd_combined_ffn, 'fasta')
+    combined_ffn_handle = SeqIO.parse(pwd_sequences_file, 'fasta')
     insert_sequence_id_list = []
     insert_sequence_seq_list = []
     for each_gene in combined_ffn_handle:
