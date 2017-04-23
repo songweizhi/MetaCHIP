@@ -547,8 +547,8 @@ def get_gbk_blast_act(candidates_file, gbk_file, flanking_length, name_to_group_
         query_c = '%s/%s_%sbp.fasta' % (prefix_c, genes[0], flanking_length)
         subject_c = '%s/%s_%sbp.fasta' % (prefix_c, genes[1], flanking_length)
 
-        parameters_c_n = ' -evalue 1e-5 -outfmt 6 -task blastn'
-        command_blast = 'blastn -query %s -subject %s -out %s%s' % (query_c, subject_c, output_c, parameters_c_n)
+        parameters_c_n = '-evalue 1e-5 -outfmt 6 -task blastn'
+        command_blast = 'blastn -query %s -subject %s -out %s %s' % (query_c, subject_c, output_c, parameters_c_n)
         os.system(command_blast)
 
         # read in gbk files

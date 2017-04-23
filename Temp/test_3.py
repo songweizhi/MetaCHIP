@@ -1,12 +1,14 @@
 
-
-matches = open('/Users/songweizhi/Desktop/new_core/new_core.tab')
-
-for each in matches:
-    each_split = each.strip().split('\t')
-    query = each_split[0]
-    subject = each_split[1]
-    if query != subject:
-        print(each.strip())
+input_list = [['None'], ['None'], ['None']]
 
 
+def uniq_list(input_list):
+    output_list = []
+    for each_element in input_list:
+        if each_element not in output_list:
+            output_list.append(each_element)
+    return output_list
+
+
+output_list = uniq_list(input_list)
+print(output_list)
