@@ -32,9 +32,7 @@ def get_match_category(folder_name, flanking_length, calculation_step, pwd_blast
     # define file name
     recipient_gene = folder_name.split('___')[0]
     donor_gene = folder_name.split('___')[1]
-    file_recipient_gene_3000 = '%s_%sbp.fasta' % (recipient_gene, flanking_length)
     file_recipient_gene_3000_gbk = '%s_%sbp.gbk' % (recipient_gene, flanking_length)
-    file_donor_gene_3000 = '%s_%sbp.fasta' % (donor_gene, flanking_length)
     file_donor_gene_3000_gbk = '%s_%sbp.gbk' % (donor_gene, flanking_length)
 
     # read in recipient contig
@@ -63,18 +61,7 @@ def get_match_category(folder_name, flanking_length, calculation_step, pwd_blast
                 gene_d_end = int(gene_d.location.end)
                 gene_d_strand = int(gene_d.location.strand)
 
-    # get subsequences of recipient contig
-    recipient_left_flanking = recipient_contig_seq[0:gene_r_start]
-    gene_r_seq = recipient_contig_seq[gene_r_start:gene_r_end]
-    recipient_right_flanking = recipient_contig_seq[gene_r_end:len(recipient_contig_seq)]
-
-    # get subsequences of donor contig
-    donor_left_flanking = donor_contig_seq[0:gene_d_start]
-    gene_d_seq = donor_contig_seq[gene_d_start:gene_d_end]
-    donor_right_flanking = donor_contig_seq[gene_d_end:len(donor_contig_seq)]
-
     # get subsequences of recipient contig left flanking region
-    # print('rlf: %s-%sbp' % (0, gene_r_start))
     rlf_subs_list = []
     n_rlf = 1
     while n_rlf <= step_number:
@@ -85,10 +72,8 @@ def get_match_category(folder_name, flanking_length, calculation_step, pwd_blast
     n_rlf = 0
     while n_rlf <= step_number-1:
         if n_rlf == 0:
-            current_rlf = '%s-%s' % (rlf_subs_list[n_rlf], gene_r_start)
             current_rlf_seq = recipient_contig_seq[rlf_subs_list[n_rlf]:gene_r_start]
         else:
-            current_rlf = '%s-%s' % (rlf_subs_list[n_rlf], rlf_subs_list[n_rlf-1])
             current_rlf_seq = recipient_contig_seq[rlf_subs_list[n_rlf]:rlf_subs_list[n_rlf-1]]
         current_rlf_id = '%s_rlf%s' % (recipient_gene, n_rlf + 1)
         current_rlf_description = ''
@@ -97,7 +82,6 @@ def get_match_category(folder_name, flanking_length, calculation_step, pwd_blast
         n_rlf += 1
 
     # get subsequences of recipient contig right flanking region
-    # print('rrf: %s-%sbp' % (gene_r_end, len(recipient_contig_seq)))
     rrf_subs_list = []
     n_rrf = 1
     while n_rrf <= step_number:
@@ -108,10 +92,8 @@ def get_match_category(folder_name, flanking_length, calculation_step, pwd_blast
     n_rrf = 0
     while n_rrf <= step_number-1:
         if n_rrf == 0:
-            current_rrf = '%s-%s' % (gene_r_end, rrf_subs_list[n_rrf])
             current_rrf_seq = recipient_contig_seq[gene_r_end:rrf_subs_list[n_rrf]]
         else:
-            current_rrf = '%s-%s' % (rrf_subs_list[n_rrf-1], rrf_subs_list[n_rrf])
             current_rrf_seq = recipient_contig_seq[rrf_subs_list[n_rrf-1]:rrf_subs_list[n_rrf]]
         current_rrf_id = '%s_rrf%s' % (recipient_gene, n_rrf + 1)
         current_rrf_description = ''
@@ -120,7 +102,6 @@ def get_match_category(folder_name, flanking_length, calculation_step, pwd_blast
         n_rrf += 1
 
     # get subsequences of donor contig left flanking region
-    # print('dlf: %s-%sbp' % (0, gene_d_start))
     dlf_subs_list = []
     n_dlf = 1
     while n_dlf <= step_number:
@@ -131,10 +112,8 @@ def get_match_category(folder_name, flanking_length, calculation_step, pwd_blast
     n_dlf = 0
     while n_dlf <= step_number-1:
         if n_dlf == 0:
-            current_dlf = '%s-%s' % (dlf_subs_list[n_dlf], gene_d_start)
             current_dlf_seq = donor_contig_seq[dlf_subs_list[n_dlf]:gene_d_start]
         else:
-            current_dlf = '%s-%s' % (dlf_subs_list[n_dlf], dlf_subs_list[n_dlf-1])
             current_dlf_seq = donor_contig_seq[dlf_subs_list[n_dlf]:dlf_subs_list[n_dlf-1]]
         current_dlf_id = '%s_dlf%s' % (donor_gene, n_dlf + 1)
         current_dlf_description = ''
@@ -143,7 +122,6 @@ def get_match_category(folder_name, flanking_length, calculation_step, pwd_blast
         n_dlf += 1
 
     # get subsequences of donor contig right flanking region
-    # print('drf: %s-%sbp' % (gene_d_end, len(donor_contig_seq)))
     drf_subs_list = []
     n_drf = 1
     while n_drf <= step_number:
@@ -154,10 +132,8 @@ def get_match_category(folder_name, flanking_length, calculation_step, pwd_blast
     n_drf = 0
     while n_drf <= step_number-1:
         if n_drf == 0:
-            current_drf = '%s-%s' % (gene_d_end, drf_subs_list[n_drf])
             current_drf_seq = donor_contig_seq[gene_d_end:drf_subs_list[n_drf]]
         else:
-            current_drf = '%s-%s' % (drf_subs_list[n_drf-1], drf_subs_list[n_drf])
             current_drf_seq = donor_contig_seq[drf_subs_list[n_drf-1]:drf_subs_list[n_drf]]
         current_drf_id = '%s_drf%s' % (donor_gene, n_drf + 1)
         current_drf_description = ''
@@ -200,8 +176,6 @@ def get_match_category(folder_name, flanking_length, calculation_step, pwd_blast
             identity_l_list = []
             for each_line_1 in open(output_1):
                 each_line_1_split = each_line_1.strip().split('\t')
-                query_1 = each_line_1_split[0]
-                subject_1 = each_line_1_split[1]
                 identity_1 = round(float(each_line_1_split[2]))
                 alignment_length_1 = int(each_line_1_split[3])
                 if alignment_length_1 >= alignment_length_cutoff:
@@ -218,8 +192,6 @@ def get_match_category(folder_name, flanking_length, calculation_step, pwd_blast
             identity_r_list = []
             for each_line_2 in open(output_2):
                 each_line_2_split = each_line_2.strip().split('\t')
-                query_2 = each_line_2_split[0]
-                subject_2 = each_line_2_split[1]
                 identity_2 = round(float(each_line_2_split[2]))
                 alignment_length_2 = int(each_line_2_split[3])
                 if alignment_length_2 >= alignment_length_cutoff:
@@ -229,9 +201,6 @@ def get_match_category(folder_name, flanking_length, calculation_step, pwd_blast
             else:
                 recipient_right_iden_profile.append(identity_r_list)
         n += 1
-
-    #print('recipient_left_iden_profile: %s' % recipient_left_iden_profile)
-    #print('recipient_right_iden_profile: %s' % recipient_right_iden_profile)
 
     # analyze flanking profile
     recipient_left_iden_profile_uniq = uniq_list(recipient_left_iden_profile)
