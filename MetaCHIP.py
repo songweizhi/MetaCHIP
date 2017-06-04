@@ -879,11 +879,11 @@ def get_gbk_blast_act(candidates_file, gbk_file, flanking_length, calculation_st
         match_category = get_match_category(folder_name, flanking_length, calculation_step, pwd_blastn_exe)
         os.chdir(path_to_output_act_folder)
         if match_category == 'Uniq matched':
-            os.system('mv %s.eps Uniq_matched/' % folder_name)
+            os.system('mv %s.eps 0_Uniq_matched/' % folder_name)
         if match_category == 'End matched':
-            os.system('mv %s.eps End_matched/' % folder_name)
+            os.system('mv %s.eps 0_End_matched/' % folder_name)
         if match_category == 'Non_end multiple matched':
-            os.system('mv %s.eps Non-end_multiple_matched/' % folder_name)
+            os.system('mv %s.eps 0_Non-end_multiple_matched/' % folder_name)
 
         # remove temporary folder
         os.chdir(current_wd)
@@ -946,7 +946,6 @@ parser.add_argument('-cfg',
 
 args = vars(parser.parse_args())
 pwd_cfg_file = args['cfg']
-
 config.read(pwd_cfg_file)
 grouping_file = config['FILES_AND_PARAMETERS']['grouping_file']
 cover_cutoff = int(config['FILES_AND_PARAMETERS']['cover_cutoff'])
@@ -1182,9 +1181,9 @@ gbk_subset.close()
 
 # create folder to hold ACT output
 os.makedirs(pwd_op_act_folder)
-os.makedirs('%s/Uniq_matched' % pwd_op_act_folder)
-os.makedirs('%s/End_matched' % pwd_op_act_folder)
-os.makedirs('%s/Non-end_multiple_matched' % pwd_op_act_folder)
+os.makedirs('%s/0_Uniq_matched' % pwd_op_act_folder)
+os.makedirs('%s/0_End_matched' % pwd_op_act_folder)
+os.makedirs('%s/0_Non-end_multiple_matched' % pwd_op_act_folder)
 
 
 sleep(1.5)

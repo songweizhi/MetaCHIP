@@ -113,4 +113,4 @@ while n <= number_of_replicates:
     os.chdir(pwd_qsub_file_folder)
     os.system('qsub %s' % pwd_current_qsub_file)
     os.chdir(current_wd)
-    n+=1
+    n += 1

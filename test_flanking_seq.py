@@ -202,6 +202,9 @@ def get_match_category(folder_name, flanking_length, calculation_step, pwd_blast
                 recipient_right_iden_profile.append(identity_r_list)
         n += 1
 
+    print(recipient_left_iden_profile)
+    print(recipient_right_iden_profile)
+
     # analyze flanking profile
     recipient_left_iden_profile_uniq = uniq_list(recipient_left_iden_profile)
     recipient_right_iden_profile_uniq = uniq_list(recipient_right_iden_profile)
@@ -219,15 +222,20 @@ def get_match_category(folder_name, flanking_length, calculation_step, pwd_blast
 
 # define input files
 flanking_length = 3000
-calculation_step = 500
+calculation_step = 1000
 pwd_blastn_exe = 'blastn'
 
 #folder_name = 'AAM_00209___BNM_00032'
 #folder_name = 'AAM_00308___BRT_00724'
-folder_name = 'ASN_02461___BHS_02663'
+#folder_name = 'ASN_02461___BHS_02663'
 #folder_name = 'AAM_00754___BAD_01373'
 #folder_name = 'AMAC_01101___BAD_02659'
 #folder_name = 'BRT_03687___ARS_03341'
+folder_name = 'AA_Refined_8_00597___CF_Refined_23_00314'
+
 
 match_category = get_match_category(folder_name, flanking_length, calculation_step, pwd_blastn_exe)
 print('%s: %s' % (folder_name, match_category))
+
+
+
