@@ -399,7 +399,6 @@ def get_flanking_region(input_gbk_file, HGT_candidate, flanking_length):
     new_fasta_final_file = '%s/%s_%sbp.fasta' % (wd, HGT_candidate, flanking_length)
     output_plot = '%s/%s_%sbp.eps' % (wd, HGT_candidate, flanking_length)
 
-
     # get flanking range of candidate
     input_gbk = SeqIO.parse(input_gbk_file, "genbank")
     new_start = 0
@@ -422,7 +421,6 @@ def get_flanking_region(input_gbk_file, HGT_candidate, flanking_length):
                     if new_end > contig_length:
                         new_end = contig_length
 
-
     # get genes within flanking region
     keep_gene_list = []
     input_gbk = SeqIO.parse(input_gbk_file, "genbank")
@@ -437,7 +435,6 @@ def get_flanking_region(input_gbk_file, HGT_candidate, flanking_length):
                 elif (gene.location.start <= new_end) and (gene.location.end > new_end):
                     keep_gene_list.append(gene.qualifiers['locus_tag'][0])
                     new_end = gene.location.end
-
 
     # remove genes not in flanking region from gbk file
     input_gbk = SeqIO.parse(input_gbk_file, "genbank")
@@ -454,7 +451,6 @@ def get_flanking_region(input_gbk_file, HGT_candidate, flanking_length):
         record.features = new_record_features
         SeqIO.write(record, new_gbk, 'genbank')
     new_gbk.close()
-
 
     # remove sequences not in flanking region
     new_gbk_full_length = SeqIO.parse(new_gbk_file, "genbank")
@@ -508,10 +504,8 @@ def get_flanking_region(input_gbk_file, HGT_candidate, flanking_length):
         SeqIO.write(new_record, new_gbk_final, 'genbank')
         SeqIO.write(new_record, new_fasta_final, 'fasta')
 
-
     new_gbk_final.close()
     new_fasta_final.close()
-
     os.system('rm %s' % new_gbk_file)
 
 
@@ -523,6 +517,75 @@ def export_dna_record(gene_seq, gene_id, gene_description, pwd_output_file):
     seq_record.description = gene_description
     SeqIO.write(seq_record, output_handle, 'fasta')
     output_handle.close()
+
+
+def check_end_break(folder_name, flanking_length, calculation_step, pwd_blastn_exe):
+    # define file name
+    recipient_gene = folder_name.split('___')[0]
+    donor_gene = folder_name.split('___')[1]
+    file_recipient_gene_3000_gbk = '%s_%sbp.gbk' % (recipient_gene, flanking_length)
+    file_donor_gene_3000_gbk = '%s_%sbp.gbk' % (donor_gene, flanking_length)
+
+    # read in recipient/donor contig
+    recipient_contig_record = SeqIO.read(file_recipient_gene_3000_gbk, 'genbank')
+    recipient_contig_seq = recipient_contig_record.seq
+    donor_contig_record = SeqIO.read(file_donor_gene_3000_gbk, 'genbank')
+    donor_contig_seq = donor_contig_record.seq
+
+    # get ending sequence of the recipient and donor genes
+    ending_seq_description = ''
+
+    # export recipient_left_end_seq
+    recipient_left_end_seq = recipient_contig_seq[0:calculation_step]
+    recipient_left_end_id = '%s_le%s' % (recipient_gene, calculation_step)
+    recipient_left_end_handle = '%s/%s.fasta' % (os.getcwd(), recipient_left_end_id)
+    export_dna_record(recipient_left_end_seq, recipient_left_end_id, ending_seq_description, recipient_left_end_handle)
+
+    # export recipient_right_end_seq
+    recipient_right_end_seq = recipient_contig_seq[len(recipient_contig_seq) - calculation_step:]
+    recipient_right_end_id = '%s_re%s' % (recipient_gene, calculation_step)
+    recipient_right_end_handle = '%s/%s.fasta' % (os.getcwd(), recipient_right_end_id)
+    export_dna_record(recipient_right_end_seq, recipient_right_end_id, ending_seq_description,
+                      recipient_right_end_handle)
+
+    # export donor_left_end_seq
+    donor_left_end_seq = donor_contig_seq[0:calculation_step]
+    donor_left_end_id = '%s_le%s' % (donor_gene, calculation_step)
+    donor_left_end_handle = '%s/%s.fasta' % (os.getcwd(), donor_left_end_id)
+    export_dna_record(donor_left_end_seq, donor_left_end_id, ending_seq_description, donor_left_end_handle)
+
+    # export donor_right_end_seq
+    donor_right_end_seq = donor_contig_seq[len(donor_contig_seq) - calculation_step:]
+    donor_right_end_id = '%s_re%s' % (donor_gene, calculation_step)
+    donor_right_end_handle = '%s/%s.fasta' % (os.getcwd(), donor_right_end_id)
+    export_dna_record(donor_right_end_seq, donor_right_end_id, ending_seq_description, donor_right_end_handle)
+
+    # run blastn between ending sequences:
+    blast_parameters = '-evalue 1e-5 -outfmt 6 -task blastn'
+    output_rle_dle = '%s/%s_rle___%s_dle.tab' % (os.getcwd(), recipient_gene, donor_gene)
+    output_rle_dre = '%s/%s_rle___%s_dre.tab' % (os.getcwd(), recipient_gene, donor_gene)
+    output_rre_dle = '%s/%s_rre___%s_dle.tab' % (os.getcwd(), recipient_gene, donor_gene)
+    output_rre_dre = '%s/%s_rre___%s_dre.tab' % (os.getcwd(), recipient_gene, donor_gene)
+    compare_end_blast_rle_dle = '%s -query %s -subject %s -out %s %s' % (
+    pwd_blastn_exe, recipient_left_end_handle, donor_left_end_handle, output_rle_dle, blast_parameters)
+    compare_end_blast_rle_dre = '%s -query %s -subject %s -out %s %s' % (
+    pwd_blastn_exe, recipient_left_end_handle, donor_right_end_handle, output_rle_dre, blast_parameters)
+    compare_end_blast_rre_dle = '%s -query %s -subject %s -out %s %s' % (
+    pwd_blastn_exe, recipient_right_end_handle, donor_left_end_handle, output_rre_dle, blast_parameters)
+    compare_end_blast_rre_dre = '%s -query %s -subject %s -out %s %s' % (
+    pwd_blastn_exe, recipient_right_end_handle, donor_right_end_handle, output_rre_dre, blast_parameters)
+    os.system(compare_end_blast_rle_dle)
+    os.system(compare_end_blast_rle_dre)
+    os.system(compare_end_blast_rre_dle)
+    os.system(compare_end_blast_rre_dre)
+
+    breakend = None
+    if (os.path.getsize(output_rle_dle) == 0) and (os.path.getsize(output_rle_dre) == 0) and (os.path.getsize(output_rre_dle) == 0) and (os.path.getsize(output_rre_dre) == 0):
+        breakend = 0
+    else:
+        breakend = 1
+
+    return breakend
 
 
 def get_match_category(folder_name, flanking_length, calculation_step, pwd_blastn_exe):
@@ -787,34 +850,34 @@ def get_gbk_blast_act(candidates_file, gbk_file, flanking_length, calculation_st
 
             # add gene content track for gene1_contig
             contig_1_gene_content_track = diagram.new_track(1,
-                                                            name = gene1_contig.name,
-                                                            greytrack = True,
-                                                            greytrack_labels = 1,
-                                                            greytrack_font = 'Helvetica',
-                                                            greytrack_fontsize = 12,
-                                                            height = 0.35,
-                                                            start = 0,
-                                                            end = len(gene1_contig),
-                                                            scale = True,
-                                                            scale_fontsize = 6,
-                                                            scale_ticks = 1,
-                                                            scale_smalltick_interval = 10000,
-                                                            scale_largetick_interval = 10000)
+                                                            name=gene1_contig.name,
+                                                            greytrack=True,
+                                                            greytrack_labels=1,
+                                                            greytrack_font='Helvetica',
+                                                            greytrack_fontsize=12,
+                                                            height=0.35,
+                                                            start=0,
+                                                            end=len(gene1_contig),
+                                                            scale=True,
+                                                            scale_fontsize=6,
+                                                            scale_ticks=1,
+                                                            scale_smalltick_interval=10000,
+                                                            scale_largetick_interval=10000)
             # add gene content track for gene2_contig
             contig_2_gene_content_track = diagram.new_track(1,
-                                                            name = gene2_contig.name,
-                                                            greytrack = True,
-                                                            greytrack_labels = 1,
-                                                            greytrack_font = 'Helvetica',
-                                                            greytrack_fontsize = 12,
-                                                            height = 0.35,
-                                                            start = 0,
-                                                            end = len(gene2_contig),
-                                                            scale = True,
-                                                            scale_fontsize = 6,
-                                                            scale_ticks = 1,
-                                                            scale_smalltick_interval = 10000,
-                                                            scale_largetick_interval = 10000)
+                                                            name=gene2_contig.name,
+                                                            greytrack=True,
+                                                            greytrack_labels=1,
+                                                            greytrack_font='Helvetica',
+                                                            greytrack_fontsize=12,
+                                                            height=0.35,
+                                                            start=0,
+                                                            end=len(gene2_contig),
+                                                            scale=True,
+                                                            scale_fontsize=6,
+                                                            scale_ticks=1,
+                                                            scale_smalltick_interval=10000,
+                                                            scale_largetick_interval=10000)
 
             # add blank feature/graph sets to each track
             feature_sets_1 = contig_1_gene_content_track.new_set(type = 'feature')
@@ -876,14 +939,21 @@ def get_gbk_blast_act(candidates_file, gbk_file, flanking_length, calculation_st
         # get match category
         current_wd = os.getcwd()
         os.chdir('%s/%s' % (path_to_output_act_folder, folder_name))
-        match_category = get_match_category(folder_name, flanking_length, calculation_step, pwd_blastn_exe)
-        os.chdir(path_to_output_act_folder)
-        if match_category == 'Uniq matched':
-            os.system('mv %s.eps 0_Uniq_matched/' % folder_name)
-        if match_category == 'End matched':
-            os.system('mv %s.eps 0_End_matched/' % folder_name)
-        if match_category == 'Non_end multiple matched':
-            os.system('mv %s.eps 0_Non-end_multiple_matched/' % folder_name)
+        end_break = check_end_break(folder_name, flanking_length, 200, pwd_blastn_exe)
+        if end_break == 1:
+            os.chdir(path_to_output_act_folder)
+            os.system('mv %s.eps 0_End_break/' % folder_name)
+        else:
+            current_wd = os.getcwd()
+            os.chdir('%s/%s' % (path_to_output_act_folder, folder_name))
+            match_category = get_match_category(folder_name, flanking_length, calculation_step, pwd_blastn_exe)
+            os.chdir(path_to_output_act_folder)
+            if match_category == 'Uniq matched':
+                os.system('mv %s.eps 0_Uniq_matched/' % folder_name)
+            if match_category == 'End matched':
+                os.system('mv %s.eps 0_End_matched/' % folder_name)
+            if match_category == 'Non_end multiple matched':
+                os.system('mv %s.eps 0_Non-end_multiple_matched/' % folder_name)
 
         # remove temporary folder
         os.chdir(current_wd)
@@ -1181,6 +1251,7 @@ gbk_subset.close()
 
 # create folder to hold ACT output
 os.makedirs(pwd_op_act_folder)
+os.makedirs('%s/0_End_break' % pwd_op_act_folder)
 os.makedirs('%s/0_Uniq_matched' % pwd_op_act_folder)
 os.makedirs('%s/0_End_matched' % pwd_op_act_folder)
 os.makedirs('%s/0_Non-end_multiple_matched' % pwd_op_act_folder)
