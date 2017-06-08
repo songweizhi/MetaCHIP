@@ -579,13 +579,47 @@ def check_end_break(folder_name, flanking_length, calculation_step, pwd_blastn_e
     os.system(compare_end_blast_rre_dle)
     os.system(compare_end_blast_rre_dre)
 
-    breakend = None
-    if (os.path.getsize(output_rle_dle) == 0) and (os.path.getsize(output_rle_dre) == 0) and (os.path.getsize(output_rre_dle) == 0) and (os.path.getsize(output_rre_dre) == 0):
-        breakend = 0
-    else:
-        breakend = 1
+    match_files = [output_rle_dle, output_rle_dre, output_rre_dle, output_rre_dre]
+    match_profile = []
+    for each_match in match_files:
+        match_dir_list = []
+        for each_hit in open(each_match):
+            each_hit_split = each_hit.strip().split('\t')
+            qstart = int(each_hit_split[6])
+            qend = int(each_hit_split[7])
+            sstart = int(each_hit_split[8])
+            send = int(each_hit_split[9])
+            q_direction = qend - qstart
+            s_direction = send - sstart
+            q_dir = ''
+            if q_direction > 0:
+                q_dir = 'forward'
+            if q_direction < 0:
+                q_dir = 'backward'
+            s_dir = ''
+            if s_direction > 0:
+                s_dir = 'forward'
+            if s_direction < 0:
+                s_dir = 'backward'
+            match_dir = ''
+            if q_dir == s_dir:
+                match_dir = 'same direction'
+            if q_dir != s_dir:
+                match_dir = 'opposite direction'
+            match_dir_list.append(match_dir)
+        match_dir_list_uniq = []
+        for each in match_dir_list:
+            if each not in match_dir_list_uniq:
+                match_dir_list_uniq.append(each)
+        match_profile.append(match_dir_list_uniq)
 
-    return breakend
+    break_end = ''
+    if (match_profile[0] == ['opposite direction']) or (match_profile[1] == ['same direction']) or (match_profile[2] == ['same direction']) or (match_profile[3] == ['opposite direction']):
+        break_end = True
+    else:
+        break_end = False
+
+    return break_end
 
 
 def get_match_category(folder_name, flanking_length, calculation_step, pwd_blastn_exe):
@@ -940,7 +974,7 @@ def get_gbk_blast_act(candidates_file, gbk_file, flanking_length, calculation_st
         current_wd = os.getcwd()
         os.chdir('%s/%s' % (path_to_output_act_folder, folder_name))
         end_break = check_end_break(folder_name, flanking_length, 200, pwd_blastn_exe)
-        if end_break == 1:
+        if end_break == True:
             os.chdir(path_to_output_act_folder)
             os.system('mv %s.eps 0_End_break/' % folder_name)
         else:
