@@ -151,7 +151,7 @@ def check_end_break(folder_name, flanking_length, calculation_step, pwd_blastn_e
 
 
 
-folder_name = 'AA_Refined_116_00049___CF_Refined_15_00403'
+folder_name = 'CF_Refined_15_00035___HO_Refined_79_00184'
 
 end_break = check_end_break(folder_name, 3000, 1000, 'blastn')
 print(end_break)

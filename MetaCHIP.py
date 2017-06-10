@@ -519,7 +519,7 @@ def export_dna_record(gene_seq, gene_id, gene_description, pwd_output_file):
     output_handle.close()
 
 
-def check_end_break(folder_name, flanking_length, calculation_step, pwd_blastn_exe):
+def check_end_break(folder_name, flanking_length, end_seq_length, pwd_blastn_exe):
     # define file name
     recipient_gene = folder_name.split('___')[0]
     donor_gene = folder_name.split('___')[1]
@@ -536,27 +536,27 @@ def check_end_break(folder_name, flanking_length, calculation_step, pwd_blastn_e
     ending_seq_description = ''
 
     # export recipient_left_end_seq
-    recipient_left_end_seq = recipient_contig_seq[0:calculation_step]
-    recipient_left_end_id = '%s_le%s' % (recipient_gene, calculation_step)
+    recipient_left_end_seq = recipient_contig_seq[0:end_seq_length]
+    recipient_left_end_id = '%s_le%s' % (recipient_gene, end_seq_length)
     recipient_left_end_handle = '%s/%s.fasta' % (os.getcwd(), recipient_left_end_id)
     export_dna_record(recipient_left_end_seq, recipient_left_end_id, ending_seq_description, recipient_left_end_handle)
 
     # export recipient_right_end_seq
-    recipient_right_end_seq = recipient_contig_seq[len(recipient_contig_seq) - calculation_step:]
-    recipient_right_end_id = '%s_re%s' % (recipient_gene, calculation_step)
+    recipient_right_end_seq = recipient_contig_seq[len(recipient_contig_seq) - end_seq_length:]
+    recipient_right_end_id = '%s_re%s' % (recipient_gene, end_seq_length)
     recipient_right_end_handle = '%s/%s.fasta' % (os.getcwd(), recipient_right_end_id)
     export_dna_record(recipient_right_end_seq, recipient_right_end_id, ending_seq_description,
                       recipient_right_end_handle)
 
     # export donor_left_end_seq
-    donor_left_end_seq = donor_contig_seq[0:calculation_step]
-    donor_left_end_id = '%s_le%s' % (donor_gene, calculation_step)
+    donor_left_end_seq = donor_contig_seq[0:end_seq_length]
+    donor_left_end_id = '%s_le%s' % (donor_gene, end_seq_length)
     donor_left_end_handle = '%s/%s.fasta' % (os.getcwd(), donor_left_end_id)
     export_dna_record(donor_left_end_seq, donor_left_end_id, ending_seq_description, donor_left_end_handle)
 
     # export donor_right_end_seq
-    donor_right_end_seq = donor_contig_seq[len(donor_contig_seq) - calculation_step:]
-    donor_right_end_id = '%s_re%s' % (donor_gene, calculation_step)
+    donor_right_end_seq = donor_contig_seq[len(donor_contig_seq) - end_seq_length:]
+    donor_right_end_id = '%s_re%s' % (donor_gene, end_seq_length)
     donor_right_end_handle = '%s/%s.fasta' % (os.getcwd(), donor_right_end_id)
     export_dna_record(donor_right_end_seq, donor_right_end_id, ending_seq_description, donor_right_end_handle)
 
@@ -815,7 +815,7 @@ def get_match_category(folder_name, flanking_length, calculation_step, pwd_blast
     return match_category
 
 
-def get_gbk_blast_act(candidates_file, gbk_file, flanking_length, calculation_step, name_to_group_number_dict, path_to_output_act_folder, pwd_blastn_exe):
+def get_gbk_blast_act(candidates_file, gbk_file, flanking_length, calculation_step, end_seq_length, name_to_group_number_dict, path_to_output_act_folder, pwd_blastn_exe):
 
     matches = open(candidates_file)
     total = 0
@@ -973,7 +973,7 @@ def get_gbk_blast_act(candidates_file, gbk_file, flanking_length, calculation_st
         # get match category
         current_wd = os.getcwd()
         os.chdir('%s/%s' % (path_to_output_act_folder, folder_name))
-        end_break = check_end_break(folder_name, flanking_length, 200, pwd_blastn_exe)
+        end_break = check_end_break(folder_name, flanking_length, end_seq_length, pwd_blastn_exe)
         if end_break == True:
             os.chdir(path_to_output_act_folder)
             os.system('mv %s.eps 0_End_break/' % folder_name)
@@ -1057,6 +1057,7 @@ flanking_length = int(config['FILES_AND_PARAMETERS']['flanking_length'])
 identity_percentile = int(config['FILES_AND_PARAMETERS']['identity_percentile'])
 align_len_cutoff = int(config['FILES_AND_PARAMETERS']['align_len_cutoff'])
 calculation_step = int(config['FILES_AND_PARAMETERS']['calculation_step'])
+ending_match_length = int(config['FILES_AND_PARAMETERS']['ending_match_length'])
 blast_results = config['FILES_AND_PARAMETERS']['blast_results']
 gbk_file_name = config['FILES_AND_PARAMETERS']['gbk_file_name']
 pwd_blastn_exe = config['FILES_AND_PARAMETERS']['pwd_blastn_exe']
@@ -1065,8 +1066,7 @@ pwd_blastn_exe = config['FILES_AND_PARAMETERS']['pwd_blastn_exe']
 
 print('Define folder/file names and create output folder')
 
-op_prefix = 'output_ip' + str(identity_percentile) + '%_al' + str(align_len_cutoff) + 'bp_c' + str(cover_cutoff) + '%'
-op_prefix_iden_0 = 'output_al' + str(align_len_cutoff) + 'bp_c' + str(cover_cutoff) + '%'
+op_prefix = 'output_ip' + str(identity_percentile) + '%_al' + str(align_len_cutoff) + 'bp_c' + str(cover_cutoff) + '%_e' + str(ending_match_length) + 'bp'
 op_folder = op_prefix
 wd = os.getcwd()
 
@@ -1294,7 +1294,7 @@ os.makedirs('%s/0_Non-end_multiple_matched' % pwd_op_act_folder)
 sleep(1.5)
 print('Get gbk files, run Blast, and plot ACT images')
 # plot ACT
-get_gbk_blast_act(pwd_op_candidates_only_gene_file, pwd_gbk_subset_file, flanking_length, calculation_step, name_to_group_number_dict, pwd_op_act_folder, pwd_blastn_exe)
+get_gbk_blast_act(pwd_op_candidates_only_gene_file, pwd_gbk_subset_file, flanking_length, calculation_step, ending_match_length, name_to_group_number_dict, pwd_op_act_folder, pwd_blastn_exe)
 
 
 sleep(1.5)
