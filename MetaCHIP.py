@@ -622,20 +622,21 @@ def check_end_break(folder_name, flanking_length, end_seq_length, pwd_blastn_exe
     return break_end
 
 
-def get_match_category(folder_name, flanking_length, calculation_step, pwd_blastn_exe):
+def get_confidence_level(folder_name, flanking_length, calculation_step, pwd_blastn_exe):
 
     # get the number of steps
     step_number = int(math.ceil(flanking_length / float(calculation_step)))
-
     # define file name
     recipient_gene = folder_name.split('___')[0]
     donor_gene = folder_name.split('___')[1]
     file_recipient_gene_3000_gbk = '%s_%sbp.gbk' % (recipient_gene, flanking_length)
     file_donor_gene_3000_gbk = '%s_%sbp.gbk' % (donor_gene, flanking_length)
+    seq_len_cutoff_for_export = 100
 
     # read in recipient contig
     recipient_contig_record = SeqIO.read(file_recipient_gene_3000_gbk, 'genbank')
     recipient_contig_seq = recipient_contig_record.seq
+    #print('\nrecipient_gene_location:')
     gene_r_start = 0
     gene_r_end = 0
     gene_r_strand = 0
@@ -645,10 +646,15 @@ def get_match_category(folder_name, flanking_length, calculation_step, pwd_blast
                 gene_r_start = int(gene_r.location.start)
                 gene_r_end = int(gene_r.location.end)
                 gene_r_strand = int(gene_r.location.strand)
+                #print(gene_r_start)
+                #print(gene_r_end)
+                #print(gene_r_strand)
+    #print('recipient_contig_length: %s' % len(recipient_contig_seq))
 
     # read in donor contig
     donor_contig_record = SeqIO.read(file_donor_gene_3000_gbk, 'genbank')
     donor_contig_seq = donor_contig_record.seq
+    #print('\ndonor_gene_location:')
     gene_d_start = 0
     gene_d_end = 0
     gene_d_strand = 0
@@ -658,25 +664,39 @@ def get_match_category(folder_name, flanking_length, calculation_step, pwd_blast
                 gene_d_start = int(gene_d.location.start)
                 gene_d_end = int(gene_d.location.end)
                 gene_d_strand = int(gene_d.location.strand)
+                #print(gene_d_start)
+                #print(gene_d_end)
+                #print(gene_d_strand)
+    #print('donor_contig_length: %s' % len(donor_contig_seq))
+    # get the length of subsequences
+    subseq_length_dict = {}
 
     # get subsequences of recipient contig left flanking region
     rlf_subs_list = []
     n_rlf = 1
     while n_rlf <= step_number:
         current_bp = gene_r_start - n_rlf * calculation_step
+        if current_bp < 0:
+            current_bp = 0
         rlf_subs_list.append(current_bp)
         n_rlf += 1
-
+    #print('\nrlf_subs_list:')
+    #print(rlf_subs_list)
     n_rlf = 0
     while n_rlf <= step_number-1:
         if n_rlf == 0:
             current_rlf_seq = recipient_contig_seq[rlf_subs_list[n_rlf]:gene_r_start]
         else:
             current_rlf_seq = recipient_contig_seq[rlf_subs_list[n_rlf]:rlf_subs_list[n_rlf-1]]
+
         current_rlf_id = '%s_rlf%s' % (recipient_gene, n_rlf + 1)
-        current_rlf_description = ''
-        current_rlf_handle = '%s/%s.fasta' % (os.getcwd(), current_rlf_id)
-        export_dna_record(current_rlf_seq, current_rlf_id, current_rlf_description, current_rlf_handle)
+        if len(current_rlf_seq) > seq_len_cutoff_for_export:
+            current_rlf_description = ''
+            current_rlf_handle = '%s/%s.fasta' % (os.getcwd(), current_rlf_id)
+            export_dna_record(current_rlf_seq, current_rlf_id, current_rlf_description, current_rlf_handle)
+        subseq_length_dict[current_rlf_id] = len(current_rlf_seq)
+        #print(current_rlf_id)
+        #print(len(current_rlf_seq))
         n_rlf += 1
 
     # get subsequences of recipient contig right flanking region
@@ -684,9 +704,12 @@ def get_match_category(folder_name, flanking_length, calculation_step, pwd_blast
     n_rrf = 1
     while n_rrf <= step_number:
         current_bp = gene_r_end + n_rrf * calculation_step
+        if current_bp > len(recipient_contig_seq):
+            current_bp = len(recipient_contig_seq)
         rrf_subs_list.append(current_bp)
         n_rrf += 1
-
+    #print('\nrrf_subs_list')
+    #print(rrf_subs_list)
     n_rrf = 0
     while n_rrf <= step_number-1:
         if n_rrf == 0:
@@ -694,9 +717,13 @@ def get_match_category(folder_name, flanking_length, calculation_step, pwd_blast
         else:
             current_rrf_seq = recipient_contig_seq[rrf_subs_list[n_rrf-1]:rrf_subs_list[n_rrf]]
         current_rrf_id = '%s_rrf%s' % (recipient_gene, n_rrf + 1)
-        current_rrf_description = ''
-        current_rrf_handle = '%s/%s.fasta' % (os.getcwd(), current_rrf_id)
-        export_dna_record(current_rrf_seq, current_rrf_id, current_rrf_description, current_rrf_handle)
+        if len(current_rrf_seq) > seq_len_cutoff_for_export:
+            current_rrf_description = ''
+            current_rrf_handle = '%s/%s.fasta' % (os.getcwd(), current_rrf_id)
+            export_dna_record(current_rrf_seq, current_rrf_id, current_rrf_description, current_rrf_handle)
+        subseq_length_dict[current_rrf_id] = len(current_rrf_seq)
+        #print(current_rrf_id)
+        #print(len(current_rrf_seq))
         n_rrf += 1
 
     # get subsequences of donor contig left flanking region
@@ -704,9 +731,12 @@ def get_match_category(folder_name, flanking_length, calculation_step, pwd_blast
     n_dlf = 1
     while n_dlf <= step_number:
         current_bp = gene_d_start - n_dlf * calculation_step
+        if current_bp < 0:
+            current_bp = 0
         dlf_subs_list.append(current_bp)
         n_dlf += 1
-
+    #print('\ndlf_subs_list:')
+    #print(dlf_subs_list)
     n_dlf = 0
     while n_dlf <= step_number-1:
         if n_dlf == 0:
@@ -714,9 +744,13 @@ def get_match_category(folder_name, flanking_length, calculation_step, pwd_blast
         else:
             current_dlf_seq = donor_contig_seq[dlf_subs_list[n_dlf]:dlf_subs_list[n_dlf-1]]
         current_dlf_id = '%s_dlf%s' % (donor_gene, n_dlf + 1)
-        current_dlf_description = ''
-        current_dlf_handle = '%s/%s.fasta' % (os.getcwd(), current_dlf_id)
-        export_dna_record(current_dlf_seq, current_dlf_id, current_dlf_description, current_dlf_handle)
+        if len(current_dlf_seq) > seq_len_cutoff_for_export:
+            current_dlf_description = ''
+            current_dlf_handle = '%s/%s.fasta' % (os.getcwd(), current_dlf_id)
+            export_dna_record(current_dlf_seq, current_dlf_id, current_dlf_description, current_dlf_handle)
+        subseq_length_dict[current_dlf_id] = len(current_dlf_seq)
+        #print(current_dlf_id)
+        #print(len(current_dlf_seq))
         n_dlf += 1
 
     # get subsequences of donor contig right flanking region
@@ -724,9 +758,12 @@ def get_match_category(folder_name, flanking_length, calculation_step, pwd_blast
     n_drf = 1
     while n_drf <= step_number:
         current_bp = gene_d_end + n_drf * calculation_step
+        if current_bp > len(donor_contig_seq):
+            current_bp = len(donor_contig_seq)
         drf_subs_list.append(current_bp)
         n_drf += 1
-
+    #print('\ndrf_subs_list:')
+    #print(drf_subs_list)
     n_drf = 0
     while n_drf <= step_number-1:
         if n_drf == 0:
@@ -734,43 +771,65 @@ def get_match_category(folder_name, flanking_length, calculation_step, pwd_blast
         else:
             current_drf_seq = donor_contig_seq[drf_subs_list[n_drf-1]:drf_subs_list[n_drf]]
         current_drf_id = '%s_drf%s' % (donor_gene, n_drf + 1)
-        current_drf_description = ''
-        current_drf_handle = '%s/%s.fasta' % (os.getcwd(), current_drf_id)
-        export_dna_record(current_drf_seq, current_drf_id, current_drf_description, current_drf_handle)
+        if len(current_drf_seq) > seq_len_cutoff_for_export:
+            current_drf_description = ''
+            current_drf_handle = '%s/%s.fasta' % (os.getcwd(), current_drf_id)
+            export_dna_record(current_drf_seq, current_drf_id, current_drf_description, current_drf_handle)
+        subseq_length_dict[current_drf_id] = len(current_drf_seq)
+        #print(current_drf_id)
+        #print(len(current_drf_seq))
         n_drf += 1
+    #print('')
+    #print(subseq_length_dict)
 
     # run pair-wise blast
     blast_parameters = '-evalue 1e-5 -outfmt 6 -task blastn'
     n = 1
-    alignment_length_cutoff = round(float(calculation_step) / 5)
+    alignment_length_cutoff = round(float(calculation_step) / 10)
     recipient_left_iden_profile = []
     recipient_right_iden_profile = []
     while n <= step_number:
         query_l = '%s/%s_rlf%s.fasta' % (os.getcwd(), recipient_gene, n)
+        query_l_length = subseq_length_dict['%s_rlf%s' % (recipient_gene, n)]
         query_r = '%s/%s_rrf%s.fasta' % (os.getcwd(), recipient_gene, n)
+        query_r_length = subseq_length_dict['%s_rrf%s' % (recipient_gene, n)]
         donor_l = '%s/%s_dlf%s.fasta' % (os.getcwd(), donor_gene, n)
+        donor_l_length = subseq_length_dict['%s_dlf%s' % (donor_gene, n)]
         donor_r = '%s/%s_drf%s.fasta' % (os.getcwd(), donor_gene, n)
-        output_1 = ''
-        output_2 = ''
-        command_blast_1 = ''
-        command_blast_2 = ''
+        donor_r_length = subseq_length_dict['%s_drf%s' % (donor_gene, n)]
+        #print()
+        #print('%s\t%s' % (query_l, query_l_length))
+        #print('%s\t%s' % (query_r, query_r_length))
+        #print('%s\t%s' % (donor_l, donor_l_length))
+        #print('%s\t%s' % (donor_r, donor_r_length))
+
+        # run pair-wise blast
         if gene_r_strand == gene_d_strand:
             output_1 = '%s/%s_rlf%s___%s_dlf%s.tab' % (os.getcwd(), recipient_gene, n, donor_gene, n)
             output_2 = '%s/%s_rrf%s___%s_drf%s.tab' % (os.getcwd(), recipient_gene, n, donor_gene, n)
             command_blast_1 = '%s -query %s -subject %s -out %s %s' % (pwd_blastn_exe, query_l, donor_l, output_1, blast_parameters)
+            if (query_l_length > seq_len_cutoff_for_export) and (donor_l_length > seq_len_cutoff_for_export):
+                os.system(command_blast_1)
             command_blast_2 = '%s -query %s -subject %s -out %s %s' % (pwd_blastn_exe, query_r, donor_r, output_2, blast_parameters)
+            if (query_r_length > seq_len_cutoff_for_export) and (donor_r_length > seq_len_cutoff_for_export):
+                os.system(command_blast_2)
+
         if gene_r_strand != gene_d_strand:
             output_1 = '%s/%s_rlf%s___%s_drf%s.tab' % (os.getcwd(), recipient_gene, n, donor_gene, n)
             output_2 = '%s/%s_rrf%s___%s_dlf%s.tab' % (os.getcwd(), recipient_gene, n, donor_gene, n)
             command_blast_1 = '%s -query %s -subject %s -out %s %s' % (pwd_blastn_exe, query_l, donor_r, output_1, blast_parameters)
+            if (query_l_length > seq_len_cutoff_for_export) and (donor_r_length > seq_len_cutoff_for_export):
+                os.system(command_blast_1)
             command_blast_2 = '%s -query %s -subject %s -out %s %s' % (pwd_blastn_exe, query_r, donor_l, output_2, blast_parameters)
-        os.system(command_blast_1)
-        os.system(command_blast_2)
+            if (query_r_length > seq_len_cutoff_for_export) and (donor_l_length > seq_len_cutoff_for_export):
+                os.system(command_blast_2)
 
         # get recipient_left_iden_profile
-        if os.path.isfile(output_1) and (os.path.getsize(output_1) == 0):
-            recipient_left_iden_profile.append(['None'])
-        if os.path.getsize(output_1) > 0:
+        if not os.path.isfile(output_1):
+            recipient_left_iden_profile.append(['No_sequence'])
+        elif os.path.isfile(output_1) and (os.path.getsize(output_1) == 0):
+            recipient_left_iden_profile.append(['No_similarity'])
+        elif os.path.getsize(output_1) > 0:
             identity_l_list = []
             for each_line_1 in open(output_1):
                 each_line_1_split = each_line_1.strip().split('\t')
@@ -779,14 +838,16 @@ def get_match_category(folder_name, flanking_length, calculation_step, pwd_blast
                 if alignment_length_1 >= alignment_length_cutoff:
                     identity_l_list.append(identity_1)
             if identity_l_list == []:
-                recipient_left_iden_profile.append(['None'])
+                recipient_left_iden_profile.append(['No_similarity'])
             else:
                 recipient_left_iden_profile.append(identity_l_list)
 
         # get recipient_right_iden_profile
-        if os.path.isfile(output_2) and (os.path.getsize(output_2) == 0):
-            recipient_right_iden_profile.append(['None'])
-        if os.path.getsize(output_2) > 0:
+        if not os.path.isfile(output_2):
+            recipient_right_iden_profile.append(['No_sequence'])
+        elif os.path.isfile(output_2) and (os.path.getsize(output_2) == 0):
+            recipient_right_iden_profile.append(['No_similarity'])
+        elif os.path.getsize(output_2) > 0:
             identity_r_list = []
             for each_line_2 in open(output_2):
                 each_line_2_split = each_line_2.strip().split('\t')
@@ -795,27 +856,66 @@ def get_match_category(folder_name, flanking_length, calculation_step, pwd_blast
                 if alignment_length_2 >= alignment_length_cutoff:
                     identity_r_list.append(identity_2)
             if identity_r_list == []:
-                recipient_right_iden_profile.append(['None'])
+                recipient_right_iden_profile.append(['No_similarity'])
             else:
                 recipient_right_iden_profile.append(identity_r_list)
         n += 1
 
+    #print('recipient_left_iden_profile: %s' % recipient_left_iden_profile)
+    #print('recipient_right_iden_profile: %s' % recipient_right_iden_profile)
+
     # analyze flanking profile
     recipient_left_iden_profile_uniq = uniq_list(recipient_left_iden_profile)
     recipient_right_iden_profile_uniq = uniq_list(recipient_right_iden_profile)
+    #print(recipient_left_iden_profile_uniq)
+    #print(recipient_right_iden_profile_uniq)
+    confidence_level = ''
 
-    match_category = ''
-    if (len(recipient_left_iden_profile_uniq) == 1) and (len(recipient_right_iden_profile_uniq) == 1) and (recipient_left_iden_profile_uniq[0][0] == 'None') and (recipient_right_iden_profile_uniq[0][0] == 'None'):
-        match_category = 'Uniq matched'
-    elif (recipient_left_iden_profile[-1][0] != 'None') or (recipient_right_iden_profile[-1][0] != 'None'):
-        match_category = 'End matched'
-    elif ((len(recipient_left_iden_profile_uniq) > 1) or (len(recipient_right_iden_profile_uniq) > 1)) and ((recipient_left_iden_profile[-1][0] == 'None') and (recipient_right_iden_profile[-1][0] == 'None')):
-        match_category = 'Non_end multiple matched'
+    if (['No_sequence'] not in recipient_left_iden_profile) and (['No_sequence'] not in recipient_right_iden_profile):
+        if (recipient_left_iden_profile[-1] == ['No_similarity']) and (recipient_right_iden_profile[-1] == ['No_similarity']): # non-end match
+            confidence_level = 'high'
+        elif (recipient_left_iden_profile[-1] != ['No_similarity']) or (recipient_right_iden_profile[-1] != ['No_similarity']): # matched to the end
+            confidence_level = 'low'
+        else:
+            confidence_level = 'low'
 
-    return match_category
+    elif (['No_sequence'] in recipient_left_iden_profile) and (['No_sequence'] not in recipient_right_iden_profile):
+        if (len(recipient_left_iden_profile_uniq) > 1) and (recipient_right_iden_profile_uniq[-1] == ['No_similarity']):
+            if recipient_left_iden_profile_uniq[-2] == ['No_similarity']:
+                confidence_level = 'high'
+            else:
+                confidence_level = 'low'
+        else:
+            confidence_level = 'low'
+
+    elif (['No_sequence'] not in recipient_left_iden_profile) and (['No_sequence'] in recipient_right_iden_profile):
+        if (recipient_left_iden_profile_uniq[-1] == ['No_similarity']) and (len(recipient_right_iden_profile_uniq) > 1):
+            if recipient_right_iden_profile_uniq[-2] == ['No_similarity']:
+                confidence_level = 'high'
+            else:
+                confidence_level = 'low'
+        else:
+            confidence_level = 'low'
+
+    elif (['No_sequence'] in recipient_left_iden_profile) and (['No_sequence'] in recipient_right_iden_profile):
+        if (len(recipient_left_iden_profile_uniq) > 1) and (len(recipient_right_iden_profile_uniq) > 1):
+            if (recipient_left_iden_profile_uniq[-2] == ['No_similarity']) and (recipient_right_iden_profile_uniq[-2] == ['No_similarity']):
+                confidence_level = 'high'
+            else:
+                confidence_level = 'low'
+        else:
+            confidence_level = 'low'
 
 
-def get_gbk_blast_act(candidates_file, gbk_file, flanking_length, calculation_step, end_seq_length, name_to_group_number_dict, path_to_output_act_folder, pwd_blastn_exe):
+    #print('\tconfidence level: %s' % confidence_level)
+    #print('left:\t%s' % recipient_left_iden_profile)
+    #print('right:\t%s' % recipient_right_iden_profile)
+
+
+    return confidence_level
+
+
+def get_gbk_blast_act(candidates_file, gbk_file, flanking_length, calculation_step, end_seq_length, name_to_group_number_dict, path_to_output_act_folder, pwd_blastn_exe, keep_temp):
 
     matches = open(candidates_file)
     total = 0
@@ -974,26 +1074,28 @@ def get_gbk_blast_act(candidates_file, gbk_file, flanking_length, calculation_st
         current_wd = os.getcwd()
         os.chdir('%s/%s' % (path_to_output_act_folder, folder_name))
         end_break = check_end_break(folder_name, flanking_length, end_seq_length, pwd_blastn_exe)
+        os.chdir(path_to_output_act_folder)
         if end_break == True:
-            os.chdir(path_to_output_act_folder)
+            # print('%s\t%s' % (folder_name, 'end_break'))
             os.system('mv %s.eps 0_End_break/' % folder_name)
+            os.chdir(current_wd)
         else:
-            current_wd = os.getcwd()
             os.chdir('%s/%s' % (path_to_output_act_folder, folder_name))
-            match_category = get_match_category(folder_name, flanking_length, calculation_step, pwd_blastn_exe)
+            confidence_level = get_confidence_level(folder_name, flanking_length, calculation_step, pwd_blastn_exe)
+            # print('%s\t%s' % (folder_name, confidence_level))
             os.chdir(path_to_output_act_folder)
-            if match_category == 'Uniq matched':
-                os.system('mv %s.eps 0_Uniq_matched/' % folder_name)
-            if match_category == 'End matched':
-                os.system('mv %s.eps 0_End_matched/' % folder_name)
-            if match_category == 'Non_end multiple matched':
-                os.system('mv %s.eps 0_Non-end_multiple_matched/' % folder_name)
+            if confidence_level == 'high':
+                os.system('mv %s.eps 0_confidence_level_high/' % folder_name)
+            if confidence_level == 'low':
+                os.system('mv %s.eps 0_confidence_level_low/' % folder_name)
+            os.chdir(current_wd)
 
         # remove temporary folder
         os.chdir(current_wd)
-        # shutil.rmtree('%s/%s' % (path_to_output_act_folder, folder_name), ignore_errors=True)
-        # if os.path.isdir('%s/%s' % (path_to_output_act_folder, folder_name)):
-        #     shutil.rmtree('%s/%s' % (path_to_output_act_folder, folder_name), ignore_errors=True)
+        if keep_temp == 0:
+            shutil.rmtree('%s/%s' % (path_to_output_act_folder, folder_name), ignore_errors=True)
+            if os.path.isdir('%s/%s' % (path_to_output_act_folder, folder_name)):
+                shutil.rmtree('%s/%s' % (path_to_output_act_folder, folder_name), ignore_errors=True)
         n += 1
 
 
@@ -1061,6 +1163,7 @@ ending_match_length = int(config['FILES_AND_PARAMETERS']['ending_match_length'])
 blast_results = config['FILES_AND_PARAMETERS']['blast_results']
 gbk_file_name = config['FILES_AND_PARAMETERS']['gbk_file_name']
 pwd_blastn_exe = config['FILES_AND_PARAMETERS']['pwd_blastn_exe']
+keep_temp = int(config['FILES_AND_PARAMETERS']['keep_temporary_files'])
 
 ############################################### Define folder/file name ################################################
 
@@ -1117,10 +1220,6 @@ if os.path.isdir(op_folder):
 else:
     os.makedirs(op_folder)
 
-# create folder to hold group-group identity distribution plot
-os.makedirs(pwd_iden_distrib_plot_folder)
-
-
 # create genome_group_dict and genome_list
 grouping = open(path_to_grouping_file)
 genome_name_list = []
@@ -1142,6 +1241,9 @@ print('Plotting overall identity distribution')
 
 # get qualified identities after alignment length and coverage filter (self-match excluded)
 all_identities = get_all_identity_list(path_to_blast_results, genome_name_list, align_len_cutoff, cover_cutoff, pwd_qual_iden_file)
+
+# create folder to hold group-group identity distribution plot
+os.makedirs(pwd_iden_distrib_plot_folder)
 
 # plot overall identity distribution
 all_identities_plot_title = 'All_vs_All'
@@ -1197,10 +1299,6 @@ for each_identity_g in qualified_identities_g:
             # get group_pair to identity dict and identity cut off for defined percentile
             do()
             ploted_group += 1
-            # if choice in ['s', 'S']:
-            #     pass
-            # elif choice in ['p', 'P']:
-            #     sleep(0.5)
             # restore current_group_pair_name and current_group_pair_identities for next group pair
             current_group_pair_name = group_pair
             current_group_pair_identities = []
@@ -1211,10 +1309,6 @@ group_pair_iden_cutoff_file.close()
 
 
 sleep(1.5)
-# if choice in ['p', 'P']:
-#     print('\nAnalyzing Blast matches to get HGT candidates')
-# else:
-#     print('Analyzing Blast matches to get HGT candidates')
 print('\nAnalyzing Blast matches to get HGT candidates')
 
 # add group information to qualified identities and sort it according to group.
@@ -1286,27 +1380,27 @@ gbk_subset.close()
 # create folder to hold ACT output
 os.makedirs(pwd_op_act_folder)
 os.makedirs('%s/0_End_break' % pwd_op_act_folder)
-os.makedirs('%s/0_Uniq_matched' % pwd_op_act_folder)
-os.makedirs('%s/0_End_matched' % pwd_op_act_folder)
-os.makedirs('%s/0_Non-end_multiple_matched' % pwd_op_act_folder)
+os.makedirs('%s/0_confidence_level_high' % pwd_op_act_folder)
+os.makedirs('%s/0_confidence_level_low' % pwd_op_act_folder)
 
 
 sleep(1.5)
 print('Get gbk files, run Blast, and plot ACT images')
 # plot ACT
-get_gbk_blast_act(pwd_op_candidates_only_gene_file, pwd_gbk_subset_file, flanking_length, calculation_step, ending_match_length, name_to_group_number_dict, pwd_op_act_folder, pwd_blastn_exe)
+get_gbk_blast_act(pwd_op_candidates_only_gene_file, pwd_gbk_subset_file, flanking_length, calculation_step, ending_match_length, name_to_group_number_dict, pwd_op_act_folder, pwd_blastn_exe, keep_temp)
 
 
-sleep(1.5)
-print('\nRemove temporary files... ')
 # remove temporary files
-# os.remove(pwd_qual_iden_file)
-# os.remove(pwd_qual_iden_file_gg)
-# os.remove(pwd_qual_iden_file_gg_sorted)
-# os.remove(pwd_qual_idens_with_group)
-# os.remove(pwd_qual_idens_with_group_sorted)
-# os.remove(pwd_subjects_in_one_line)
-# os.remove(pwd_gbk_subset_file)
+if keep_temp == 0:
+    sleep(1.5)
+    print('\nRemove temporary files... ')
+    os.remove(pwd_qual_iden_file)
+    os.remove(pwd_qual_iden_file_gg)
+    os.remove(pwd_qual_iden_file_gg_sorted)
+    os.remove(pwd_qual_idens_with_group)
+    os.remove(pwd_qual_idens_with_group_sorted)
+    os.remove(pwd_subjects_in_one_line)
+    os.remove(pwd_gbk_subset_file)
 
 sleep(1.5)
 print('All done, enjoy!')

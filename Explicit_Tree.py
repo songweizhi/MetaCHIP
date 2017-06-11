@@ -9,17 +9,28 @@ from ete3 import NCBITaxa, Tree
 from PIL import Image, ImageDraw, ImageFont
 from lib.tree_ploter import plot_species_tree, plot_gene_tree
 from lib.Bin_record_class import BinRecord
+import argparse
 
 ############################################## Read in configuration file ##############################################
 
+parser = argparse.ArgumentParser()
 config = configparser.ConfigParser()
-config.read('/Users/songweizhi/Desktop/working_directory/config.txt')
-working_directory = config['FILES_AND_PARAMETERS']['working_directory']
+
+parser.add_argument('-cfg',
+                    required=True,
+                    help='path to configuration file')
+
+args = vars(parser.parse_args())
+pwd_cfg_file = args['cfg']
+config.read(pwd_cfg_file)
+
+
 ffn_file = config['FILES_AND_PARAMETERS']['ffn_file']
 grouping_file = config['FILES_AND_PARAMETERS']['grouping_file']
 cover_cutoff = config['FILES_AND_PARAMETERS']['cover_cutoff']
 align_len_cutoff = config['FILES_AND_PARAMETERS']['align_len_cutoff']
 identity_percentile = int(config['FILES_AND_PARAMETERS']['identity_percentile'])
+ending_match_length = int(config['FILES_AND_PARAMETERS']['ending_match_length'])
 ortholog_group_folder_name = config['FILES_AND_PARAMETERS']['ortholog_group_folder_name']
 inputs_folder_name = config['FILES_AND_PARAMETERS']['inputs_folder_name']
 
@@ -35,8 +46,8 @@ pwd_ranger_exe = config['DEPENDENCIES']['path_to_Ranger_executable']
 
 ############################################### Define folder/file name ################################################
 
-wd = working_directory
-op_folder = 'output_ip' + str(identity_percentile) + '%_al' + str(align_len_cutoff) + 'bp_c' + str(cover_cutoff) + '%'
+wd = os.getcwd()
+op_folder = 'output_ip' + str(identity_percentile) + '%_al' + str(align_len_cutoff) + 'bp_c' + str(cover_cutoff) + '%_e' + str(ending_match_length) + 'bp'
 
 gene_tree_seq_folder =       'gene_tree_seq'
 gene_tree_folder_ranger =    'gene_tree_ranger_txt'
