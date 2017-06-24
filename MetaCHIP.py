@@ -1148,7 +1148,7 @@ config = configparser.ConfigParser()
 
 parser.add_argument('-cfg',
                     required=True,
-                    help='path to configuration file')
+                    help='configuration file')
 
 args = vars(parser.parse_args())
 pwd_cfg_file = args['cfg']

@@ -24,7 +24,6 @@ args = vars(parser.parse_args())
 pwd_cfg_file = args['cfg']
 config.read(pwd_cfg_file)
 
-
 ffn_file = config['FILES_AND_PARAMETERS']['ffn_file']
 grouping_file = config['FILES_AND_PARAMETERS']['grouping_file']
 cover_cutoff = config['FILES_AND_PARAMETERS']['cover_cutoff']
@@ -32,7 +31,6 @@ align_len_cutoff = config['FILES_AND_PARAMETERS']['align_len_cutoff']
 identity_percentile = int(config['FILES_AND_PARAMETERS']['identity_percentile'])
 ending_match_length = int(config['FILES_AND_PARAMETERS']['ending_match_length'])
 ortholog_group_folder_name = config['FILES_AND_PARAMETERS']['ortholog_group_folder_name']
-inputs_folder_name = config['FILES_AND_PARAMETERS']['inputs_folder_name']
 
 pwd_phyml_exe = config['DEPENDENCIES']['path_to_phyml_executable']
 pwd_muscle_exe = config['DEPENDENCIES']['path_to_muscle_executable']
@@ -65,9 +63,9 @@ tree_image_folder_name =     'combined_tree_images'
 #qsub_folder_for_AnGST = 'qsub_files_for_AnGST'
 #angst_output_folder_name = 'gene_tree_angst_outputs'
 
-pwd_grouping_file =              '%s/%s/%s'      % (wd, inputs_folder_name, grouping_file)
-pwd_ffn_file =                   '%s/%s/%s'      % (wd, inputs_folder_name, ffn_file)
-pwd_ortholog_group_folder =      '%s/%s/%s'      % (wd, inputs_folder_name, ortholog_group_folder_name)
+pwd_grouping_file =              '%s/%s'         % (wd, grouping_file)
+pwd_ffn_file =                   '%s/%s'         % (wd, ffn_file)
+pwd_ortholog_group_folder =      '%s/%s'         % (wd, ortholog_group_folder_name)
 pwd_candidates_file =            '%s/%s/%s'      % (wd, op_folder, candidates_file_name)
 pwd_ranger_wd =                  '%s/%s/%s/%s/'  % (wd, op_folder, output_tree_folder_name, ranger_wd_name)
 pwd_angst_inputs_folder =        '%s/%s/%s/%s'   % (wd, op_folder, output_tree_folder_name, angst_inputs_folder_name)

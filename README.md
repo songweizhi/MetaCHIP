@@ -84,7 +84,18 @@ Prepare input files:
         # 3. Add your genomes at the end of the names.dmp and nodes.dmp files according to their formats.
 
         # 4. Compress customized taxonomy database.
-        tar -czf names.dmp nodes.dmp merged.dmp
+        tar -czvf taxdump_customized.tar.gz names.dmp nodes.dmp merged.dmp
+
+        # 2. modify ncbiquery.py (/Users/songweizhi/anaconda3/lib/python3.5/site-packages/ete3/ncbi_taxonomy/ncbiquery.py)
+        # 2.1 Delete line 720: urlretrieve("ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz", "taxdump.tar.gz")
+        # 2.2 Change the path in line 722 to your customized "taxdump.tar.gz"
+
+        # 5. load/upgrade your customized database to ETE3
+        # First, open your python3 console, then type
+        from ete3 import NCBITaxa
+        ncbi = NCBITaxa()
+        ncbi.update_taxonomy_database()
+
 
 How to run it:
 ---

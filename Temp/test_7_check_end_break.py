@@ -42,12 +42,7 @@ def export_dna_record(gene_seq, gene_id, gene_description, pwd_output_file):
     output_handle.close()
 
 
-def get_match_direction():
-    direction = 'same'
-    return direction
-
-
-def check_end_break(folder_name, flanking_length, calculation_step, pwd_blastn_exe):
+def check_end_break(folder_name, flanking_length, end_seq_length, pwd_blastn_exe):
     # define file name
     recipient_gene = folder_name.split('___')[0]
     donor_gene = folder_name.split('___')[1]
@@ -64,27 +59,27 @@ def check_end_break(folder_name, flanking_length, calculation_step, pwd_blastn_e
     ending_seq_description = ''
 
     # export recipient_left_end_seq
-    recipient_left_end_seq = recipient_contig_seq[0:calculation_step]
-    recipient_left_end_id = '%s_le%s' % (recipient_gene, calculation_step)
+    recipient_left_end_seq = recipient_contig_seq[0:end_seq_length]
+    recipient_left_end_id = '%s_le%s' % (recipient_gene, end_seq_length)
     recipient_left_end_handle = '%s/%s.fasta' % (os.getcwd(), recipient_left_end_id)
     export_dna_record(recipient_left_end_seq, recipient_left_end_id, ending_seq_description, recipient_left_end_handle)
 
     # export recipient_right_end_seq
-    recipient_right_end_seq = recipient_contig_seq[len(recipient_contig_seq) - calculation_step:]
-    recipient_right_end_id = '%s_re%s' % (recipient_gene, calculation_step)
+    recipient_right_end_seq = recipient_contig_seq[len(recipient_contig_seq) - end_seq_length:]
+    recipient_right_end_id = '%s_re%s' % (recipient_gene, end_seq_length)
     recipient_right_end_handle = '%s/%s.fasta' % (os.getcwd(), recipient_right_end_id)
     export_dna_record(recipient_right_end_seq, recipient_right_end_id, ending_seq_description,
                       recipient_right_end_handle)
 
     # export donor_left_end_seq
-    donor_left_end_seq = donor_contig_seq[0:calculation_step]
-    donor_left_end_id = '%s_le%s' % (donor_gene, calculation_step)
+    donor_left_end_seq = donor_contig_seq[0:end_seq_length]
+    donor_left_end_id = '%s_le%s' % (donor_gene, end_seq_length)
     donor_left_end_handle = '%s/%s.fasta' % (os.getcwd(), donor_left_end_id)
     export_dna_record(donor_left_end_seq, donor_left_end_id, ending_seq_description, donor_left_end_handle)
 
     # export donor_right_end_seq
-    donor_right_end_seq = donor_contig_seq[len(donor_contig_seq) - calculation_step:]
-    donor_right_end_id = '%s_re%s' % (donor_gene, calculation_step)
+    donor_right_end_seq = donor_contig_seq[len(donor_contig_seq) - end_seq_length:]
+    donor_right_end_id = '%s_re%s' % (donor_gene, end_seq_length)
     donor_right_end_handle = '%s/%s.fasta' % (os.getcwd(), donor_right_end_id)
     export_dna_record(donor_right_end_seq, donor_right_end_id, ending_seq_description, donor_right_end_handle)
 
@@ -150,9 +145,7 @@ def check_end_break(folder_name, flanking_length, calculation_step, pwd_blastn_e
     return break_end
 
 
-
 folder_name = 'CF_Refined_15_00035___HO_Refined_79_00184'
-
 end_break = check_end_break(folder_name, 3000, 1000, 'blastn')
 print(end_break)
 
