@@ -91,7 +91,7 @@ candidates = open(pwd_candidates_file)
 candidates_list = []
 for match_group in candidates:
     match_group_split = match_group.strip().split('\t')
-    match_group_split = sorted(match_group_split)
+    #match_group_split = sorted(match_group_split)
     candidates_list.append(match_group_split)
 
 
@@ -140,8 +140,6 @@ for each_bin in bin_taxon_ids:
     name_to_group_number_dict[bin_name] = bin_group
     name_to_group_number_without_underscore_dict[bin_name] = bin_group_without_underscore
     bin_record = BinRecord(bin_name, bin_id, bin_group, bin_group_without_underscore)
-
-
     bin_record_list.append(bin_record)
     genome_name_list.append(bin_name)
     bin_group_list.append(bin_group)
@@ -150,34 +148,26 @@ for each_bin in bin_taxon_ids:
 
 ##################################### Create folders to hold species/gene trees ######################################
 
-# create output_tree_folder
+# create output_tree_folder, gene_tree_seq and gene_tree_txt folder
 if not os.path.isdir(pwd_op_tree_folder):
     os.mkdir(pwd_op_tree_folder)
+    os.mkdir(pwd_gene_tree_seq_folder)
+    os.mkdir(pwd_gene_tree_folder_ranger)
 else:
     shutil.rmtree(pwd_op_tree_folder)
     os.mkdir(pwd_op_tree_folder)
-
-# create gene_tree_seq and gene_tree_txt folder
-if not os.path.isdir(pwd_gene_tree_seq_folder):
     os.mkdir(pwd_gene_tree_seq_folder)
     os.mkdir(pwd_gene_tree_folder_ranger)
-    #os.mkdir(path_to_output_tree_folder + angst_output_folder_name)
-else:
-    pass
 
 if 'Ranger-DTL' in programs_for_HGT_prediction:
-    if not os.path.isdir(pwd_species_tree_folder_ranger):
-        os.mkdir(pwd_species_tree_folder_ranger)
-        os.mkdir(pwd_species_tree_folder_plot)
-    else:
-        pass
+    os.mkdir(pwd_species_tree_folder_ranger)
+    os.mkdir(pwd_species_tree_folder_plot)
 
-if 'AnGST' in programs_for_HGT_prediction:
-    if not os.path.isdir(pwd_op_tree_folder + '/' + species_tree_folder_angst):
-        os.mkdir(pwd_op_tree_folder + '/' + species_tree_folder_angst)
-    else:
-        pass
-
+# if 'AnGST' in programs_for_HGT_prediction:
+#     if not os.path.isdir(pwd_op_tree_folder + '/' + species_tree_folder_angst):
+#         os.mkdir(pwd_op_tree_folder + '/' + species_tree_folder_angst)
+#     else:
+#         pass
 
 ####################################################### Main Code ######################################################
 
@@ -189,190 +179,198 @@ for each_candidates in candidates_list:
     # get ortholog_list for each match pairs
     ortholog_list = []
     for each in clusters_dict:
-        if each_candidates[0] in clusters_dict[each] and each_candidates[1] in clusters_dict[each]:
+        if (each_candidates[0] in clusters_dict[each]) or (each_candidates[1] in clusters_dict[each]):
             ortholog_list += clusters_dict[each]
-        else:
-            pass
 
-    # get bin name list from candidates gene list
-    each_candidates_bin_name = []
-    for each_g in each_candidates:
-        each_g_new = each_g.split('_')[0] + '_' + each_g.split('_')[1]
-        each_candidates_bin_name.append(each_g_new)
+    print(len(ortholog_list))
+    if len(ortholog_list) == 0:
+        print('No orthologes for the current HGT candidate')
+    else:
 
-    # uniq ortholog_list why?
-    gene_member = []
-    for each_g in ortholog_list:
-        if each_g not in gene_member:
-            gene_member.append(each_g)
+        # get bin name list from candidates gene list
+        each_candidates_bin_name = []
+        for each_g in each_candidates:
+            each_g_new = '_'.join(each_g.split('_')[:-1])
+            each_candidates_bin_name.append(each_g_new)
 
-    # get sequences of othorlog group to build gene tree
-    seq_file_name = 'gene_tree_' + '___'.join(each_candidates) + '.seq'
-    output_handle = open(pwd_gene_tree_seq_folder + '/' + seq_file_name, "w")
-    records = SeqIO.parse(pwd_ffn_file, 'fasta')
-    for record in records:
-        if record.id in gene_member:
-            record_id_split = record.id.split('_')
-            bin_name_in_record_dot_name = record_id_split[0] + '_' + record_id_split[1]
-            for each_bin_record in bin_record_list:
-                if each_bin_record.name == bin_name_in_record_dot_name:
-                    record.id = each_bin_record.group_without_underscore + '_' + record_id_split[2]
-                    name_len = len(record.id)
-                    add_upp_num = 10 - name_len
-                    record.id += add_upp_num * '_'
-                    record.description = ''
-                    SeqIO.write(record, output_handle, 'fasta')
-    output_handle.close()
+        # uniq ortholog_list
+        gene_member = []
+        for each_g in ortholog_list:
+            if each_g not in gene_member:
+                gene_member.append(each_g)
+        # get sequences of othorlog group to build gene tree
+        seq_file_name = 'gene_tree_' + '___'.join(each_candidates) + '.seq'
+        output_handle = open(pwd_gene_tree_seq_folder + '/' + seq_file_name, "w")
+        records = SeqIO.parse(pwd_ffn_file, 'fasta')
+        for record in records:
+            if record.id in gene_member:
+                record_id_split = record.id.split('_')
+                bin_name_in_record_dot_name = '_'.join(record_id_split[:-1])
+                for each_bin_record in bin_record_list:
+                    pass
+                    if each_bin_record.name == bin_name_in_record_dot_name:
+                        record.id = each_bin_record.group_without_underscore + '_' + record_id_split[-1]
+                        name_len = len(record.id)
+                        add_upp_num = 10 - name_len
+                        record.id += add_upp_num * '_'
+                        record.description = ''
+                        SeqIO.write(record, output_handle, 'fasta')
+        output_handle.close()
 
 
-##################################################### tree builder #####################################################
+    ##################################################### tree builder #####################################################
 
-    species_tree_ranger_file_name = 'species_tree_ranger_' + '___'.join(each_candidates)
-    species_tree_angst_file_name = 'species_tree_angst_' + '___'.join(each_candidates)
-    gene_tree_file_name = 'gene_tree_' + '___'.join(each_candidates)
+        species_tree_ranger_file_name = 'species_tree_ranger_' + '___'.join(each_candidates)
+        #species_tree_angst_file_name = 'species_tree_angst_' + '___'.join(each_candidates)
+        gene_tree_file_name = 'gene_tree_' + '___'.join(each_candidates)
 
-    # build tree with Ranger-DTL pipeline
-    if 'Ranger-DTL' in programs_for_HGT_prediction:
-        # prepare file name
-        seq_file_name_non_extention = seq_file_name[:-4]
-        first_clustalo_output = '%s.aln' % seq_file_name_non_extention
-        filter_ranger_input_name = '%s.aln-gb' % seq_file_name_non_extention
-        filter_ranger_output_name = '%s_aln_gb_filted.fasta' % seq_file_name_non_extention
-        second_clustalo_output = '%s_aln_gb_filted.aln' % seq_file_name_non_extention
-        fastTree_output = '%s.txt' % seq_file_name_non_extention
+        # build tree with Ranger-DTL pipeline
+        if 'Ranger-DTL' in programs_for_HGT_prediction:
+            # prepare file name
+            seq_file_name_non_extention = seq_file_name[:-4]
+            first_clustalo_output = '%s.aln' % seq_file_name_non_extention
+            filter_ranger_input_name = '%s.aln-gb' % seq_file_name_non_extention
+            filter_ranger_output_name = '%s_aln_gb_filted.fasta' % seq_file_name_non_extention
+            second_clustalo_output = '%s_aln_gb_filted.aln' % seq_file_name_non_extention
+            fastTree_output = '%s.txt' % seq_file_name_non_extention
 
-        # program parameters
-        gblocks_parameters = '-t=d -b3=24 -b4=6 -b5=a'
-        fasttree_parameters = '-gtr -nt'
+            # program parameters
+            gblocks_parameters = '-t=d -b3=24 -b4=6 -b5=a'
+            fasttree_parameters = '-gtr -nt'
 
-        # path to input/output files
-        path_to_first_clustalo_input = '%s/%s' % (pwd_gene_tree_seq_folder, seq_file_name)
-        path_to_first_clustalo_output = '%s/%s' % (pwd_gene_tree_seq_folder, first_clustalo_output)
-        path_to_ranger_filter_input = '%s/%s' % (pwd_gene_tree_seq_folder, filter_ranger_input_name)
-        path_to_ranger_filter_output = '%s/%s' % (pwd_gene_tree_seq_folder, filter_ranger_output_name)
-        path_to_second_clustalo_output = '%s/%s' % (pwd_gene_tree_seq_folder, second_clustalo_output)
-        path_to_fasttree_output = '%s/%s' % (pwd_gene_tree_folder_ranger, fastTree_output)
+            # path to input/output files
+            path_to_first_clustalo_input = '%s/%s' % (pwd_gene_tree_seq_folder, seq_file_name)
+            path_to_first_clustalo_output = '%s/%s' % (pwd_gene_tree_seq_folder, first_clustalo_output)
+            path_to_ranger_filter_input = '%s/%s' % (pwd_gene_tree_seq_folder, filter_ranger_input_name)
+            path_to_ranger_filter_output = '%s/%s' % (pwd_gene_tree_seq_folder, filter_ranger_output_name)
+            path_to_second_clustalo_output = '%s/%s' % (pwd_gene_tree_seq_folder, second_clustalo_output)
+            path_to_fasttree_output = '%s/%s' % (pwd_gene_tree_folder_ranger, fastTree_output)
 
-        # prepare program command
-        first_clustalo_cmd = '%s --force -i %s -o %s' % (pwd_clustalo_exe, path_to_first_clustalo_input, path_to_first_clustalo_output)
-        gblocks_ranger_cmd = '%s %s %s' % (pwd_gblocks_exe, path_to_first_clustalo_output, gblocks_parameters)
-        ranger_filter_cmd = 'python %s %s %s' % (pwd_alignment_filter_script, path_to_ranger_filter_input, path_to_ranger_filter_output)
-        second_clustalo_cmd = '%s --force -i %s -o %s' % (pwd_clustalo_exe, path_to_ranger_filter_output, path_to_second_clustalo_output)
-        FastTree_cmd = '%s %s %s > %s' % (pwd_fasttree_exe, fasttree_parameters, path_to_second_clustalo_output, path_to_fasttree_output)
+            # prepare program command
+            first_clustalo_cmd = '%s --force -i %s -o %s' % (pwd_clustalo_exe, path_to_first_clustalo_input, path_to_first_clustalo_output)
+            gblocks_ranger_cmd = '%s %s %s' % (pwd_gblocks_exe, path_to_first_clustalo_output, gblocks_parameters)
+            ranger_filter_cmd = 'python %s %s %s' % (pwd_alignment_filter_script, path_to_ranger_filter_input, path_to_ranger_filter_output)
+            second_clustalo_cmd = '%s --force -i %s -o %s' % (pwd_clustalo_exe, path_to_ranger_filter_output, path_to_second_clustalo_output)
+            FastTree_cmd = '%s %s %s > %s' % (pwd_fasttree_exe, fasttree_parameters, path_to_second_clustalo_output, path_to_fasttree_output)
 
-        # execute commands
-        print('Running first round clustal-o')
-        os.system(first_clustalo_cmd)
-        print('Running Gblocks')
-        os.system(gblocks_ranger_cmd)
-        print('Filtering alignment sequences')
-        os.system(ranger_filter_cmd)
-        print('Running second round clustal-o')
-        os.system(second_clustalo_cmd)
-        print('Running FastTree')
-        os.system(FastTree_cmd)
-        print('Got gene tree')
+            # execute commands
+            print('Running first round clustal-o')
+            os.system(first_clustalo_cmd)
+            print('Running Gblocks')
+            os.system(gblocks_ranger_cmd)
+            print('Filtering alignment sequences')
+            os.system(ranger_filter_cmd)
+            print('Running second round clustal-o')
+            os.system(second_clustalo_cmd)
+            print('Running FastTree')
+            os.system(FastTree_cmd)
+            print('Got gene tree')
 
-    # # build tree with AnGST pipeline
-    # if 'AnGST' in programs_for_HGT_prediction:
-    #     # prepare file name
-    #     seq_file_name_non_extention = seq_file_name[:-4]
-    #     first_muscle_output_name = '%s_aln.fasta' % seq_file_name_non_extention
-    #     angst_filter_input_name = '%s_aln.fasta-gb' % seq_file_name_non_extention
-    #     angst_filter_output_name = '%s_aln_gb_filted.fasta' % seq_file_name_non_extention
-    #     second_muscle_output_name = '%s_aln_gb_filted_aln.phy' % seq_file_name_non_extention
-    #     phyml_output_name = '%s_aln_gb_filted_aln.phy_phyml_tree.txt' % seq_file_name_non_extention
-    #     phyml_tree_file_name = '%s.txt' % seq_file_name_non_extention
-    #
-    #     # program parameters
-    #     gblocks_parameters = '-t=d -b3=24 -b4=6 -b5=a'
-    #     phyml_parameters = '-a 1.0 -b 100 -o tl'
-    #
-    #     # path to input/output files
-    #     path_to_first_muscle_input_mac ='%s%s/%s' % (path_to_output_tree_folder, gene_tree_seq_folder, seq_file_name)
-    #     path_to_first_muscle_output_mac = '%s%s/%s' % (path_to_output_tree_folder, angst_output_folder_name, first_muscle_output_name)
-    #     path_to_angst_filter_input_mac = '%s%s/%s' % (path_to_output_tree_folder, angst_output_folder_name, angst_filter_input_name)
-    #     path_to_angst_filter_output_mac = '%s%s/%s' % (path_to_output_tree_folder, angst_output_folder_name, angst_filter_output_name)
-    #     path_to_second_muscle_output_mac = '%s%s/%s' % (path_to_output_tree_folder, angst_output_folder_name, second_muscle_output_name)
-    #     path_to_phyml_output_name_mac = '%s%s/%s' % (path_to_output_tree_folder, angst_output_folder_name, phyml_output_name)
-    #
-    #     # prepare program command
-    #     first_muscle_cmd = '%s -in %s -out %s' % (path_to_muscle_mac, path_to_first_muscle_input_mac, path_to_first_muscle_output_mac)
-    #     gblocks_angst_cmd = '%s %s %s' % (path_to_gblocks_mac, path_to_first_muscle_output_mac, gblocks_parameters)
-    #     angst_filter_cmd = 'python %s %s %s' % (path_to_alignment_filter_script_mac, path_to_angst_filter_input_mac, path_to_angst_filter_output_mac)
-    #     second_muscle_cmd = '%s -phyi -in %s -out %s' % (path_to_muscle_mac, path_to_angst_filter_output_mac, path_to_second_muscle_output_mac)
-    #     phyml_cmd = '%s %s -i %s' % (path_to_phyml_mac, phyml_parameters, path_to_second_muscle_output_mac)
-    #
-    #     # execute commands
-    #     os.system(first_muscle_cmd)
-    #     os.system(gblocks_angst_cmd)
-    #     os.system(angst_filter_cmd)
-    #     os.system(second_muscle_cmd)
-    #     os.system(phyml_cmd)
+#     # # build tree with AnGST pipeline
+#     # if 'AnGST' in programs_for_HGT_prediction:
+#     #     # prepare file name
+#     #     seq_file_name_non_extention = seq_file_name[:-4]
+#     #     first_muscle_output_name = '%s_aln.fasta' % seq_file_name_non_extention
+#     #     angst_filter_input_name = '%s_aln.fasta-gb' % seq_file_name_non_extention
+#     #     angst_filter_output_name = '%s_aln_gb_filted.fasta' % seq_file_name_non_extention
+#     #     second_muscle_output_name = '%s_aln_gb_filted_aln.phy' % seq_file_name_non_extention
+#     #     phyml_output_name = '%s_aln_gb_filted_aln.phy_phyml_tree.txt' % seq_file_name_non_extention
+#     #     phyml_tree_file_name = '%s.txt' % seq_file_name_non_extention
+#     #
+#     #     # program parameters
+#     #     gblocks_parameters = '-t=d -b3=24 -b4=6 -b5=a'
+#     #     phyml_parameters = '-a 1.0 -b 100 -o tl'
+#     #
+#     #     # path to input/output files
+#     #     path_to_first_muscle_input_mac ='%s%s/%s' % (path_to_output_tree_folder, gene_tree_seq_folder, seq_file_name)
+#     #     path_to_first_muscle_output_mac = '%s%s/%s' % (path_to_output_tree_folder, angst_output_folder_name, first_muscle_output_name)
+#     #     path_to_angst_filter_input_mac = '%s%s/%s' % (path_to_output_tree_folder, angst_output_folder_name, angst_filter_input_name)
+#     #     path_to_angst_filter_output_mac = '%s%s/%s' % (path_to_output_tree_folder, angst_output_folder_name, angst_filter_output_name)
+#     #     path_to_second_muscle_output_mac = '%s%s/%s' % (path_to_output_tree_folder, angst_output_folder_name, second_muscle_output_name)
+#     #     path_to_phyml_output_name_mac = '%s%s/%s' % (path_to_output_tree_folder, angst_output_folder_name, phyml_output_name)
+#     #
+#     #     # prepare program command
+#     #     first_muscle_cmd = '%s -in %s -out %s' % (path_to_muscle_mac, path_to_first_muscle_input_mac, path_to_first_muscle_output_mac)
+#     #     gblocks_angst_cmd = '%s %s %s' % (path_to_gblocks_mac, path_to_first_muscle_output_mac, gblocks_parameters)
+#     #     angst_filter_cmd = 'python %s %s %s' % (path_to_alignment_filter_script_mac, path_to_angst_filter_input_mac, path_to_angst_filter_output_mac)
+#     #     second_muscle_cmd = '%s -phyi -in %s -out %s' % (path_to_muscle_mac, path_to_angst_filter_output_mac, path_to_second_muscle_output_mac)
+#     #     phyml_cmd = '%s %s -i %s' % (path_to_phyml_mac, phyml_parameters, path_to_second_muscle_output_mac)
+#     #
+#     #     # execute commands
+#     #     os.system(first_muscle_cmd)
+#     #     os.system(gblocks_angst_cmd)
+#     #     os.system(angst_filter_cmd)
+#     #     os.system(second_muscle_cmd)
+#     #     os.system(phyml_cmd)
 
 #################################################### Get species tree ##################################################
 
-    # get bin name
-    genome_member = []
-    for each_gene in gene_member:
-        genome_name = each_gene.split('_')[0] + '_' + each_gene.split('_')[1]
-        genome_member.append(genome_name)
+        # get bin name
+        genome_member = []
+        for each_gene in gene_member:
+            # need to be changed
+            each_gene_split = each_gene.split('_')
+            genome_name = '_'.join(each_gene_split[:-1])
+            genome_member.append(genome_name)
+        print(gene_member)
+        print(genome_member)
 
-    # get all id list for a sub-tree
-    id_list = []
-    for genome in genome_member:
-        for each_bin_record in bin_record_list:
-            if each_bin_record.name == genome:
-                id_list.append(each_bin_record.id)
+        # get  taxon id list for a sub-tree
+        id_list = []
+        for genome in genome_member:
+            for each_bin_record in bin_record_list:
+                if each_bin_record.name == genome:
+                    id_list.append(each_bin_record.id)
+        print(id_list)
 
-    # get species tree
-    ncbi = NCBITaxa()
-    tree_phylo = ncbi.get_topology(id_list, intermediate_nodes = 0)
+        # get species tree
+        ncbi = NCBITaxa()
+        tree_phylo = ncbi.get_topology(id_list, intermediate_nodes = 0)
 
-    # customize species tree for plot
-    tree_phylo_plot = ncbi.get_topology(id_list, intermediate_nodes = 1)
-    for each_node in tree_phylo_plot.traverse():
-        node_name_list = []
-        node_name_list.append(each_node.name)
-        if node_name_list == ['']:
-            pass
-        else:
-            if each_node.is_leaf():
-                # change bin id to bin name
-                each_node.name = ncbi.get_taxid_translator(node_name_list)[int(each_node.name)]
-                # add group information to bin name
-                each_node.name = name_to_group_number_without_underscore_dict[each_node.name] + '_' + each_node.name
-
-            # for non-leaf node name, only display the first 12 characters
+        # customize species tree for plot
+        tree_phylo_plot = ncbi.get_topology(id_list, intermediate_nodes = 1)
+        for each_node in tree_phylo_plot.traverse():
+            node_name_list = []
+            node_name_list.append(each_node.name)
+            if node_name_list == ['']:
+                pass
             else:
-                if len(ncbi.get_taxid_translator(node_name_list)[int(each_node.name)]) <= 12:
+                if each_node.is_leaf():
+                    # change bin id to bin name
                     each_node.name = ncbi.get_taxid_translator(node_name_list)[int(each_node.name)]
+                    # add group information to bin name
+                    each_node.name = name_to_group_number_without_underscore_dict[each_node.name] + '_' + each_node.name
+
+                # for non-leaf node name, only display the first 12 characters
                 else:
-                    each_node.name = ncbi.get_taxid_translator(node_name_list)[int(each_node.name)][0:12] + '.'
+                    if len(ncbi.get_taxid_translator(node_name_list)[int(each_node.name)]) <= 12:
+                        each_node.name = ncbi.get_taxid_translator(node_name_list)[int(each_node.name)]
+                    else:
+                        each_node.name = ncbi.get_taxid_translator(node_name_list)[int(each_node.name)][0:12] + '.'
 
-    species_tree_plot_out = open(pwd_species_tree_folder_plot + '/species_tree_plot_' + process_name + '.txt', 'w')
-    species_tree_plot_out.write(tree_phylo_plot.write(format = 8) + '\n')
-    species_tree_plot_out.close()
+        species_tree_plot_out = open(pwd_species_tree_folder_plot + '/species_tree_plot_' + process_name + '.txt', 'w')
+        species_tree_plot_out.write(tree_phylo_plot.write(format = 8) + '\n')
+        species_tree_plot_out.close()
 
-    # change leaf name from bin_id to bin_name and write to output file
-    tree = Tree(tree_phylo.write(format = 8))
-    for leaf in tree.iter_leaves():
-        for each_bin_record_2 in bin_record_list:
-            if each_bin_record_2.id == leaf.name:
-                leaf.name = each_bin_record_2.group_without_underscore + '_' + each_bin_record_2.name
+        # change leaf name from bin_id to bin_name and write to output file
+        tree = Tree(tree_phylo.write(format = 8))
+        for leaf in tree.iter_leaves():
+            for each_bin_record_2 in bin_record_list:
+                if each_bin_record_2.id == leaf.name:
+                    leaf.name = each_bin_record_2.group_without_underscore + '_' + each_bin_record_2.name
 
-    if 'Ranger-DTL' in programs_for_HGT_prediction:
-        species_tree_ranger_out = open(pwd_species_tree_folder_ranger + '/' + species_tree_ranger_file_name + '.txt', 'w')
-        species_tree_ranger_out.write(tree.write(format = 8))
-        species_tree_ranger_out.close()
+        if 'Ranger-DTL' in programs_for_HGT_prediction:
+            species_tree_ranger_out = open(pwd_species_tree_folder_ranger + '/' + species_tree_ranger_file_name + '.txt', 'w')
+            species_tree_ranger_out.write(tree.write(format = 8))
+            species_tree_ranger_out.close()
 
-    if 'AnGST' in programs_for_HGT_prediction:
-        species_tree_angst_out = open(pwd_op_tree_folder + '/' + species_tree_folder_angst + '/' + species_tree_angst_file_name + '.txt', 'w')
-        # add root and its branch length to the tree, to fufill AnGST's requirement
-        modified_species_tree = '(' + tree.write()[:-1] + ':1);'
-        species_tree_angst_out.write(modified_species_tree)
-        species_tree_angst_out.close()
-
+        # if 'AnGST' in programs_for_HGT_prediction:
+        #     species_tree_angst_out = open(pwd_op_tree_folder + '/' + species_tree_folder_angst + '/' + species_tree_angst_file_name + '.txt', 'w')
+        #     # add root and its branch length to the tree, to fufill AnGST's requirement
+        #     modified_species_tree = '(' + tree.write()[:-1] + ':1);'
+        #     species_tree_angst_out.write(modified_species_tree)
+        #     species_tree_angst_out.close()
+#
     n += 1
 
 
@@ -404,12 +402,12 @@ for cluster in clusters:
 
 #################################### Prepare AnGST and Ranger-DTL working directory ####################################
 
-# prepare AnGST working directory
-if not os.path.exists(pwd_angst_inputs_folder):
-    os.makedirs(pwd_angst_inputs_folder)
-else:
-    shutil.rmtree(pwd_angst_inputs_folder)
-    os.makedirs(pwd_angst_inputs_folder)
+# # prepare AnGST working directory
+# if not os.path.exists(pwd_angst_inputs_folder):
+#     os.makedirs(pwd_angst_inputs_folder)
+# else:
+#     shutil.rmtree(pwd_angst_inputs_folder)
+#     os.makedirs(pwd_angst_inputs_folder)
 
 # prepare Ranger-DTL working directory
 if not os.path.exists(pwd_ranger_wd):
@@ -526,7 +524,7 @@ for candidate in candidates:
     # get two possible transfer situation
     candidate_split_group = []
     for each_gene in candidate_split_gene:
-        each_gene_bin_name = each_gene.split('_')[0] + '_' + each_gene.split('_')[1]
+        each_gene_bin_name = '_'.join(each_gene.split('_')[:-1])
         for each_bin_record in bin_record_list:
             if each_gene_bin_name == each_bin_record.name:
                 each_gene_g = each_bin_record.group
@@ -609,57 +607,57 @@ for candidate in candidates:
     os.remove('%s/Species_Tree_%s.png' % (pwd_tree_image_folder, candidate))  # remove species tree
     os.remove('%s/Gene_Tree_%s.png' % (pwd_tree_image_folder, candidate))  # remove gene tree
 
-############################################### Prepare Input for AnGST ################################################
-
-    # generate folders for outputs
-    if not os.path.exists('%s/%s' % (pwd_angst_inputs_folder, candidate)):
-        os.makedirs('%s/%s' % (pwd_angst_inputs_folder, candidate))
-    else:
-        shutil.rmtree('%s/%s' % (pwd_angst_inputs_folder, candidate))
-        os.makedirs('%s/%s' % (pwd_angst_inputs_folder, candidate))
-
-    # read in AnGST species/gene tree
-    angst_species_tree = Tree('%s/species_tree_angst_%s.txt' % (pwd_species_tree_folder_angst, candidate), format = 1)
-    angst_gene_tree = Tree('%s/gene_tree_%s.txt' % (pwd_gene_tree_folder_ranger, candidate), format = 1)
-
-    # change leaf name in AnGST species tree
-    for each_asl in angst_species_tree:
-        each_asl.name = each_asl.name.split('_')[0]
-
-    # change leaf name in AnGST gene tree
-    for each_agl in angst_gene_tree:
-        each_agl_name_split = each_agl.name.split('_')
-        each_agl.name = '%s_%s' % (each_agl_name_split[0], each_agl_name_split[1])
-
-    # get species/gene tree for AnGST input
-    angst_species_tree_new = open('%s/%s/species_tree_%s.txt' % (pwd_angst_inputs_folder, candidate, candidate), 'w')
-    angst_gene_tree_new = open('%s/%s/gene_tree_%s.txt' % (pwd_angst_inputs_folder, candidate, candidate), 'w')
-    angst_species_tree_new.write(angst_species_tree.write() + '\n')
-    angst_gene_tree_new.write(angst_gene_tree.write() + '\n')
-    angst_species_tree_new.close()
-    angst_gene_tree_new.close()
-
-    # get AnGST.input file
-    AnGST_dot_input_file = open('%s/%s/AnGST.input' % (pwd_angst_inputs_folder, candidate), 'w')
-    line_1 = 'species=%s/%s/species_tree_%s.txt' % (pwd_angst_inputs_folder, candidate, candidate)
-    line_2 = 'gene=%s/%s/gene_tree_%s.txt' % (pwd_angst_inputs_folder, candidate, candidate)
-    line_3 = 'output=%s/%s/%s_out' % (pwd_angst_inputs_folder, candidate, candidate)
-    line_4 = 'penalties=%s/%s/penalty.file' % (pwd_angst_inputs_folder, candidate)
-    AnGST_dot_input_file.write('%s\n%s\n%s\n%s\n' % (line_1, line_2, line_3, line_4))
-    AnGST_dot_input_file.close()
-
-    # get penalty.file file
-    penalty_dot_file = open('%s/%s/penalty.file' % (pwd_angst_inputs_folder, candidate), 'w')
-    penalty_dot_file_content = 'hgt : 3.0\ndup : 2.0\nlos : 1.0\nspc : 0.0\n'
-    penalty_dot_file.write(penalty_dot_file_content)
-    penalty_dot_file.close()
-
-    # prepare commands to run AnGST
-    AnGST_dot_input_file_location = '%s/%s/AnGST.input' % (pwd_angst_inputs_folder, candidate)
-    #AnGST_commands_file.write('python %s %s\n' % (path_to_AnGST_executable, AnGST_dot_input_file_location))
-    processing_num += 1
-
-# Close files
-#AnGST_commands_file.close()
+# ############################################### Prepare Input for AnGST ################################################
+#
+#     # generate folders for outputs
+#     if not os.path.exists('%s/%s' % (pwd_angst_inputs_folder, candidate)):
+#         os.makedirs('%s/%s' % (pwd_angst_inputs_folder, candidate))
+#     else:
+#         shutil.rmtree('%s/%s' % (pwd_angst_inputs_folder, candidate))
+#         os.makedirs('%s/%s' % (pwd_angst_inputs_folder, candidate))
+#
+#     # read in AnGST species/gene tree
+#     angst_species_tree = Tree('%s/species_tree_angst_%s.txt' % (pwd_species_tree_folder_angst, candidate), format = 1)
+#     angst_gene_tree = Tree('%s/gene_tree_%s.txt' % (pwd_gene_tree_folder_ranger, candidate), format = 1)
+#
+#     # change leaf name in AnGST species tree
+#     for each_asl in angst_species_tree:
+#         each_asl.name = each_asl.name.split('_')[0]
+#
+#     # change leaf name in AnGST gene tree
+#     for each_agl in angst_gene_tree:
+#         each_agl_name_split = each_agl.name.split('_')
+#         each_agl.name = '%s_%s' % (each_agl_name_split[0], each_agl_name_split[1])
+#
+#     # get species/gene tree for AnGST input
+#     angst_species_tree_new = open('%s/%s/species_tree_%s.txt' % (pwd_angst_inputs_folder, candidate, candidate), 'w')
+#     angst_gene_tree_new = open('%s/%s/gene_tree_%s.txt' % (pwd_angst_inputs_folder, candidate, candidate), 'w')
+#     angst_species_tree_new.write(angst_species_tree.write() + '\n')
+#     angst_gene_tree_new.write(angst_gene_tree.write() + '\n')
+#     angst_species_tree_new.close()
+#     angst_gene_tree_new.close()
+#
+#     # get AnGST.input file
+#     AnGST_dot_input_file = open('%s/%s/AnGST.input' % (pwd_angst_inputs_folder, candidate), 'w')
+#     line_1 = 'species=%s/%s/species_tree_%s.txt' % (pwd_angst_inputs_folder, candidate, candidate)
+#     line_2 = 'gene=%s/%s/gene_tree_%s.txt' % (pwd_angst_inputs_folder, candidate, candidate)
+#     line_3 = 'output=%s/%s/%s_out' % (pwd_angst_inputs_folder, candidate, candidate)
+#     line_4 = 'penalties=%s/%s/penalty.file' % (pwd_angst_inputs_folder, candidate)
+#     AnGST_dot_input_file.write('%s\n%s\n%s\n%s\n' % (line_1, line_2, line_3, line_4))
+#     AnGST_dot_input_file.close()
+#
+#     # get penalty.file file
+#     penalty_dot_file = open('%s/%s/penalty.file' % (pwd_angst_inputs_folder, candidate), 'w')
+#     penalty_dot_file_content = 'hgt : 3.0\ndup : 2.0\nlos : 1.0\nspc : 0.0\n'
+#     penalty_dot_file.write(penalty_dot_file_content)
+#     penalty_dot_file.close()
+#
+#     # prepare commands to run AnGST
+#     AnGST_dot_input_file_location = '%s/%s/AnGST.input' % (pwd_angst_inputs_folder, candidate)
+#     #AnGST_commands_file.write('python %s %s\n' % (path_to_AnGST_executable, AnGST_dot_input_file_location))
+#     processing_num += 1
+#
+# # Close files
+# #AnGST_commands_file.close()
 
 print('\nAll done!')
