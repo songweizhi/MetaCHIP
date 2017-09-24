@@ -18,6 +18,7 @@ config.read(pwd_cfg_file)
 
 nodes_number = int(config['GENERAL']['qsub_nodes'])
 ppn_number = int(config['GENERAL']['qsub_ppn'])
+qsub_folder = config['GENERAL']['qsub_folder']
 memory = int(config['STEP_1_1_GemSIM']['qsub_memory_1_1'])
 walltime_needed = config['STEP_1_1_GemSIM']['qsub_walltime_1_1']
 email = config['GENERAL']['qsub_email']
@@ -34,7 +35,7 @@ wd = os.getcwd()
 pwd_genome_folder = '%s/%s' % (wd, genome_folder)
 pwd_abundance_file = '%s/%s' % (wd, abundance_file)
 pwd_GemSIM_wd = '%s/%s' % (wd, GemSIM_wd)
-pwd_qsub_file_folder = '%s/qsub_files' % wd
+pwd_qsub_file_folder = '%s/%s' % (wd, qsub_folder)
 
 ###################################### Prepare qsub file header ######################################
 

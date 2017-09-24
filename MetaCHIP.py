@@ -372,6 +372,8 @@ def set_contig_track_features(gene_contig, name_group_dict, candidate_list, feat
             feature.qualifiers['locus_tag'][0] = name_group_dict[bin_name_gbk] + '_' + bin_name_gbk_split[-1]
 
             # strands
+            color = None
+            label_angle = 0
             if feature.location.strand == 1:
                 label_angle = 45
                 color = colors.lightblue
@@ -910,14 +912,13 @@ def get_confidence_level(folder_name, flanking_length, calculation_step, pwd_bla
     #print('\tconfidence level: %s' % confidence_level)
     #print('left:\t%s' % recipient_left_iden_profile)
     #print('right:\t%s' % recipient_right_iden_profile)
-
-
     return confidence_level
 
 
 def get_gbk_blast_act(candidates_file, gbk_file, flanking_length, calculation_step, end_seq_length, name_to_group_number_dict, path_to_output_act_folder, pwd_blastn_exe, keep_temp):
 
     matches = open(candidates_file)
+
     total = 0
     for match in matches:
         total += 1
@@ -997,6 +998,7 @@ def get_gbk_blast_act(candidates_file, gbk_file, flanking_length, calculation_st
                                                             scale_ticks=1,
                                                             scale_smalltick_interval=10000,
                                                             scale_largetick_interval=10000)
+
             # add gene content track for gene2_contig
             contig_2_gene_content_track = diagram.new_track(1,
                                                             name=gene2_contig.name,
@@ -1014,8 +1016,8 @@ def get_gbk_blast_act(candidates_file, gbk_file, flanking_length, calculation_st
                                                             scale_largetick_interval=10000)
 
             # add blank feature/graph sets to each track
-            feature_sets_1 = contig_1_gene_content_track.new_set(type = 'feature')
-            feature_sets_2 = contig_2_gene_content_track.new_set(type = 'feature')
+            feature_sets_1 = contig_1_gene_content_track.new_set(type='feature')
+            feature_sets_2 = contig_2_gene_content_track.new_set(type='feature')
 
             # add gene features to 2 blank feature sets
             set_contig_track_features(gene1_contig, name_to_group_number_dict, genes, feature_sets_1)
@@ -1061,12 +1063,12 @@ def get_gbk_blast_act(candidates_file, gbk_file, flanking_length, calculation_st
 
             ############################################### Draw and Export ################################################
 
-            diagram.draw(format = "linear",
-                         orientation = "landscape",
-                         pagesize = (75 * cm, 25 * cm),
-                         fragments = 1,
-                         start = 0,
-                         end = max_len)
+            diagram.draw(format="linear",
+                         orientation="landscape",
+                         pagesize=(75 * cm, 25 * cm),
+                         fragments=1,
+                         start=0,
+                         end=max_len)
 
             diagram.write('%s/%s.eps' % (path_to_output_act_folder, folder_name), "EPS")
 
@@ -1359,11 +1361,9 @@ for match in matches:
 
 # get subset of combined gbk file
 gbk_subset = open(pwd_gbk_subset_file, 'w')
-records = SeqIO.parse(path_to_gbk_file, 'genbank')
 records_recorded = []
 
-
-for record in records:
+for record in SeqIO.parse(path_to_gbk_file, 'genbank'):
     record_id = record.id
     for gene_f in record.features:
         if 'locus_tag' in gene_f.qualifiers:

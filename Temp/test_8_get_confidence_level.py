@@ -1,26 +1,13 @@
 #!/usr/bin/env python
 import os
 import math
-import shutil
-import argparse
-import configparser
-from sys import stdout
-from time import sleep
-import numpy as np
 import matplotlib as mpl
 mpl.use('Agg')
-import matplotlib.pyplot as plt
-from scipy.stats import gaussian_kde
 from Bio import SeqIO
 from Bio.Seq import Seq
-from Bio.SeqUtils import GC
 from Bio.Alphabet import IUPAC
 from Bio.SeqRecord import SeqRecord
-from Bio.Graphics import GenomeDiagram
-from Bio.SeqFeature import FeatureLocation
-from Bio.Graphics.GenomeDiagram import CrossLink
-from reportlab.lib import colors
-from reportlab.lib.units import cm
+
 
 
 def uniq_list(input_list):
@@ -323,5 +310,13 @@ def get_confidence_level(folder_name, flanking_length, calculation_step, pwd_bla
     return confidence_level
 
 
-print(get_confidence_level('AA_Refined_134_00470___AA_Refined_13_00243', 3000, 1000, 'blastn'))
+wd = '/Users/songweizhi/Desktop/MetaCHIP_wd/optimize_confidence_level'
+candidate = 'AA_Refined_13_00139___PA_Refined_11_01369'
+# candidate = 'AA_Refined_13_00597___DP_Refined_163_00555'
+# candidate = 'AA_Refined_109_01081___AA_Refined_96_01072'
+# candidate = 'AA_Refined_116_00628___PC_Refined_57_00060'
+# candidate = 'AA_Refined_117_00923___HO_Refined_109_00124'
 
+os.chdir('%s/%s' % (wd, candidate))
+confidence_level = get_confidence_level(candidate, 3000, 300, 'blastn')
+print(confidence_level)

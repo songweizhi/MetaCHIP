@@ -2,6 +2,7 @@ import os
 import re
 import glob
 import shutil
+import argparse
 from sys import stdout
 import configparser
 from Bio import SeqIO
@@ -9,7 +10,7 @@ from ete3 import NCBITaxa, Tree
 from PIL import Image, ImageDraw, ImageFont
 from lib.tree_ploter import plot_species_tree, plot_gene_tree
 from lib.Bin_record_class import BinRecord
-import argparse
+
 
 ############################################## Read in configuration file ##############################################
 
