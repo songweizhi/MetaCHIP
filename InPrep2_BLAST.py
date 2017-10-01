@@ -22,7 +22,7 @@ usage = """
 
 working_directory = os.getcwd()
 path_to_makeblastdb_executable = '/share/apps/blast+/2.2.31/bin/makeblastdb'
-blast_module = 'blast+/2.2.31'
+blast_module = 'blast+/2.6.0'
 
 ########################################################################################################################
 
@@ -48,11 +48,11 @@ os.system(makeblastdb_cmd)
 
 # prepare blastn qsub file header
 line_1 = '#!/bin/bash\n'
-line_2 = '#PBS -l nodes=1:ppn=12\n'
-line_3 = '#PBS -l vmem=60gb\n'
+line_2 = '#PBS -l nodes=1:ppn=3\n'
+line_3 = '#PBS -l vmem=20gb\n'
 line_4 = '#PBS -l walltime=11:59:00' + '\n'
 line_5 = '#PBS -j oe\n'
-line_6 = '#PBS -M weizhi.song@student.unsw.edu.au\n'
+line_6 = '#PBS -M wythe1987@163.com\n'
 line_7 = '#PBS -m ae\n'
 line_8 = 'cd ' + working_directory
 header = line_1 + line_2 + line_3 + line_4 + line_5 + line_6 + line_7 + line_8

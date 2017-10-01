@@ -22,17 +22,18 @@ config.read(pwd_cfg_file)
 
 nodes_number = int(config['GENERAL']['qsub_nodes'])
 ppn_number = int(config['GENERAL']['qsub_ppn'])
-memory = int(config['STEP_2_ASSEMBLE']['qsub_memory_2'])
-walltime_needed = config['STEP_2_ASSEMBLE']['qsub_walltime_2']
+qsub_folder = config['GENERAL']['qsub_folder']
+memory = int(config['STEP_2_ASSEMBLE_idba_ud']['qsub_memory_2'])
+walltime_needed = config['STEP_2_ASSEMBLE_idba_ud']['qsub_walltime_2']
 email = config['GENERAL']['qsub_email']
-modules_needed = config['STEP_2_ASSEMBLE']['qsub_modules_2']
+modules_needed = config['STEP_2_ASSEMBLE_idba_ud']['qsub_modules_2']
 abundance_file = config['GENERAL']['abundance_file']
 GemSIM_wd = config['GENERAL']['GemSIM_wd']
 IDBA_UD_wd = config['GENERAL']['IDBA_UD_wd']
 prefix = config['GENERAL']['prefix']
-mink = int(config['STEP_2_ASSEMBLE']['idba_ud_mink'])
-maxk = int(config['STEP_2_ASSEMBLE']['idba_ud_maxk'])
-step = int(config['STEP_2_ASSEMBLE']['idba_ud_step'])
+mink = int(config['STEP_2_ASSEMBLE_idba_ud']['idba_ud_mink'])
+maxk = int(config['STEP_2_ASSEMBLE_idba_ud']['idba_ud_maxk'])
+step = int(config['STEP_2_ASSEMBLE_idba_ud']['idba_ud_step'])
 
 wd = os.getcwd()
 pwd_abundance_file = '%s/%s' % (wd, abundance_file)
@@ -97,7 +98,7 @@ pwd_combined_R1_fastq_file_name = '%s/%s' % (pwd_IDBA_UD_wd, combined_R1_fastq_f
 pwd_combined_R2_fastq_file_name = '%s/%s' % (pwd_IDBA_UD_wd, combined_R2_fastq_file_name)
 pwd_combined_BP_fasta_file_name = '%s/%s' % (pwd_IDBA_UD_wd, combined_BP_fasta_file_name)
 
-pwd_qsub_idba_ud_file = '%s/%s/qsub_idba_ud.sh' % (wd, 'qsub_files')
+pwd_qsub_idba_ud_file = '%s/%s/qsub_idba_ud.sh' % (wd, qsub_folder)
 qsub_idba_ud_file_handle = open(pwd_qsub_idba_ud_file, 'w')
 
 qsub_idba_ud_file_handle.write(header + module_lines)
@@ -115,8 +116,8 @@ qsub_idba_ud_file_handle.write('idba_ud --pre_correction --num_threads %s --mink
 
 qsub_idba_ud_file_handle.close()
 
-if args['qsub'] == True:
-    current_wd = os.getcwd()
-    os.chdir('%s/qsub_files' % wd)
-    os.system('qsub %s' % pwd_qsub_idba_ud_file)
-    os.chdir(current_wd)
+
+current_wd = os.getcwd()
+os.chdir('%s/%s' % (wd, qsub_folder))
+os.system('qsub %s' % pwd_qsub_idba_ud_file)
+os.chdir(current_wd)

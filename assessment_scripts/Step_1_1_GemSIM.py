@@ -94,7 +94,7 @@ while n <= number_of_replicates:
         current_abundance_handle.write('%s\t%s\n' % (each[0], each[n]))
 
     # prepare current qsub file
-    pwd_current_qsub_file = '%s/qsub_files/qsub_GemSIM_abundance_%s.sh' % (wd, n)
+    pwd_current_qsub_file = '%s/%s/qsub_GemSIM_abundance_%s.sh' % (wd, qsub_folder, n)
     current_qsub_handle = open(pwd_current_qsub_file, 'w')
     cmd = 'python %s -R ../../%s -a %s -m %s -o %s_%s %s\n' % (pwd_GemReads_executable,
                                                                genome_folder,

@@ -95,7 +95,7 @@ combined_R2_fastq_file_name = 'combined_R2.fastq'
 pwd_combined_R1_fastq_file_name = '%s/%s' % (pwd_metaSPAdes_wd, combined_R1_fastq_file_name)
 pwd_combined_R2_fastq_file_name = '%s/%s' % (pwd_metaSPAdes_wd, combined_R2_fastq_file_name)
 
-metaSPAdes_output_scaffold = 'scaffolds.fasta'
+metaSPAdes_output_scaffold = 'scaffolds_renamed.fasta'
 metaSPAdes_output_scaffold_filtered = 'scaffolds_k21-127_lt%s.fa' % (min_contig_length)
 metaSPAdes_output_scaffold_filtered_no_extension = 'scaffolds_k21-127_lt%s' % (min_contig_length)
 pwd_scaffold = '%s/combined_k21-127/%s' % (pwd_metaSPAdes_wd, metaSPAdes_output_scaffold)
@@ -119,7 +119,7 @@ while n <= number_of_replicates:
     pwd_bam_file = '%s/%s_%s.bam' % (pwd_Mapping_wd, prefix, n)
     pwd_bam_file_sorted = '%s/%s_%s_sorted' % (pwd_Mapping_wd, prefix, n)
     qsub_mapping_file_handle.write(header + module_lines)
-    qsub_mapping_file_handle.write('bowtie2 -x %s -1 %s -2 %s -S %s -p 6 -q\n' % (pwd_metaSPAdes_output_scaffold_filtered_no_extension, pwd_fastq_file_R1_Q30_P, pwd_fastq_file_R2_Q30_P, pwd_sam_file))
+    qsub_mapping_file_handle.write('bowtie2 -x %s -1 %s -2 %s -S %s -p 1 -q\n' % (pwd_metaSPAdes_output_scaffold_filtered_no_extension, pwd_fastq_file_R1_Q30_P, pwd_fastq_file_R2_Q30_P, pwd_sam_file))
     qsub_mapping_file_handle.write('samtools view -bS %s -o %s\n' % (pwd_sam_file, pwd_bam_file))
     qsub_mapping_file_handle.write('samtools sort %s %s\n' % (pwd_bam_file, pwd_bam_file_sorted))
     qsub_mapping_file_handle.write('samtools index %s.bam\n' % pwd_bam_file_sorted)
@@ -129,8 +129,6 @@ while n <= number_of_replicates:
     qsub_mapping_file_handle.close()
     current_wd = os.getcwd()
     os.chdir('%s/%s' % (wd, qsub_folder))
-    #print('qsub %s' % pwd_qsub_mapping_file)
     os.system('qsub %s' % pwd_qsub_mapping_file)
     os.chdir(current_wd)
     n += 1
-

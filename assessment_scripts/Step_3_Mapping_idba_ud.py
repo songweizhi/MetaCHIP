@@ -19,22 +19,22 @@ config.read(pwd_cfg_file)
 nodes_number = int(config['GENERAL']['qsub_nodes'])
 ppn_number = int(config['GENERAL']['qsub_ppn'])
 qsub_folder = config['GENERAL']['qsub_folder']
-memory = int(config['STEP_3_MAPPING']['qsub_memory_3'])
-walltime_needed = config['STEP_3_MAPPING']['qsub_walltime_3']
+memory = int(config['STEP_3_MAPPING_idba_ud']['qsub_memory_3'])
+walltime_needed = config['STEP_3_MAPPING_idba_ud']['qsub_walltime_3']
 email = config['GENERAL']['qsub_email']
-modules_needed = config['STEP_3_MAPPING']['qsub_modules_3']
+modules_needed = config['STEP_3_MAPPING_idba_ud']['qsub_modules_3']
 abundance_file = config['GENERAL']['abundance_file']
 GemSIM_wd = config['GENERAL']['GemSIM_wd']
 IDBA_UD_wd = config['GENERAL']['IDBA_UD_wd']
 Mapping_wd = config['GENERAL']['Mapping_wd']
 prefix = config['GENERAL']['prefix']
-mink = int(config['STEP_2_ASSEMBLE']['idba_ud_mink'])
-maxk = int(config['STEP_2_ASSEMBLE']['idba_ud_maxk'])
-step = int(config['STEP_2_ASSEMBLE']['idba_ud_step'])
-pwd_select_contig_pl = config['STEP_3_MAPPING']['pwd_select_contig_pl']
-pwd_get_fasta_stats_pl = config['STEP_3_MAPPING']['pwd_get_fasta_stats_pl']
-pwd_bowtie2_build = config['STEP_3_MAPPING']['pwd_bowtie2_build']
-min_contig_length = int(config['STEP_3_MAPPING']['min_contig_length'])
+mink = int(config['STEP_2_ASSEMBLE_idba_ud']['idba_ud_mink'])
+maxk = int(config['STEP_2_ASSEMBLE_idba_ud']['idba_ud_maxk'])
+step = int(config['STEP_2_ASSEMBLE_idba_ud']['idba_ud_step'])
+pwd_select_contig_pl = config['STEP_3_MAPPING_idba_ud']['pwd_select_contig_pl']
+pwd_get_fasta_stats_pl = config['STEP_3_MAPPING_idba_ud']['pwd_get_fasta_stats_pl']
+pwd_bowtie2_build = config['STEP_3_MAPPING_idba_ud']['pwd_bowtie2_build']
+min_contig_length = int(config['STEP_3_MAPPING_idba_ud']['min_contig_length'])
 
 wd = os.getcwd()
 pwd_abundance_file = '%s/%s' % (wd, abundance_file)
@@ -124,10 +124,12 @@ while n <= number_of_replicates:
     pwd_bam_file = '%s/%s_%s.bam' % (pwd_Mapping_wd, prefix, n)
     pwd_bam_file_sorted = '%s/%s_%s_sorted' % (pwd_Mapping_wd, prefix, n)
     qsub_mapping_file_handle.write(header + module_lines)
-    qsub_mapping_file_handle.write('bowtie2 -x %s -1 %s -2 %s -S %s -p 6 -q\n' % (pwd_idba_ud_output_scaffold_filtered_no_extension, pwd_fastq_file_R1_Q30_P, pwd_fastq_file_R2_Q30_P, pwd_sam_file))
+    qsub_mapping_file_handle.write('bowtie2 -x %s -1 %s -2 %s -S %s -p 1 -q\n' % (pwd_idba_ud_output_scaffold_filtered_no_extension, pwd_fastq_file_R1_Q30_P, pwd_fastq_file_R2_Q30_P, pwd_sam_file))
     qsub_mapping_file_handle.write('samtools view -bS %s -o %s\n' % (pwd_sam_file, pwd_bam_file))
     qsub_mapping_file_handle.write('samtools sort %s %s\n' % (pwd_bam_file, pwd_bam_file_sorted))
     qsub_mapping_file_handle.write('samtools index %s.bam\n' % pwd_bam_file_sorted)
+    qsub_mapping_file_handle.write('rm %s\n' % pwd_sam_file)
+    qsub_mapping_file_handle.write('rm %s\n' % pwd_bam_file)
     qsub_mapping_file_handle.close()
     current_wd = os.getcwd()
     os.chdir('%s/%s' % (wd, qsub_folder))

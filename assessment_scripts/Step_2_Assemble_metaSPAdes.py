@@ -21,7 +21,7 @@ pwd_cfg_file = args['cfg']
 config.read(pwd_cfg_file)
 
 nodes_number = int(config['GENERAL']['qsub_nodes'])
-ppn_number = int(config['GENERAL']['qsub_ppn'])
+ppn_number = int(config['STEP_2_ASSEMBLE_metaSPAdes']['qsub_ppn_2'])
 qsub_folder = config['GENERAL']['qsub_folder']
 memory = int(config['STEP_2_ASSEMBLE_metaSPAdes']['qsub_memory_2'])
 walltime_needed = config['STEP_2_ASSEMBLE_metaSPAdes']['qsub_walltime_2']
@@ -100,7 +100,7 @@ qsub_metaSPAdes_file_handle = open(pwd_qsub_metaSPAdes_file, 'w')
 qsub_metaSPAdes_file_handle.write(header + module_lines)
 qsub_metaSPAdes_file_handle.write('cat %s > %s\n' % (' '.join(R1_reads_files), pwd_combined_R1_fastq_file_name))
 qsub_metaSPAdes_file_handle.write('cat %s > %s\n' % (' '.join(R2_reads_files), pwd_combined_R2_fastq_file_name))
-qsub_metaSPAdes_file_handle.write('spades.py --meta -1 %s -2 %s -o %s/combined_k21-127 -k %s\n' % (pwd_combined_R1_fastq_file_name, pwd_combined_R2_fastq_file_name, pwd_metaSPAdes_wd, kmer_range))
+qsub_metaSPAdes_file_handle.write('spades.py --meta -t %s -1 %s -2 %s -o %s/combined_k21-127 -k %s\n' % (ppn_number, pwd_combined_R1_fastq_file_name, pwd_combined_R2_fastq_file_name, pwd_metaSPAdes_wd, kmer_range))
 
 qsub_metaSPAdes_file_handle.close()
 

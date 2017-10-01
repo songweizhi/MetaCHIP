@@ -58,7 +58,7 @@ line_2 = '#PBS -l nodes=' + str(1) + ':ppn=' + str(1) + '\n'
 line_3 = '#PBS -l vmem=' + str(10) + 'gb\n'
 line_4 = '#PBS -l walltime=' +'00:59:00' + '\n'
 line_5 = '#PBS -j oe\n'
-line_6 = '#PBS -M ' + 'weizhi.song@student.unsw.edu.au' + '\n'
+line_6 = '#PBS -M ' + 'wythe1987@163.com' + '\n'
 line_7 = '#PBS -m ae'
 header = line_1 + line_2 + line_3 + line_4 + line_5 + line_6 + line_7
 
