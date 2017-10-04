@@ -1,4 +1,7 @@
-from ete3 import Tree, TreeStyle, NodeStyle, TextFace
+from ete3 import Tree
+from ete3 import TreeStyle
+from ete3 import NodeStyle
+from ete3 import TextFace
 
 
 def plot_tree(tree_newick, tree_title):
@@ -69,8 +72,8 @@ def plot_tree(tree_newick, tree_title):
 tree_1 = '((((((((D5_amphiroa_bin16,D6_caulerpa_bin21)Saprospirace.)Chitinophaga.)Chitinophagi.,(((C7_amphiroa_bin21)Flavobacteri.)unclassified.,(((C1_amphiroa_bin24)Fluviicola)Crocinitomic.)Flavobacteri.)Flavobacteri.,((D18_ulva_bin9)Sphingobacte.)Sphingobacte.)Bacteroidete.)Bacteroidete.)FCB group,((((F9_ulva_bin45,F10_ulva_bin74)Rhodobactera.,((G5_delisea_bin38,G16_ulva_bin8,G7_delisea_bin9,G8_ecklonia_bin2,G10_ecklonia_bin7)Robiginitoma.)Hyphomonadac.)Rhodobactera.,G24_ulva_bin64,G25_ulva_bin65,G26_ulva_bin67,G18_ecklonia_bin26,G21_halophila_bin34,G23_halophila_bin48)Alphaproteob.,(L12_water_bin80,L6_ecklonia_bin49)Gammaproteob.)Proteobacter.,((((B2_delisea_bin83,B1_delisea_bin26)Planctomycet.)Planctomycet.)Planctomycet.,(((((A1_ecklonia_bin31)Rubritalea)Rubritaleace.)Verrucomicro.)Verrucomicro.)Verrucomicro.)PVC group)Bacteria);'
 
 
+tree_2 = '(Refined_9:0.29446,Refined_34:0.25674,Refined_53:0.70393);'
 
 
-
-plot_tree(tree_1, 'Katana')
+plot_tree(tree_2, 'Katana')
 
