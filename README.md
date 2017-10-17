@@ -146,7 +146,7 @@ Output files:
 
 1. ACT image for checking flanking regions of identified HGTs.
 
-    ![flanking_regions](doc/images/flanking_regions.png)
+    ![flanking_regions](doc/images/flanking_regions.jpg)
 
 1. Combined species tree and gene tree, as well as Ranger-DTL predicted HGTs.
 
