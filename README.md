@@ -121,11 +121,11 @@ Output files:
 
 1. All identified candidates (this file will be used as input for the second step).
 
-        Recipient	Donor	    Recipient_ID	Donor_ID	Identity	End_break	Direction(Blast)
+        Recipient	Donor	    Recipient_ID	Donor_ID	IdentityEnd_break	Direction(Blast)
         AAM_03063	BAD_01456	A_1	            B_1	        100.0	    no	        AAM<-BAD
-        AMAU_05759	BHS_02873	A_4	            B_4	        79.02	    no  	    AMAU<-BHS
+        AMAU_05759	BHS_02873	A_4	            B_4	        79.02	    no         AMAU<-BHS
         BAD_00475	AAM_01658	B_1	            A_1	        74.354	    no	        BAD<-AAM
-        BDS_01877	AMAC_00215	B_2	            A_3	        100.0	    no  	    BDS<-AMAC
+        BDS_01877	AMAC_00215	B_2	            A_3	        100.0	    no  	   BDS<-AMAC
         BGC_01656	AKV_01272	B_3	            A_2	        100.0	    yes	        BGC<-AKV
         BNM_00983	AMAC_00159	B_5	            A_3	        75.269	    no	        BNM<-AMAC
         BNM_02093	AMS_03378	B_5	            A_5	        100.0	    no	        BNM<-AMS
@@ -133,14 +133,6 @@ Output files:
         BNM_02717	AAM_02737	B_5	            A_1	        74.47	    yes	        BNM<-AAM
         BAD_02075	AMAU_02632	B_1	            A_4	        100.0	    no	        N/A
         BAD_02565	AKV_02618	B_1	            A_2	        79.279	    no	        N/A
-
-
-1. All identified candidates with group and identity.
-
-        C_7|amphiroa_bin21_00300	D_6|caulerpa_bin21_01365|75.15
-        D_17|caulerpa_bin67_00007	C_3|rock_bin3_00003|76.06
-        D_17|caulerpa_bin67_00446	C_11|ulva_bin3_00142|75.77
-        ...
 
 1. Determined identity cut off for each group pairs.
 
