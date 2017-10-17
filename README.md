@@ -150,4 +150,4 @@ Output files:
 
 1. Combined species tree and gene tree, as well as Ranger-DTL predicted HGTs.
 
-    ![Combined_tree](doc/images/Combined_tree.png)
+    ![Combined_tree](doc/images/Combined_trees.png)
