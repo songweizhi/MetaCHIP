@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import os
 import re
-import dendropy
+#import dendropy
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.Alphabet import IUPAC
@@ -39,7 +39,9 @@ def treeMaker(path_to_prokka, path_to_hmm):
     print('Running hmmsearch...')
     for f in prokka_files:
         # call hmmsearch
-        os.system('hmmsearch -o /dev/null --domtblout %s/%s_hmmout.tbl %s %s/%s/%s.faa' % (tmp_folder, f, path_to_hmm, path_to_prokka, f, f))
+        #os.system('hmmsearch -o /dev/null --domtblout %s/%s_hmmout.tbl %s %s/%s/%s.faa' % (tmp_folder, f, path_to_hmm, path_to_prokka, f, f))
+        os.system('/Users/songweizhi/Softwares/hmmer/hmmer-3.1b2-macosx-intel/binaries/hmmsearch -o /dev/null --domtblout %s/%s_hmmout.tbl %s %s/%s/%s.faa' % (tmp_folder, f, path_to_hmm, path_to_prokka, f, f))
+
         # Reading the protein file in a dictionary
         proteinSequence = {}
         for seq_record in SeqIO.parse('%s/%s/%s.faa' % (path_to_prokka, f, f), 'fasta'):
@@ -94,7 +96,7 @@ def treeMaker(path_to_prokka, path_to_hmm):
                 concatAlignment[element] += '-' * alignmentLength
 
     # writing alignment to file
-    file_out = open('/alignment.fasta', 'w')
+    file_out = open('./alignment.fasta', 'w')
     for element in prokka_files:
         file_out.write('>' + element + '\n' + concatAlignment[element] + '\n')
     file_out.close()
@@ -110,4 +112,5 @@ def treeMaker(path_to_prokka, path_to_hmm):
     print('Tree exported to phylogenticTree.phy')
 
 
+os.chdir('/Users/songweizhi/Desktop/hmmTree')
 treeMaker('prokka', 'phylo.hmm')

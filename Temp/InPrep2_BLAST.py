@@ -38,9 +38,8 @@ if not os.path.isdir('qsub_files'):
 
 if os.path.isdir('blastdb'):
     shutil.rmtree('blastdb')
-    os.mkdir('blastdb')
-else:
-    os.mkdir('./blastdb')
+os.mkdir('blastdb')
+
 os.system('cp combined.ffn ./blastdb/')
 makeblastdb_cmd = path_to_makeblastdb_executable + ' -in ./blastdb/combined.ffn -dbtype nucl -parse_seqids'
 os.system(makeblastdb_cmd)
