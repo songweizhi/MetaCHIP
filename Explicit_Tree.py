@@ -1,9 +1,10 @@
+#!/usr/bin/env python
 import os
 import re
 import glob
 import shutil
 import argparse
-import configparser
+from ConfigParser import SafeConfigParser
 from ete3 import Tree
 from Bio import SeqIO
 from Bio.Seq import Seq
@@ -272,7 +273,6 @@ def plot_species_tree(tree_newick, tree_type, gene_name, tree_file_name, name_li
 ############################################## Read in configuration file ##############################################
 
 parser = argparse.ArgumentParser()
-config = configparser.ConfigParser()
 
 parser.add_argument('-cfg',
                     required=True,
@@ -286,21 +286,22 @@ if not os.path.isfile(pwd_cfg_file):
     print('config file not found')
     exit()
 
+config = SafeConfigParser()
 config.read(pwd_cfg_file)
 
-grouping_file =              config['FILES_AND_PARAMETERS']['grouping_file']
-cover_cutoff =               config['FILES_AND_PARAMETERS']['cover_cutoff']
-align_len_cutoff =           config['FILES_AND_PARAMETERS']['align_len_cutoff']
-identity_percentile =    int(config['FILES_AND_PARAMETERS']['identity_percentile'])
-ending_match_length =    int(config['FILES_AND_PARAMETERS']['ending_match_length'])
-prokka_output =              config['FILES_AND_PARAMETERS']['prokka_outputs']
-ortholog_group_folder_name = config['FILES_AND_PARAMETERS']['orthologs_folder']
-plot_tree =              int(config['FILES_AND_PARAMETERS']['plot_tree'])
-
-pwd_ranger_exe =             config['DEPENDENCIES']['path_to_ranger_executable']
-pwd_hmmsearch_exe =          config['DEPENDENCIES']['path_to_hmmsearch_executable']
-pwd_mafft_exe =              config['DEPENDENCIES']['path_to_mafft_executable']
-pwd_fasttree_exe =           config['DEPENDENCIES']['path_to_fasttree_executable']
+grouping_file =              config.get('FILES_AND_PARAMETERS', 'grouping_file')
+cover_cutoff =               config.get('FILES_AND_PARAMETERS', 'cover_cutoff')
+align_len_cutoff =           config.get('FILES_AND_PARAMETERS', 'align_len_cutoff')
+identity_percentile =    int(config.get('FILES_AND_PARAMETERS', 'identity_percentile'))
+ending_match_length =    int(config.get('FILES_AND_PARAMETERS', 'ending_match_length'))
+prokka_output =              config.get('FILES_AND_PARAMETERS', 'prokka_outputs')
+ortholog_group_folder_name = config.get('FILES_AND_PARAMETERS', 'orthologs_folder')
+plot_tree =              int(config.get('FILES_AND_PARAMETERS', 'plot_tree'))
+pwd_phylo_hmm =              config.get('FILES_AND_PARAMETERS', 'phylo_hmm')
+pwd_ranger_exe =             config.get('DEPENDENCIES', 'path_to_ranger_executable')
+pwd_hmmsearch_exe =          config.get('DEPENDENCIES', 'path_to_hmmsearch_executable')
+pwd_mafft_exe =              config.get('DEPENDENCIES', 'path_to_mafft_executable')
+pwd_fasttree_exe =           config.get('DEPENDENCIES', 'path_to_fasttree_executable')
 # pwd_gblocks_exe = config['DEPENDENCIES']['path_to_gblocks_executable']
 # pwd_alignment_filter_script = config['DEPENDENCIES']['path_to_alignment_filter_script']
 # programs_for_HGT_prediction = config['DEPENDENCIES']['programs_for_HGT_prediction'].split(' ')
@@ -323,9 +324,7 @@ ranger_wd_name =             'Ranger-DTL_wd'
 output_tree_folder_name =    'Explicit_tree_output'
 tree_image_folder_name =     'combined_tree_images'
 ffn_file =                   'combined.ffn'
-phylo_hmm =                  'phylo.hmm'
 pwd_prokka =                     '%s/%s'         % (wd, prokka_output)
-pwd_phylo_hmm =                  '%s/%s'         % (wd, phylo_hmm)
 pwd_grouping_file =              '%s/%s'         % (wd, grouping_file)
 pwd_ffn_file =                   '%s/%s'         % (wd, ffn_file)
 pwd_ortholog_group_folder =      '%s/%s'         % (wd, ortholog_group_folder_name)

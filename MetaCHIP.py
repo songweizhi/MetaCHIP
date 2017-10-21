@@ -1241,7 +1241,7 @@ if run_blastn == 1:
     makeblastdb_cmd = '%s -in blastdb/combined.ffn -dbtype nucl -parse_seqids' % pwd_makeblastdb_exe
     os.system(makeblastdb_cmd)
     blast_parameters = '-evalue 1e-5 -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen" -task blastn'
-    print('Running BlastN, be patient...')
+    print('Running blastn, be patient...')
     os.system('%s -query combined.ffn -db blastdb/combined.ffn -out %s %s' % (pwd_blastn_exe, path_to_blast_results, blast_parameters))
 
 
