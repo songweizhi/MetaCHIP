@@ -308,6 +308,11 @@ pwd_fasttree_exe =           config.get('DEPENDENCIES', 'path_to_fasttree_execut
 
 ############################################### Define folder/file name ################################################
 
+# import modules for tree plot
+if plot_tree == 1:
+    from ete3 import TreeStyle, NodeStyle, TextFace
+    from PIL import Image, ImageDraw, ImageFont
+
 wd = os.getcwd()
 op_folder = 'output_ip%s_al%sbp_c%s_e%sbp' % (str(identity_percentile), str(align_len_cutoff), str(cover_cutoff), str(ending_match_length))
 
@@ -320,6 +325,7 @@ ranger_inputs_folder_name =  'Ranger_input'
 ranger_outputs_folder_name = 'Ranger_output'
 candidates_file_name =       'HGT_candidates.txt'
 candidates_file_name_ET =    'HGT_candidates_ET.txt'
+candidates_file_name_ET_validated = 'HGT_candidates_ET_validated.txt'
 ranger_wd_name =             'Ranger-DTL_wd'
 output_tree_folder_name =    'Explicit_tree_output'
 tree_image_folder_name =     'combined_tree_images'
@@ -330,6 +336,8 @@ pwd_ffn_file =                   '%s/%s'         % (wd, ffn_file)
 pwd_ortholog_group_folder =      '%s/%s'         % (wd, ortholog_group_folder_name)
 pwd_candidates_file =            '%s/%s/%s'      % (wd, op_folder, candidates_file_name)
 pwd_candidates_file_ET =         '%s/%s/%s'      % (wd, op_folder, candidates_file_name_ET)
+pwd_candidates_file_ET_validated='%s/%s/%s'      % (wd, op_folder, candidates_file_name_ET_validated)
+
 pwd_ranger_wd =                  '%s/%s/%s/%s/'  % (wd, op_folder, output_tree_folder_name, ranger_wd_name)
 pwd_ranger_inputs_folder =       '%s/%s'         % (pwd_ranger_wd, ranger_inputs_folder_name)
 pwd_ranger_outputs_folder =      '%s/%s'         % (pwd_ranger_wd, ranger_outputs_folder_name)
@@ -341,13 +349,17 @@ pwd_gene_tree_newick_folder =    '%s/%s'         % (pwd_op_tree_folder, gene_tre
 pwd_species_tree_folder_plot =   '%s/%s'         % (pwd_op_tree_folder, species_tree_folder_plot)
 pwd_species_tree_folder_ranger = '%s/%s'         % (pwd_op_tree_folder, species_tree_folder_ranger)
 
+# check whether file exist
+unfound_inputs = []
+for each_input in [pwd_prokka, pwd_grouping_file, pwd_ortholog_group_folder, pwd_phylo_hmm]:
+    if (not os.path.isfile(each_input)) and (not os.path.isdir(each_input)):
+        unfound_inputs.append(each_input)
+if len(unfound_inputs) > 0:
+    for each_unfound in unfound_inputs:
+        print('%s not found' % each_unfound)
+    exit()
+
 ########################################################################################################################
-
-# import modules for tree plot
-if plot_tree == 1:
-    from ete3 import TreeStyle, NodeStyle, TextFace
-    from PIL import Image, ImageDraw, ImageFont
-
 
 # get list of match pair list
 candidates_file = open(pwd_candidates_file)
@@ -416,12 +428,15 @@ for each_bin in grouping_profile:
 if not os.path.isdir(pwd_op_tree_folder):
     os.mkdir(pwd_op_tree_folder)
     os.mkdir(pwd_tree_folder)
-    os.mkdir(pwd_tree_plots_folder)
+    if plot_tree == 1:
+        os.mkdir(pwd_tree_plots_folder)
 else:
+    shutil.rmtree(pwd_op_tree_folder)
     shutil.rmtree(pwd_op_tree_folder)
     os.mkdir(pwd_op_tree_folder)
     os.mkdir(pwd_tree_folder)
-    os.mkdir(pwd_tree_plots_folder)
+    if plot_tree == 1:
+        os.mkdir(pwd_tree_plots_folder)
 
 # prepare Ranger-DTL working directory
 if not os.path.exists(pwd_ranger_wd):
@@ -429,6 +444,7 @@ if not os.path.exists(pwd_ranger_wd):
     os.makedirs(pwd_ranger_inputs_folder)
     os.makedirs(pwd_ranger_outputs_folder)
 else:
+    shutil.rmtree(pwd_ranger_wd)
     shutil.rmtree(pwd_ranger_wd)
     os.makedirs(pwd_ranger_wd)
     os.makedirs(pwd_ranger_inputs_folder)
@@ -544,7 +560,7 @@ for each_candidates in candidates_list:
         # change gene tree leaf name for Ranger-DTL
         for each_gr_leaf in gene_tree:
             each_gr_leaf_name_split = each_gr_leaf.name.split('_')
-            each_gr_leaf.name = each_gr_leaf.name.split('_')[0]
+            each_gr_leaf.name = '_'.join(each_gr_leaf.name.split('_')[:-1])
 
         # write species tree and gene tree to Ranger-DTL input file
         ranger_inputs_file.write('%s\n[&U]%s\n' % (species_tree.write(format=9), gene_tree.write(format=9)))
@@ -585,81 +601,91 @@ for each_candidates in candidates_list:
 ##################### Combine Species and Gene Tree Together and add Ranger-DTL prediction results #####################
 
         # read in species/gene tree image
-        pwd_species_tree_png = '%s/%s_species_tree.png' % (pwd_tree_folder, process_name)
-        pwd_gene_tree_png = '%s/%s_gene_tree.png' % (pwd_tree_folder, process_name)
-        species_tree_image = Image.open(pwd_species_tree_png)
-        gene_tree_image = Image.open(pwd_gene_tree_png)
-        images = [species_tree_image, gene_tree_image]
+        if plot_tree == 1:
+            pwd_species_tree_png = '%s/%s_species_tree.png' % (pwd_tree_folder, process_name)
+            pwd_gene_tree_png = '%s/%s_gene_tree.png' % (pwd_tree_folder, process_name)
+            species_tree_image = Image.open(pwd_species_tree_png)
+            gene_tree_image = Image.open(pwd_gene_tree_png)
+            images = [species_tree_image, gene_tree_image]
 
-        # get new width and height
-        widths = []
-        heights = []
-        text_height = (len(predicted_transfers)//9 + 1) * 40 + 80
-        for image_size in images:
-            width = image_size.size[0]
-            height = image_size.size[1]
-            widths.append(width)
-            heights.append(height)
-        new_width = sum(widths) + 90  # 30 left, 30 right and 30 in the middle
-        new_height = max(heights) + 30 + text_height  # 30 in the top, text_height for the text
+            # get new width and height
+            widths = []
+            heights = []
+            text_height = (len(predicted_transfers)//9 + 1) * 40 + 80
+            for image_size in images:
+                width = image_size.size[0]
+                height = image_size.size[1]
+                widths.append(width)
+                heights.append(height)
+            new_width = sum(widths) + 90  # 30 left, 30 right and 30 in the middle
+            new_height = max(heights) + 30 + text_height  # 30 in the top, text_height for the text
 
-        # create a new image
-        new_image = Image.new('RGB', color = (255, 255, 255), size = (new_width, new_height))  # setup background and size
-        x_starting = 30
-        for image_paste in images:
-            new_image.paste(image_paste, (x_starting, 30))
-            x_starting += image_paste.size[0] + 50
+            # create a new image
+            new_image = Image.new('RGB', color = (255, 255, 255), size = (new_width, new_height))  # setup background and size
+            x_starting = 30
+            for image_paste in images:
+                new_image.paste(image_paste, (x_starting, 30))
+                x_starting += image_paste.size[0] + 50
 
-        # add Ranger-DTL prediction results to the combined image
-        add_text = ImageDraw.Draw(new_image)
-        # define font
-        font_arial = ImageFont.truetype("Arial.ttf", 24)
-        font_arial_bold = ImageFont.truetype("Arial Bold.ttf", 24)
-        font_arial_black = ImageFont.truetype("Arial Black.ttf", 24)
-        # predicted_transfers
-        x_start = 30
-        y_start_t = 30 + max(heights)
-        y_start = 30 + max(heights) + 40
-        add_text.text((x_start, y_start_t), 'Ranger-DTL predicted HGTs (%s): ' % len(predicted_transfers), (0, 0, 0), font = font_arial_bold)
+            # add Ranger-DTL prediction results to the combined image
+            add_text = ImageDraw.Draw(new_image)
+            # define font
+            #font_arial = ImageFont.truetype("arial.ttf", 24)
 
-        for hgt in predicted_transfers:
-            hgt_split = hgt.split('-->')
-            hgt_d = hgt_split[0]
-            hgt_r = hgt_split[1]
+            # predicted_transfers
+            x_start = 30
+            y_start_t = 30 + max(heights)
+            y_start = 30 + max(heights) + 40
+            #add_text.text((x_start, y_start_t), 'Ranger-DTL predicted HGTs (%s): ' % len(predicted_transfers), (0, 0, 0), font = font_arial)
+            add_text.text((x_start, y_start_t), 'Ranger-DTL predicted HGTs (%s): ' % len(predicted_transfers), (0, 0, 0))
 
-            if x_start < 1800:
-                if hgt in possible_hgts:
-                    add_text.text((x_start, y_start), hgt, (225, 0, 0), font = font_arial)
-                    x_start += 200
-                else:
-                    if (hgt_d in bin_group_without_underscore_list) and (hgt_r in bin_group_without_underscore_list) and (hgt_d[0] != hgt_r[0]):
-                        add_text.text((x_start, y_start), hgt, (0, 0, 0), font = font_arial)
+            for hgt in predicted_transfers:
+                hgt_split = hgt.split('-->')
+                hgt_d = hgt_split[0]
+                hgt_r = hgt_split[1]
+
+                if x_start < 1800:
+                    if hgt in possible_hgts:
+                        #add_text.text((x_start, y_start), hgt, (225, 0, 0), font = font_arial)
+                        add_text.text((x_start, y_start), hgt, (225, 0, 0))
+
                         x_start += 200
                     else:
-                        add_text.text((x_start, y_start), hgt, (0, 0, 0), font = font_arial)
-                        x_start += 200
-            elif x_start >= 1800:
-                x_start = 30
-                y_start += 40
-                if hgt in possible_hgts:
-                    add_text.text((x_start, y_start), hgt, (225, 0, 0), font = font_arial)
-                    x_start += 200
-                else:
-                    if (hgt_d in bin_group_without_underscore_list) and (hgt_r in bin_group_without_underscore_list) and (hgt_d[0] != hgt_r[0]):
-                        add_text.text((x_start, y_start), hgt, (0, 0, 0), font = font_arial)
+                        if (hgt_d in bin_group_without_underscore_list) and (hgt_r in bin_group_without_underscore_list) and (hgt_d[0] != hgt_r[0]):
+                            #add_text.text((x_start, y_start), hgt, (0, 0, 0), font = font_arial)
+                            add_text.text((x_start, y_start), hgt, (0, 0, 0))
+                            x_start += 200
+                        else:
+                            #add_text.text((x_start, y_start), hgt, (0, 0, 0), font = font_arial)
+                            add_text.text((x_start, y_start), hgt, (0, 0, 0))
+                            x_start += 200
+                elif x_start >= 1800:
+                    x_start = 30
+                    y_start += 40
+                    if hgt in possible_hgts:
+                        #add_text.text((x_start, y_start), hgt, (225, 0, 0), font = font_arial)
+                        add_text.text((x_start, y_start), hgt, (225, 0, 0))
                         x_start += 200
                     else:
-                        add_text.text((x_start, y_start), hgt, (0, 0, 0), font = font_arial)
-                        x_start += 200
+                        if (hgt_d in bin_group_without_underscore_list) and (hgt_r in bin_group_without_underscore_list) and (hgt_d[0] != hgt_r[0]):
+                            #add_text.text((x_start, y_start), hgt, (0, 0, 0), font = font_arial)
+                            add_text.text((x_start, y_start), hgt, (0, 0, 0))
+                            x_start += 200
+                        else:
+                            #add_text.text((x_start, y_start), hgt, (0, 0, 0), font = font_arial)
+                            add_text.text((x_start, y_start), hgt, (0, 0, 0))
+                            x_start += 200
 
-        new_image.save('%s/%s_combined_trees.png' % (pwd_tree_plots_folder, process_name))
-        os.remove(pwd_species_tree_png)  # remove species tree
-        os.remove(pwd_gene_tree_png)  # remove gene tree
+            new_image.save('%s/%s_combined_trees.png' % (pwd_tree_plots_folder, process_name))
+            os.remove(pwd_species_tree_png)  # remove species tree
+            os.remove(pwd_gene_tree_png)  # remove gene tree
     n += 1
 
 # add results to output file of best blast match approach
 print('Add Ranger-DTL predicted direction to HGT_candidates.txt')
 combined_output_handle = open(pwd_candidates_file_ET, 'w')
+combined_output_validated_handle = open(pwd_candidates_file_ET_validated, 'w')
+
 combined_output_handle.write('Recipient\tDonor\tRecipient_ID\tDonor_ID\tIdentity\tEnd_break\tDirection(Blast)\tDirection(Tree)\n' % ())
 
 for match_group in open(pwd_candidates_file):
@@ -672,14 +698,19 @@ for match_group in open(pwd_candidates_file):
         identity = match_group_split[4]
         end_break = match_group_split[5]
         direction = match_group_split[6]
-
         concatenated = '%s___%s' % (recipient_gene, donor_gene)
         possible_direction = candidate_2_possible_direction_dict[concatenated]
-        validated_prediction = 'no'
+        validated_prediction = 'N/A'
         for each_prediction in candidate_2_predictions_dict[concatenated]:
             if each_prediction in possible_direction:
                 validated_prediction = each_prediction
+
+        if (end_break == 'no') and (validated_prediction != 'N/A'):
+            combined_output_validated_handle.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' % (recipient_gene, donor_gene, recipient_genome_id, donor_genome_id, identity, end_break, direction, validated_prediction))
         combined_output_handle.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' % (recipient_gene, donor_gene, recipient_genome_id, donor_genome_id, identity, end_break, direction, validated_prediction))
+
 combined_output_handle.close()
+combined_output_validated_handle.close()
+
 
 print('\nAll done!')

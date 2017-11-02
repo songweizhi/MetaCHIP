@@ -53,7 +53,6 @@ for each_recipient in open(distribution_of_transfers):
     transferred_genes = each_recipient_split[1:]
     for each_transferred_gene in transferred_genes:
         transfer_to_recipient_dict[each_transferred_gene] = recipient_genome
-#print(transfer_to_recipient_dict)
 
 # get the sequences of MetaCHIP predicted candidates
 MetaCHIP_predicted_HGTs = []
@@ -93,10 +92,8 @@ for match in open(pwd_blast_result):
     subject_len = int(match_split[13])
     coverage_q = float("{0:.2f}".format(float(align_len) * 100 / float(query_len)))
     coverage_s = float("{0:.2f}".format(float(align_len) * 100 / float(subject_len)))
-    #print(match.strip())
 
-
-    if (identity >= 94) and (coverage_q >= 98) and (coverage_s >= 98):
+    if (identity >= 99) and (coverage_q >= 98) and (coverage_s >= 98):
         if (subject not in recovered_transfers) and ((query_genome == subject_genome) or (query_genome == transfer_to_recipient_dict[subject])):
             gene_correlations_handle.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\n' % (transfer_to_recipient_dict[subject], query, subject, identity, align_len, query_len, subject_len))
             recovered_transfers.append(subject)

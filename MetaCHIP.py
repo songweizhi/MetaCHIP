@@ -1134,7 +1134,7 @@ def add_direction(input_file, candidate2identity_dict, output_file):
     for each in non_overlap_list:
         each_split = each.split('\t')
         each_concatenated = '%s___%s' % (each_split[0], each_split[1])
-        output.write('%s\t%s<-%s\t%s\n' % (each, each_split[0].split('_')[0], each_split[1].split('_')[0], candidate2identity_dict[each_concatenated]))
+        output.write('%s\t%s<--%s\t%s\n' % (each, '_'.join(each_split[0].split('_')[:-1]), '_'.join(each_split[1].split('_')[:-1]), candidate2identity_dict[each_concatenated]))
     for each in overlap_list:
         each_concatenated = '%s___%s' % (each.split('\t')[0], each.split('\t')[1])
         output.write('%s\tN/A\t%s\n' % (each, candidate2identity_dict[each_concatenated]))
@@ -1200,6 +1200,7 @@ op_candidates_seq =                                 'HGT_candidates.fasta'
 gbk_subset_file =                                   'combined_subset.gbk'
 op_act_folder_name =                                'Flanking_regions'
 
+pwd_prokka_output =                                 '%s/%s'       % (wd, prokka_output)
 pwd_iden_distrib_plot_folder =                      '%s/%s/%s'    % (wd, op_folder, iden_distrib_plot_folder)
 pwd_qual_iden_file =                                '%s/%s/%s'    % (wd, op_folder, qual_idens_file)
 pwd_qual_iden_file_gg =                             '%s/%s/%s'    % (wd, op_folder, qual_idens_file_gg)
@@ -1216,19 +1217,33 @@ pwd_op_cans_only_gene_with_direction_end_break =    '%s/%s/%s'    % (wd, op_fold
 pwd_op_candidates_seq =                             '%s/%s/%s'    % (wd, op_folder, op_candidates_seq)
 pwd_gbk_subset_file =                               '%s/%s/%s'    % (wd, op_folder, gbk_subset_file)
 pwd_op_act_folder =                                 '%s/%s/%s'    % (wd, op_folder, op_act_folder_name)
-path_to_grouping_file =                             '%s/%s'       % (wd, grouping_file)
-path_to_blast_results = ''
+pwd_grouping_file =                                 '%s/%s'       % (wd, grouping_file)
+pwd_gbk_file =                                      '%s/%s'       % (wd, 'combined.gbk')
+pwd_blast_results = ''
 if run_blastn == 0:
-    path_to_blast_results =                         '%s/%s'       % (wd, blast_results)
+    pwd_blast_results =                             '%s/%s'       % (wd, blast_results)
 if run_blastn == 1:
-    path_to_blast_results =                         '%s/%s'       % (wd, 'all_vs_all_ffn.tab')
-path_to_gbk_file =                                  '%s/%s'       % (wd, 'combined.gbk')
+    pwd_blast_results =                             '%s/%s'       % (wd, 'all_vs_all_ffn.tab')
+
+# check whether file exist
+unfound_inputs = []
+for each_input in [pwd_grouping_file, pwd_prokka_output]:
+    if (not os.path.isfile(each_input)) and (not os.path.isdir(each_input)):
+        unfound_inputs.append(each_input)
+
+if run_blastn == 0:
+    if not os.path.isfile(pwd_blast_results):
+        unfound_inputs.append(pwd_blast_results)
+
+if len(unfound_inputs) > 0:
+    for each_unfound in unfound_inputs:
+        print('%s not found' % each_unfound)
+    exit()
 
 ########################################################################################################################
 
-
 # Prepare input files
-os.system('cat %s/%s/*/*.gbk > %s' % (wd, prokka_output, path_to_gbk_file)) # get combined gbk file
+os.system('cat %s/*/*.gbk > %s' % (pwd_prokka_output, pwd_gbk_file)) # get combined gbk file
 os.system('cat %s/%s/*/*.ffn > combined.ffn' % (wd, prokka_output)) # get combined ffn file
 
 # run blastn if specified
@@ -1242,7 +1257,7 @@ if run_blastn == 1:
     os.system(makeblastdb_cmd)
     blast_parameters = '-evalue 1e-5 -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen" -task blastn'
     print('Running blastn, be patient...')
-    os.system('%s -query combined.ffn -db blastdb/combined.ffn -out %s %s' % (pwd_blastn_exe, path_to_blast_results, blast_parameters))
+    os.system('%s -query combined.ffn -db blastdb/combined.ffn -out %s %s' % (pwd_blastn_exe, pwd_blast_results, blast_parameters))
 
 
 # create outputs folder
@@ -1255,7 +1270,7 @@ else:
     os.makedirs(op_folder)
 
 # create genome_group_dict and genome_list
-grouping = open(path_to_grouping_file)
+grouping = open(pwd_grouping_file)
 genome_name_list = []
 name_to_group_number_dict = {}
 name_to_group_dict = {}
@@ -1274,7 +1289,7 @@ sleep(1.5)
 print('Plotting overall identity distribution')
 
 # get qualified identities after alignment length and coverage filter (self-match excluded)
-all_identities = get_all_identity_list(path_to_blast_results, genome_name_list, align_len_cutoff, cover_cutoff, pwd_qual_iden_file)
+all_identities = get_all_identity_list(pwd_blast_results, genome_name_list, align_len_cutoff, cover_cutoff, pwd_qual_iden_file)
 
 # create folder to hold group-group identity distribution plot
 os.makedirs(pwd_iden_distrib_plot_folder)
@@ -1405,7 +1420,7 @@ for match in matches:
 gbk_subset = open(pwd_gbk_subset_file, 'w')
 records_recorded = []
 
-for record in SeqIO.parse(path_to_gbk_file, 'genbank'):
+for record in SeqIO.parse(pwd_gbk_file, 'genbank'):
     record_id = record.id
     for gene_f in record.features:
         if 'locus_tag' in gene_f.qualifiers:
