@@ -324,8 +324,12 @@ species_tree_folder_ranger = 'species_tree'
 ranger_inputs_folder_name =  'Ranger_input'
 ranger_outputs_folder_name = 'Ranger_output'
 candidates_file_name =       'HGT_candidates.txt'
+candidates_seq_file_name =   'HGT_candidates.fasta'
+
 candidates_file_name_ET =    'HGT_candidates_ET.txt'
 candidates_file_name_ET_validated = 'HGT_candidates_ET_validated.txt'
+candidates_file_name_ET_validated_fasta = 'HGT_candidates_ET_validated.fasta'
+
 ranger_wd_name =             'Ranger-DTL_wd'
 output_tree_folder_name =    'Explicit_tree_output'
 tree_image_folder_name =     'combined_tree_images'
@@ -335,9 +339,10 @@ pwd_grouping_file =              '%s/%s'         % (wd, grouping_file)
 pwd_ffn_file =                   '%s/%s'         % (wd, ffn_file)
 pwd_ortholog_group_folder =      '%s/%s'         % (wd, ortholog_group_folder_name)
 pwd_candidates_file =            '%s/%s/%s'      % (wd, op_folder, candidates_file_name)
+pwd_candidates_seq_file =        '%s/%s/%s'      % (wd, op_folder, candidates_seq_file_name)
 pwd_candidates_file_ET =         '%s/%s/%s'      % (wd, op_folder, candidates_file_name_ET)
-pwd_candidates_file_ET_validated='%s/%s/%s'      % (wd, op_folder, candidates_file_name_ET_validated)
-
+pwd_candidates_file_ET_validated ='%s/%s/%s'      % (wd, op_folder, candidates_file_name_ET_validated)
+pwd_candidates_file_ET_validated_fasta ='%s/%s/%s'      % (wd, op_folder, candidates_file_name_ET_validated_fasta)
 pwd_ranger_wd =                  '%s/%s/%s/%s/'  % (wd, op_folder, output_tree_folder_name, ranger_wd_name)
 pwd_ranger_inputs_folder =       '%s/%s'         % (pwd_ranger_wd, ranger_inputs_folder_name)
 pwd_ranger_outputs_folder =      '%s/%s'         % (pwd_ranger_wd, ranger_outputs_folder_name)
@@ -685,9 +690,10 @@ for each_candidates in candidates_list:
 print('Add Ranger-DTL predicted direction to HGT_candidates.txt')
 combined_output_handle = open(pwd_candidates_file_ET, 'w')
 combined_output_validated_handle = open(pwd_candidates_file_ET_validated, 'w')
-
+combined_output_validated_handle.write('Recipient\tDonor\tRecipient_ID\tDonor_ID\tIdentity\tEnd_break\tDirection(Blast)\tDirection(Tree)\n' % ())
 combined_output_handle.write('Recipient\tDonor\tRecipient_ID\tDonor_ID\tIdentity\tEnd_break\tDirection(Blast)\tDirection(Tree)\n' % ())
 
+validated_candidate_list = []
 for match_group in open(pwd_candidates_file):
     if not match_group.startswith('Recipient'):
         match_group_split = match_group.strip().split('\t')
@@ -706,11 +712,25 @@ for match_group in open(pwd_candidates_file):
                 validated_prediction = each_prediction
 
         if (end_break == 'no') and (validated_prediction != 'N/A'):
+
+            if recipient_gene not in validated_candidate_list:
+                validated_candidate_list.append(recipient_gene)
+            if donor_gene not in validated_candidate_list:
+                validated_candidate_list.append(donor_gene)
+
             combined_output_validated_handle.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' % (recipient_gene, donor_gene, recipient_genome_id, donor_genome_id, identity, end_break, direction, validated_prediction))
+
         combined_output_handle.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' % (recipient_gene, donor_gene, recipient_genome_id, donor_genome_id, identity, end_break, direction, validated_prediction))
 
 combined_output_handle.close()
 combined_output_validated_handle.close()
+
+# export the sequence of validated candidates
+combined_output_validated_fasta_handle = open(pwd_candidates_file_ET_validated_fasta, 'w')
+for each_candidate in SeqIO.parse(pwd_candidates_seq_file, 'fasta'):
+    if each_candidate.id in validated_candidate_list:
+        SeqIO.write(each_candidate, combined_output_validated_fasta_handle, 'fasta')
+combined_output_validated_fasta_handle.close()
 
 
 print('\nAll done!')
