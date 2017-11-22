@@ -62,18 +62,48 @@ def get_species_tree_alignment(tmp_folder, path_to_prokka, path_to_hmm, pwd_hmms
             proteinSequence[seq_record.id] = str(seq_record.seq)
 
         # Reading the hmmersearch table/extracting the protein part found beu hmmsearch out of the protein/Writing each protein sequence that was extracted to a fasta file (one for each hmm in phylo.hmm
-        proteinName = ''
-        for line in open('%s/%s_hmmout.tbl' % (tmp_folder, f), 'r'):
-            if line[0] != "#":
-                line = re.sub('\s+', ' ', line) # ro remove redundant spaces
+        hmm_id = ''
+        hmm_name = ''
+        hmm_pos1 = 0
+        hmm_pos2 = 0
+        hmm_score = 0
+
+        with open(tmp_folder + '/' + f.replace('prokka/', '') + '_hmmout.tbl', 'r') as tbl:
+            for line in tbl:
+                if line[0] == "#": continue
+                line = re.sub('\s+', ' ', line)
                 splitLine = line.split(' ')
-                if proteinName != splitLine[3]:
-                    proteinName = splitLine[3]
-                    file_out = open(tmp_folder + '/' + proteinName + '.fasta', 'a+')
-                    x1 = int(splitLine[17]) - 1
-                    x2 = int(splitLine[18])
-                    export_dna_record(proteinSequence[splitLine[0]][x1: x2], f, '', file_out)
+
+                if (hmm_id == ''):
+                    hmm_id = splitLine[4]
+                    hmm_name = splitLine[0]
+                    hmm_pos1 = int(splitLine[17]) - 1
+                    hmm_pos2 = int(splitLine[18])
+                    hmm_score = float(splitLine[13])
+                elif (hmm_id == splitLine[4]):
+                    if(float(splitLine[13]) > hmm_score):
+                        hmm_name = splitLine[0]
+                        hmm_pos1 = int(splitLine[17]) - 1
+                        hmm_pos2 = int(splitLine[18])
+                        hmm_score = float(splitLine[13])
+                else:
+                    file_out = open(tmp_folder + '/' + hmm_id + '.faa', 'a+')
+                    file_out.write('>' + f + '\n')
+                    seq = str(proteinSequence[hmm_name][hmm_pos1:hmm_pos2])
+                    file_out.write(str(seq) + '\n')
                     file_out.close()
+                    hmm_id = splitLine[4]
+                    hmm_name = splitLine[0]
+                    hmm_pos1 = int(splitLine[17]) - 1
+                    hmm_pos2 = int(splitLine[18])
+                    hmm_score = float(splitLine[13])
+
+            else:
+                file_out = open(tmp_folder + '/' + hmm_id + '.faa', 'a+')
+                file_out.write('>' + f + '\n')
+                seq = str(proteinSequence[hmm_name][hmm_pos1:hmm_pos2])
+                file_out.write(str(seq) + '\n')
+                file_out.close()
 
     # Call mafft to align all single fasta files with hmms
     files = os.listdir(tmp_folder)
@@ -490,8 +520,6 @@ for each_candidates in candidates_list:
         print('No orthologes for the current HGT candidates')
         candidate_2_predictions_dict[process_name] = []
         candidate_2_possible_direction_dict[process_name] = []
-
-
     else:
         # get bin name list from candidates gene list
         each_candidates_bin_name = []
