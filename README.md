@@ -1,7 +1,8 @@
+![logo](doc/images/MetaCHIP_logo.jpg)
+
+
 MetaCHIP (Community level Hgt Identification Pipeline)
 ---
-
-![logo](doc/images/MetaCHIP_logo.jpg)
 
 This pipeline was developed to identify HGTs at community level by the combination of best Blast matches and explicit phylogenetic methods.
 
