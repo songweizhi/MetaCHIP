@@ -87,7 +87,7 @@ def get_species_tree_alignment(tmp_folder, path_to_prokka, path_to_hmm, pwd_hmms
                         hmm_pos2 = int(splitLine[18])
                         hmm_score = float(splitLine[13])
                 else:
-                    file_out = open(tmp_folder + '/' + hmm_id + '.faa', 'a+')
+                    file_out = open(tmp_folder + '/' + hmm_id + '.fasta', 'a+')
                     file_out.write('>' + f + '\n')
                     seq = str(proteinSequence[hmm_name][hmm_pos1:hmm_pos2])
                     file_out.write(str(seq) + '\n')
@@ -99,7 +99,7 @@ def get_species_tree_alignment(tmp_folder, path_to_prokka, path_to_hmm, pwd_hmms
                     hmm_score = float(splitLine[13])
 
             else:
-                file_out = open(tmp_folder + '/' + hmm_id + '.faa', 'a+')
+                file_out = open(tmp_folder + '/' + hmm_id + '.fasta', 'a+')
                 file_out.write('>' + f + '\n')
                 seq = str(proteinSequence[hmm_name][hmm_pos1:hmm_pos2])
                 file_out.write(str(seq) + '\n')
@@ -202,35 +202,35 @@ def plot_gene_tree(tree_newick, tree_type, gene_name, tree_file_name, name_list,
                 ns["fgcolor"] = "red"  # the dot setting
                 # the node name text setting
                 each_node.add_face(TextFace(each_node.name,
-                                            fsize = 8,
-                                            fgcolor = 'red',
-                                            tight_text = False,
-                                            bold = False),
-                                   column = 0,
-                                   position = 'branch-right')
+                                            fsize=8,
+                                            fgcolor='red',
+                                            tight_text=False,
+                                            bold=False),
+                                   column=0,
+                                   position='branch-right')
                 each_node.set_style(ns)
             else:
                 ns["fgcolor"] = "blue"  # the dot setting
                 # the node name text setting
                 each_node.add_face(TextFace(each_node.name,
-                                            fsize = 8,
-                                            fgcolor = 'black',
-                                            tight_text = False,
-                                            bold = False),
-                                   column = 0,
-                                   position = 'branch-right')
+                                            fsize=8,
+                                            fgcolor='black',
+                                            tight_text=False,
+                                            bold=False),
+                                   column=0,
+                                   position='branch-right')
                 each_node.set_style(ns)
         else:  # non-leaf node parameters
             nlns = NodeStyle()
             nlns["size"] = 0  # dot size
             each_node.set_style(nlns)
     # set figures size
-    tree.render('%s/%s.png' % (tree_image_folder, tree_file_name), w = 900, units = "px", tree_style = ts)
+    tree.render('%s/%s.png' % (tree_image_folder, tree_file_name), w=900, units="px", tree_style=ts)
 
 
 def plot_species_tree(tree_newick, tree_type, gene_name, tree_file_name, name_list, tree_image_folder):
     # set tree parameters
-    tree = Tree(tree_newick, format = 2)
+    tree = Tree(tree_newick, format=2)
     ts = TreeStyle()
     ts.mode = "r"  # tree model: 'r' for rectangular, 'c' for circular
     ts.show_leaf_name = False

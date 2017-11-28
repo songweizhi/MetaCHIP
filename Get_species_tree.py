@@ -67,7 +67,7 @@ def treeMaker(path_to_prokka, path_to_hmm, pwd_hmmsearch_exe, pwd_mafft_exe, pwd
                         hmm_pos2 = int(splitLine[18])
                         hmm_score = float(splitLine[13])
                 else:
-                    file_out = open(tmp_folder + '/' + hmm_id + '.faa', 'a+')
+                    file_out = open(tmp_folder + '/' + hmm_id + '.fasta', 'a+')
                     file_out.write('>' + f + '\n')
                     seq = str(proteinSequence[hmm_name][hmm_pos1:hmm_pos2])
                     file_out.write(str(seq) + '\n')
@@ -79,7 +79,7 @@ def treeMaker(path_to_prokka, path_to_hmm, pwd_hmmsearch_exe, pwd_mafft_exe, pwd
                     hmm_score = float(splitLine[13])
 
             else:
-                file_out = open(tmp_folder + '/' + hmm_id + '.faa', 'a+')
+                file_out = open(tmp_folder + '/' + hmm_id + '.fasta', 'a+')
                 file_out.write('>' + f + '\n')
                 seq = str(proteinSequence[hmm_name][hmm_pos1:hmm_pos2])
                 file_out.write(str(seq) + '\n')
