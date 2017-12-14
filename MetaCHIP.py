@@ -380,15 +380,15 @@ def set_contig_track_features(gene_contig, name_group_dict, candidate_list, feat
                 color = colors.lightgreen
             # add feature
             feature_set.add_feature(feature,
-                                    color = color,
-                                    label = True,
-                                    sigil = 'ARROW',
-                                    arrowshaft_height = 0.7,
-                                    arrowhead_length = 0.4,
-                                    label_color = label_color,
-                                    label_size = 10,
-                                    label_angle = label_angle,
-                                    label_position = "middle")
+                                    color=color,
+                                    label=True,
+                                    sigil='ARROW',
+                                    arrowshaft_height=0.7,
+                                    arrowhead_length=0.4,
+                                    label_color=label_color,
+                                    label_size=10,
+                                    label_angle=label_angle,
+                                    label_position="middle")
 
 
 def get_flanking_region(input_gbk_file, HGT_candidate, flanking_length):

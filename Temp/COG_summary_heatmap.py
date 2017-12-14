@@ -9,6 +9,9 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 
 
+# python3 ~/PycharmProjects/MetaCHIP/Temp/COG_summary_heatmap.py -in func_stats_files -out PBTR_ML.jpg -in_percent
+
+
 def turn_to_percentage(number_list):
     number_list_percent = []
     for each_element in number_list:
@@ -89,7 +92,6 @@ category_num_df = pandas.DataFrame(category_num_arrary, index=category_id_list, 
 # re-index row order
 category_num_df = category_num_df.reindex(arrange_order_row_reversed)
 
-
 # re-index column order
 genome_name_list_sorted = sorted(genome_name_list)
 if column_order == None:
@@ -97,7 +99,7 @@ if column_order == None:
 else:
     category_num_df = category_num_df.reindex(arrange_order_column, axis=1)
 
-
+print(category_num_df)
 
 # get the minimal value in the dataframe
 min_value = 0
@@ -159,5 +161,5 @@ row_num = category_num_df.shape[0]
 column_num = category_num_df.shape[1]
 #fig.set_size_inches(column_num + 3, row_num)
 
-plt.savefig('%s.jpg' % (image_title), dpi = 300)
+plt.savefig('%s.jpg' % (image_title), dpi = 600)
 plt.close()

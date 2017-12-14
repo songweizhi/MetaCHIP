@@ -16,15 +16,22 @@ def get_recovered_iden100_transfers(d, match_summary):
         for transfer in transfers:
             transfer_to_recipient_dict[transfer] = recipient_genome
 
-    recovered_num = 0
+    recovered_transfers_recipient = []
     for match in open(match_summary):
         match_split = match.strip().split('\t')
         transfer_d = match_split[0]
         recipient_genome_d = match_split[1:]
         if transfer_to_recipient_dict[transfer_d] in recipient_genome_d:
-            recovered_num += 1
+            recovered_transfers_recipient.append(transfer_d)
+    return recovered_transfers_recipient
 
-    return recovered_num
+
+def get_intersection(list_1, list_2):
+    intersect_list = []
+    for each in list_1:
+        if (each in list_2) and (each not in intersect_list):
+            intersect_list.append(each)
+    return intersect_list
 
 
 parser = argparse.ArgumentParser()
@@ -205,16 +212,15 @@ for each_match in matched_list:
     #     print(each_match)
 matched_summary_handle.close()
 
-recovered_iden100_transfer_num = get_recovered_iden100_transfers(transfer_profile_file, pwd_matched_summary)
+recovered_iden100_transfer_recipient = get_recovered_iden100_transfers(transfer_profile_file, pwd_matched_summary)
 
-print('Recovered transfers(identity >= 99, coverage >= 99 and at least one flanking side longer than %sbp): %s' % (minf, recovered_iden100_transfer_num))
 
 print('\nRemove temporary files... ')
 os.system('rm *_flanking.fasta')
 os.system('rm *_flanking.tab')
-#os.system('rm blast_result.tab')
-#os.system('rm matched_summary.tab')
-#os.system('rm matches.tab')
+os.system('rm blast_result.tab')
+os.system('rm matched_summary.tab')
+os.system('rm matches.tab')
 os.system('rm *.nhr')
 os.system('rm *.nin')
 os.system('rm *.nog')
@@ -222,4 +228,68 @@ os.system('rm *.nsd')
 os.system('rm *.nsi')
 os.system('rm *.nsq')
 
-print('\nAll done! ')
+#print('recovered_transfers (all): %s' % len(recovered_transfers))
+#print('Recovered transfers(identity >= 99, coverage >= 99 and at least one flanking side longer than %sbp): %s' % (minf, len(recovered_iden100_transfer_recipient)))
+#print(recovered_iden100_transfer_recipient)
+
+recovered_iden100_transfer_donor = []
+for each in recovered_transfers:
+    if each not in recovered_iden100_transfer_recipient:
+        recovered_iden100_transfer_donor.append(each)
+
+
+
+
+
+
+
+
+
+
+############################## get all binned transfers ##############################
+
+combined_ffn = 'combined_m0.ffn'
+transfers_seq = transfers_fasta
+blast_output = 'blast_results_binned.tab'
+transfer_distribution = 'distribution_of_transfers.txt'
+
+# run blast
+os.system('makeblastdb -in %s -dbtype nucl -parse_seqids' % transfers_seq)
+blast_parameters = '-evalue 1e-5 -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen" -task blastn'
+os.system('blastn -query %s -db %s -out %s %s' % (combined_ffn, transfers_seq, blast_output, blast_parameters))
+
+transfer2recipient_dict = {}
+for each_donor in open(transfer_distribution):
+    each_donor_split = each_donor.strip().split(',')
+    recipient_genome = each_donor_split[0]
+    transfers = each_donor_split[1:]
+    for each_transfer in transfers:
+        transfer2recipient_dict[each_transfer] = recipient_genome
+
+binned_transfers_overall = []
+for each_hit in open(blast_output):
+    each_hit_split = each_hit.strip().split('\t')
+    query = each_hit_split[0]
+    query_genome = query.split('_')[0]
+    subject = each_hit_split[1]
+    identity = float(each_hit_split[2])
+    align_len = int(each_hit_split[3])
+    query_len = int(each_hit_split[12])
+    subject_len = int(each_hit_split[13])
+    query_coverage = align_len/query_len
+    subject_coverage = align_len/subject_len
+
+    if (identity >= 99) and (query_coverage >= 0.99) and (subject_coverage > 0.99) and (transfer2recipient_dict[subject] == query_genome):
+        if subject not in binned_transfers_overall:
+            binned_transfers_overall.append(subject)
+
+binned_transfers_from_donor = get_intersection(binned_transfers_overall, recovered_iden100_transfer_donor)
+binned_transfers_from_recipient = get_intersection(binned_transfers_overall, recovered_iden100_transfer_recipient)
+
+
+print('recovered_iden100_transfer_donor: %s' % len(recovered_iden100_transfer_donor))
+print('recovered_iden100_transfer_recipient: %s' % len(recovered_iden100_transfer_recipient))
+print('binned_transfers_overall: %s' % len(binned_transfers_overall))
+print('binned_transfers_from_donor : %s' % len(binned_transfers_from_donor))
+print('binned_transfers_from_recipient : %s' % len(binned_transfers_from_recipient))
+
