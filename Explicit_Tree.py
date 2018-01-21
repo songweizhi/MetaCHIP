@@ -718,8 +718,8 @@ for each_candidates in candidates_list:
 print('Add Ranger-DTL predicted direction to HGT_candidates.txt')
 combined_output_handle = open(pwd_candidates_file_ET, 'w')
 combined_output_validated_handle = open(pwd_candidates_file_ET_validated, 'w')
-combined_output_validated_handle.write('Recipient\tDonor\tRecipient_ID\tDonor_ID\tIdentity\tEnd_break\tDirection(Blast)\tDirection(Tree)\n' % ())
-combined_output_handle.write('Recipient\tDonor\tRecipient_ID\tDonor_ID\tIdentity\tEnd_break\tDirection(Blast)\tDirection(Tree)\n' % ())
+combined_output_validated_handle.write('Gene_1\tGene_2\tGenome_1_ID\tGenome_2_ID\tIdentity\tEnd_break\tDirection\n' % ())
+combined_output_handle.write('Gene_1\tGene_2\tGenome_1_ID\tGenome_2_ID\tIdentity\tEnd_break\tDirection\n' % ())
 
 validated_candidate_list = []
 for match_group in open(pwd_candidates_file):
@@ -731,7 +731,6 @@ for match_group in open(pwd_candidates_file):
         donor_genome_id = match_group_split[3]
         identity = match_group_split[4]
         end_break = match_group_split[5]
-        direction = match_group_split[6]
         concatenated = '%s___%s' % (recipient_gene, donor_gene)
         possible_direction = candidate_2_possible_direction_dict[concatenated]
         validated_prediction = 'N/A'
@@ -746,9 +745,9 @@ for match_group in open(pwd_candidates_file):
             if donor_gene not in validated_candidate_list:
                 validated_candidate_list.append(donor_gene)
 
-            combined_output_validated_handle.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' % (recipient_gene, donor_gene, recipient_genome_id, donor_genome_id, identity, end_break, direction, validated_prediction))
+            combined_output_validated_handle.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\n' % (recipient_gene, donor_gene, recipient_genome_id, donor_genome_id, identity, end_break, validated_prediction))
 
-        combined_output_handle.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' % (recipient_gene, donor_gene, recipient_genome_id, donor_genome_id, identity, end_break, direction, validated_prediction))
+        combined_output_handle.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\n' % (recipient_gene, donor_gene, recipient_genome_id, donor_genome_id, identity, end_break, validated_prediction))
 
 combined_output_handle.close()
 combined_output_validated_handle.close()

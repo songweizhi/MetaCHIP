@@ -179,12 +179,9 @@ os.system('%s -in %s -dbtype nucl -parse_seqids' % (pwd_makeblastdb_exe, pwd_com
 pwd_matched_summary = '%s/matched_summary.tab' % wd
 matched_summary_handle = open(pwd_matched_summary, 'w')
 for each_match in matched_list:
-    #print(each_match)
     flank_file = '%s/%s_flanking.fasta' % (wd, each_match)
     blastdb = pwd_combined_genomes
 
-    #print(flank_file)
-    #print(combined_genomes)
     pwd_each_match_blast_result = '%s/%s_flanking.tab' % (wd, each_match)
     outfmt = '-outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen"'
     os.system('%s -query %s -db %s -out %s %s' % (pwd_blastn_exe, flank_file, blastdb, pwd_each_match_blast_result, outfmt))
@@ -193,27 +190,20 @@ for each_match in matched_list:
     current_match_result = open(pwd_each_match_blast_result)
     current_match_list = []
     for each_current_match in current_match_result:
-        #print(each_current_match)
         each_current_match_split = each_current_match.strip().split('\t')
         subject_genome = each_current_match_split[1]
         identity = float(each_current_match_split[2])
         if identity == 100:
             current_match_list.append(subject_genome)
-    #print(current_match_list)
     current_match_list_uniq = []
     for each_match_genome in current_match_list:
         if each_match_genome not in current_match_list_uniq:
             current_match_list_uniq.append(each_match_genome)
-    #print(current_match_list_uniq)
-    #print('\t'.join(current_match_list_uniq))
 
     matched_summary_handle.write('%s\t%s\n' % (each_match, '\t'.join(current_match_list_uniq)))
-    # if len(current_match_list_uniq) > 1:
-    #     print(each_match)
 matched_summary_handle.close()
 
 recovered_iden100_transfer_recipient = get_recovered_iden100_transfers(transfer_profile_file, pwd_matched_summary)
-
 
 print('\nRemove temporary files... ')
 os.system('rm *_flanking.fasta')
@@ -236,15 +226,6 @@ recovered_iden100_transfer_donor = []
 for each in recovered_transfers:
     if each not in recovered_iden100_transfer_recipient:
         recovered_iden100_transfer_donor.append(each)
-
-
-
-
-
-
-
-
-
 
 ############################## get all binned transfers ##############################
 
@@ -286,10 +267,8 @@ for each_hit in open(blast_output):
 binned_transfers_from_donor = get_intersection(binned_transfers_overall, recovered_iden100_transfer_donor)
 binned_transfers_from_recipient = get_intersection(binned_transfers_overall, recovered_iden100_transfer_recipient)
 
-
 print('recovered_iden100_transfer_donor: %s' % len(recovered_iden100_transfer_donor))
 print('recovered_iden100_transfer_recipient: %s' % len(recovered_iden100_transfer_recipient))
 print('binned_transfers_overall: %s' % len(binned_transfers_overall))
 print('binned_transfers_from_donor : %s' % len(binned_transfers_from_donor))
 print('binned_transfers_from_recipient : %s' % len(binned_transfers_from_recipient))
-

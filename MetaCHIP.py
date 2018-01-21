@@ -1447,7 +1447,7 @@ candidates_2_endbreak_dict = get_gbk_blast_act(pwd_op_candidates_only_gene_file_
 
 # add end break information to output file
 output_file = open(pwd_op_cans_only_gene_with_direction_end_break, 'w')
-output_file.write('Recipient\tDonor\tRecipient_ID\tDonor_ID\tIdentity\tEnd_break\tDirection(Blast)\n' % ())
+output_file.write('Gene_1\tGene_2\tGenome_1_ID\tGenome_2_ID\tIdentity\tEnd_break\n')
 all_candidate_genes = []
 for each_candidate in open(pwd_op_candidates_only_gene_file_with_direction):
     each_candidate_split = each_candidate.strip().split('\t')
@@ -1457,16 +1457,15 @@ for each_candidate in open(pwd_op_candidates_only_gene_file_with_direction):
     donor_gene = each_candidate_split[1]
     donor_genome = '_'.join(donor_gene.split('_')[:-1])
     donor_genome_group_id = name_to_group_number_dict[donor_genome]
-    direction = each_candidate_split[2]
     identity = each_candidate_split[3]
     concatenated = '%s___%s' % (recipient_gene, donor_gene)
     end_break = candidates_2_endbreak_dict[concatenated]
 
     # write to output files
     if end_break == True:
-        output_file.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\n' % (recipient_gene, donor_gene, recipient_genome_group_id, donor_genome_group_id, identity, 'yes', direction))
+        output_file.write('%s\t%s\t%s\t%s\t%s\t%s\n' % (recipient_gene, donor_gene, recipient_genome_group_id, donor_genome_group_id, identity, 'yes' ))
     else:
-        output_file.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\n' % (recipient_gene, donor_gene, recipient_genome_group_id, donor_genome_group_id, identity, 'no', direction))
+        output_file.write('%s\t%s\t%s\t%s\t%s\t%s\n' % (recipient_gene, donor_gene, recipient_genome_group_id, donor_genome_group_id, identity, 'no'))
 
 output_file.close()
 

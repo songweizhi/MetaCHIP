@@ -145,22 +145,25 @@ for each_hit in open(blast_output):
             binned_transfers_overall.append(subject)
 
 
-
-# report
-print('Recovered transfers_m0: %s' % len(recovered_transfers_m0))
-print('Recovered transfers: %s' % len(recovered_transfers))
-print('Recovered transfers_both: %s' % len(recovered_transfers_both))
-#print('%s,%s,%s' % (len(recovered_transfers_m0), len(recovered_transfers), len(recovered_transfers_both)))
-#print('Recovered transfers(identity >= 99, coverage >= 99 and at least one flanking side longer than %sbp): %s' % (minf, len(recovered_transfers)))
-
-print('binned_transfers_overall: %s' % len(binned_transfers_overall))
-
 binned_transfers_from_recipient = get_intersection(binned_transfers_overall, recovered_transfers_m0)
 binned_transfers_from_donor = get_intersection(binned_transfers_overall, recovered_transfers)
 binned_transfers_from_both = get_intersection(binned_transfers_overall, recovered_transfers_both)
 
-print('binned_transfers_from_donor : %s' % len(binned_transfers_from_donor))
-print('binned_transfers_from_recipient : %s' % len(binned_transfers_from_recipient))
-print('binned_transfers_from_both : %s' % len(binned_transfers_from_both))
+# report
+print('Recovered transfers_donor: %s' % len(recovered_transfers_m0))
+print('Recovered transfers_recipient: %s' % len(recovered_transfers))
+print('Recovered transfers_intersection: %s' % len(recovered_transfers_both))
+#print('%s,%s,%s' % (len(recovered_transfers_m0), len(recovered_transfers), len(recovered_transfers_both)))
+#print('Recovered transfers(identity >= 99, coverage >= 99 and at least one flanking side longer than %sbp): %s' % (minf, len(recovered_transfers)))
 
+print('binned_transfers_from_donor: %s' % len(binned_transfers_from_donor))
+print('binned_transfers_from_recipient: %s' % len(binned_transfers_from_recipient))
+print('binned_transfers_union: %s' % len(binned_transfers_overall))
+print('binned_transfers_intersection: %s' % len(binned_transfers_from_both))
 
+print('%s\t%s\t%s\t%s\t%s\t%s' % (len(recovered_transfers_m0),
+                                  len(recovered_transfers),
+                                  len(recovered_transfers_both),
+                                  len(binned_transfers_from_donor),
+                                  len(binned_transfers_from_recipient),
+                                  len(binned_transfers_from_both)))
