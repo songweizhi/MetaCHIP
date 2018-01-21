@@ -1,18 +1,13 @@
 ![logo](doc/images/MetaCHIP_logo.jpg)
 
-
-MetaCHIP (Community level Hgt Identification Pipeline)
+Publication
 ---
-
-This pipeline was developed to identify HGTs at community level by the combination of best Blast matches and explicit phylogenetic methods.
-
-+ Author: Weizhi Song (songwz03@gmail.com)
-
-+ Affiliation: The Centre for Marine Bio-Innovation (CMB), The University of  New South Wales, Sydney, Australia
++ In Preparation
++ Contact: Weizhi Song (songwz03@gmail.com), Torsten Thomas(t.thomas@unsw.edu.au)
++ Affiliation: The Centre for Marine Bio-Innovation (CMB), The University of New South Wales, Sydney, Australia
 
 Dependencies:
 ---
-
 + [BioPython](https://github.com/biopython/biopython.github.io/)
 + [ETE3](http://etetoolkit.org)
 + [Numpy](http://www.numpy.org)
@@ -98,7 +93,7 @@ Output files:
 
 1. All identified candidates (this file will be used as input for the second step).
 
-        Recipient	Donor	Recipient_ID	Donor_ID	Identity	End_break	Direction(Blast)
+        Gene_1	Gene_2	Genome_1_ID	Genome_2_ID	Identity	End_break	Direction
         AAM_03063	BAD_01456	A_1	B_1	100.0	no	AAM<-BAD
         AMAU_05759	BHS_02873	A_4	B_4	79.02	no	AMAU<-BHS
         BAD_00475	AAM_01658	B_1	A_1	74.354	no	BAD<-AAM
@@ -108,8 +103,6 @@ Output files:
         BNM_02093	AMS_03378	B_5	A_5	100.0	no	BNM<-AMS
         BNM_02445	AMS_01681	B_5	A_5	77.961	no	BNM<-AMS
         BNM_02717	AAM_02737	B_5	A_1	74.47	no	BNM<-AAM
-        BAD_02075	AMAU_02632	B_1	A_4	100.0	no	N/A
-        BAD_02565	AKV_02618	B_1	A_2	79.279	no	N/A
 
 1. Determined identity cut off for each group pairs.
 
