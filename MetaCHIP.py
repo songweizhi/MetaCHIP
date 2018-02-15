@@ -579,6 +579,7 @@ def export_dna_record(gene_seq, gene_id, gene_description, pwd_output_file):
 
 
 def check_end_break(folder_name, flanking_length, end_seq_length, pwd_blastn_exe):
+
     # define file name
     recipient_gene = folder_name.split('___')[0]
     donor_gene = folder_name.split('___')[1]
@@ -604,8 +605,7 @@ def check_end_break(folder_name, flanking_length, end_seq_length, pwd_blastn_exe
     recipient_right_end_seq = recipient_contig_seq[len(recipient_contig_seq) - end_seq_length:]
     recipient_right_end_id = '%s_re%s' % (recipient_gene, end_seq_length)
     recipient_right_end_handle = '%s/%s.fasta' % (os.getcwd(), recipient_right_end_id)
-    export_dna_record(recipient_right_end_seq, recipient_right_end_id, ending_seq_description,
-                      recipient_right_end_handle)
+    export_dna_record(recipient_right_end_seq, recipient_right_end_id, ending_seq_description, recipient_right_end_handle)
 
     # export donor_left_end_seq
     donor_left_end_seq = donor_contig_seq[0:end_seq_length]
@@ -692,6 +692,7 @@ def get_gbk_blast_act(candidates_file, gbk_file, flanking_length, end_seq_length
     matches = open(candidates_file)
     n = 1
     candidates_2_endbreak_dict = {}
+    candidates_2_endlocation_dict = {}
 
     for match in matches:
         match = match.strip()
@@ -700,26 +701,31 @@ def get_gbk_blast_act(candidates_file, gbk_file, flanking_length, end_seq_length
         stdout.write("\rProcessing %dth of %d HGT candidates: %s" % (n, total, folder_name))
         os.mkdir('%s/%s' % (path_to_output_act_folder, folder_name))
 
+        dict_value_list = []
         # Extract gbk and faa files
         records = SeqIO.parse(gbk_file, 'genbank')
-        #gene_gc_dict = {}
         for record in records:
-            for gene_f in record.features :
+            for gene_f in record.features:
                 if 'locus_tag' in gene_f.qualifiers:
-                    for gene_1 in genes :
+
+                    for gene_1 in genes:
                         if gene_1 in gene_f.qualifiers["locus_tag"]:
-                            start = gene_f.location.start.position
-                            end = gene_f.location.end.position
-                            orf = record.seq[start :end]
-                            #gene_gc = GC(orf)
-                            #gene_gc_dict[gene_1] = float("{0:.2f}".format(gene_gc))
+                            #print(gene_1)
+                            #print(gene_f.location)
+                            #print(gene_f.location.start)
+                            #print(gene_f.location.end)
+                            #print(gene_f.location.strand)
+                            #print(len(record.seq))
+                            dict_value_list.append([gene_1, int(gene_f.location.start), int(gene_f.location.end), gene_f.location.strand, len(record.seq)])
+                            #print([gene_1, gene_f.location.start, gene_f.location.end, gene_f.location.strand, len(record.seq)])
                             pwd_gbk_file = '%s/%s/%s.gbk' % (path_to_output_act_folder, folder_name, gene_1)
                             pwd_fasta_file = '%s/%s/%s.fasta' % (path_to_output_act_folder, folder_name, gene_1)
                             SeqIO.write(record, pwd_gbk_file, 'genbank')
                             SeqIO.write(record, pwd_fasta_file, 'fasta')
-
                             # get flanking regions
                             get_flanking_region(pwd_gbk_file, gene_1, flanking_length)
+
+        candidates_2_endlocation_dict[folder_name] = dict_value_list
 
         # Run Blast
         prefix_c = '%s/%s' % (path_to_output_act_folder, folder_name)
@@ -798,7 +804,6 @@ def get_gbk_blast_act(candidates_file, gbk_file, flanking_length, end_seq_length
             for each_line in blast_results:
                 each_line_split = each_line.split('\t')
                 query = each_line_split[0]
-                target = each_line_split[1]
                 identity = float(each_line_split[2])
                 query_start = int(each_line_split[6])
                 query_end = int(each_line_split[7])
@@ -868,7 +873,7 @@ def get_gbk_blast_act(candidates_file, gbk_file, flanking_length, end_seq_length
                 shutil.rmtree('%s/%s' % (path_to_output_act_folder, folder_name), ignore_errors=True)
         n += 1
 
-    return candidates_2_endbreak_dict
+    return candidates_2_endbreak_dict, candidates_2_endlocation_dict
 
 
 def add_direction(input_file, candidate2identity_dict, output_file):
@@ -955,7 +960,6 @@ parser.add_argument('-a',
 parser.add_argument('-n',
                     required=False,
                     help='all vs all blast results')
-
 # parser.add_argument('-o',
 #                     required=True,
 #                     help='orthologs folder')
@@ -968,7 +972,6 @@ parser.add_argument('-n',
 #                     action="store_true",
 #                     required=False,
 #                     help='plot tree')
-
 parser.add_argument('-t',
                     action="store_true",
                     required=False,
@@ -1275,7 +1278,39 @@ os.makedirs('%s/0_plots_with_end_break' % pwd_op_act_folder)
 os.makedirs('%s/0_plots' % pwd_op_act_folder)
 
 # plot flanking regions
-candidates_2_endbreak_dict = get_gbk_blast_act(pwd_op_candidates_only_gene_file_with_direction, pwd_gbk_subset_file, flanking_length, ending_match_length, name_to_group_number_dict, pwd_op_act_folder, pwd_blastn_exe, keep_temp)
+candidates_2_endbreak_dict, candidates_2_endlocation_dict = get_gbk_blast_act(pwd_op_candidates_only_gene_file_with_direction, pwd_gbk_subset_file, flanking_length, ending_match_length, name_to_group_number_dict, pwd_op_act_folder, pwd_blastn_exe, keep_temp)
+
+
+end_location_return_value_dict = {}
+for each in candidates_2_endlocation_dict:
+
+    gene_1 = candidates_2_endlocation_dict[each][0][0]
+    gene_1_start = candidates_2_endlocation_dict[each][0][1]
+    gene_1_end = candidates_2_endlocation_dict[each][0][2]
+    gene_1_brand = candidates_2_endlocation_dict[each][0][3]
+    gene_1_ctg_length = candidates_2_endlocation_dict[each][0][4]
+
+    gene_2 = candidates_2_endlocation_dict[each][1][0]
+    gene_2_start = candidates_2_endlocation_dict[each][1][1]
+    gene_2_end = candidates_2_endlocation_dict[each][1][2]
+    gene_2_brand = candidates_2_endlocation_dict[each][1][3]
+    gene_2_ctg_length = candidates_2_endlocation_dict[each][1][4]
+
+    # for gene1
+    gene1_end_location = 0
+    if (gene_1_start <= ending_match_length) or ((gene_1_ctg_length - gene_1_end) <= ending_match_length):
+        gene1_end_location = 1
+
+    # for gene2
+    gene2_end_location = 0
+    if (gene_2_start <= ending_match_length) or ((gene_2_ctg_length - gene_2_end) <= ending_match_length):
+        gene2_end_location = 1
+
+    if (gene1_end_location == 1) and (gene2_end_location == 1):
+        end_location_return_value_dict[each] = 1
+    else:
+        end_location_return_value_dict[each] = 0
+
 
 # add end break information to output file
 output_file = open(pwd_op_cans_only_gene_with_direction_end_break, 'w')
@@ -1291,10 +1326,9 @@ for each_candidate in open(pwd_op_candidates_only_gene_file_with_direction):
     donor_genome_group_id = name_to_group_number_dict[donor_genome]
     identity = each_candidate_split[3]
     concatenated = '%s___%s' % (recipient_gene, donor_gene)
-    end_break = candidates_2_endbreak_dict[concatenated]
-
+    end_break = end_location_return_value_dict[concatenated]
     # write to output files
-    if end_break == True:
+    if end_break == 1:
         output_file.write('%s\t%s\t%s\t%s\t%s\t%s\n' % (recipient_gene, donor_gene, recipient_genome_group_id, donor_genome_group_id, identity, 'yes' ))
     else:
         output_file.write('%s\t%s\t%s\t%s\t%s\t%s\n' % (recipient_gene, donor_gene, recipient_genome_group_id, donor_genome_group_id, identity, 'no'))
@@ -1307,7 +1341,6 @@ for each_seq in SeqIO.parse('combined.ffn', 'fasta'):
     if each_seq.id in all_candidates_genes:
         SeqIO.write(each_seq, candidates_seq_handle, 'fasta')
 candidates_seq_handle.close()
-
 
 # remove temporary files
 if keep_temp == 0:
