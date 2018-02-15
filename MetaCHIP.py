@@ -2,6 +2,7 @@
 import os
 import shutil
 import argparse
+import itertools
 from sys import stdout
 from time import sleep
 from Bio import SeqIO
@@ -13,12 +14,12 @@ from Bio.SeqFeature import FeatureLocation
 from Bio.Graphics.GenomeDiagram import CrossLink
 from reportlab.lib import colors
 from reportlab.lib.units import cm
-from ConfigParser import SafeConfigParser
 import numpy as np
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
 from scipy.stats import gaussian_kde
+from string import ascii_uppercase
 
 
 # To-do list
@@ -27,6 +28,64 @@ from scipy.stats import gaussian_kde
 # check the m0 group for the big differentces
 # if run_blast = 1, there is no need to provide the blast results
 # output folder format
+
+
+def get_group_index_list():
+    def iter_all_strings():
+        size = 1
+        while True:
+            for s in itertools.product(ascii_uppercase, repeat=size):
+                yield "".join(s)
+            size += 1
+
+    group_index_list = []
+    for s in iter_all_strings():
+        group_index_list.append(s)
+        if s == 'ZZ':
+            break
+    return group_index_list
+
+
+def cluster_2_grouping_file(cluster_file, grouping_file):
+
+    t1 = 'cluster_tmp1.txt'
+    t1_sorted = 'cluster_tmp1_sorted.txt'
+
+    t1_handle = open(t1, 'w')
+    for each in open(cluster_file):
+        if not each.startswith(','):
+            genome_id = each.strip().split(',')[0]
+            cluster_id = each.strip().split(',')[1]
+            t1_handle.write('%s,%s\n' % (cluster_id, genome_id))
+    t1_handle.close()
+
+    os.system('cat %s | sort > %s' % (t1, t1_sorted))
+    group_index_list = get_group_index_list()
+    grouping_file_handle = open(grouping_file, 'w')
+
+    current_cluster_name = ''
+    group_index_no = 0
+    n = 1
+    for each in open(t1_sorted):
+        cluster_name = each.strip().split(',')[0]
+        genome_name = each.strip().split(',')[1]
+
+        if current_cluster_name == '':
+            current_cluster_name = cluster_name
+            grouping_file_handle.write('%s_%s,%s\n' % (group_index_list[group_index_no], n, genome_name))
+            n += 1
+        elif current_cluster_name == cluster_name:
+            grouping_file_handle.write('%s_%s,%s\n' % (group_index_list[group_index_no], n, genome_name))
+            n += 1
+        elif current_cluster_name != cluster_name:
+            current_cluster_name = cluster_name
+            group_index_no += 1
+            n = 1
+            grouping_file_handle.write('%s_%s,%s\n' % (group_index_list[group_index_no], n, genome_name))
+            n += 1
+
+    os.remove(t1)
+    os.remove(t1_sorted)
 
 
 def uniq_list(input_list):
@@ -622,297 +681,6 @@ def check_end_break(folder_name, flanking_length, end_seq_length, pwd_blastn_exe
     return break_end
 
 
-# def get_confidence_level(folder_name, flanking_length, calculation_step, pwd_blastn_exe):
-#
-#     # get the number of steps
-#     step_number = int(math.ceil(flanking_length / float(calculation_step)))
-#     # define file name
-#     recipient_gene = folder_name.split('___')[0]
-#     donor_gene = folder_name.split('___')[1]
-#     file_recipient_gene_3000_gbk = '%s_%sbp.gbk' % (recipient_gene, flanking_length)
-#     file_donor_gene_3000_gbk = '%s_%sbp.gbk' % (donor_gene, flanking_length)
-#     seq_len_cutoff_for_export = 100
-#
-#     # read in recipient contig
-#     recipient_contig_record = SeqIO.read(file_recipient_gene_3000_gbk, 'genbank')
-#     recipient_contig_seq = recipient_contig_record.seq
-#     #print('\nrecipient_gene_location:')
-#     gene_r_start = 0
-#     gene_r_end = 0
-#     gene_r_strand = 0
-#     for gene_r in recipient_contig_record.features:
-#         if 'locus_tag' in gene_r.qualifiers:
-#             if gene_r.qualifiers['locus_tag'][0] == recipient_gene:
-#                 gene_r_start = int(gene_r.location.start)
-#                 gene_r_end = int(gene_r.location.end)
-#                 gene_r_strand = int(gene_r.location.strand)
-#                 #print(gene_r_start)
-#                 #print(gene_r_end)
-#                 #print(gene_r_strand)
-#     #print('recipient_contig_length: %s' % len(recipient_contig_seq))
-#
-#     # read in donor contig
-#     donor_contig_record = SeqIO.read(file_donor_gene_3000_gbk, 'genbank')
-#     donor_contig_seq = donor_contig_record.seq
-#     #print('\ndonor_gene_location:')
-#     gene_d_start = 0
-#     gene_d_end = 0
-#     gene_d_strand = 0
-#     for gene_d in donor_contig_record.features:
-#         if 'locus_tag' in gene_d.qualifiers:
-#             if gene_d.qualifiers['locus_tag'][0] == donor_gene:
-#                 gene_d_start = int(gene_d.location.start)
-#                 gene_d_end = int(gene_d.location.end)
-#                 gene_d_strand = int(gene_d.location.strand)
-#                 #print(gene_d_start)
-#                 #print(gene_d_end)
-#                 #print(gene_d_strand)
-#     #print('donor_contig_length: %s' % len(donor_contig_seq))
-#     # get the length of subsequences
-#     subseq_length_dict = {}
-#
-#     # get subsequences of recipient contig left flanking region
-#     rlf_subs_list = []
-#     n_rlf = 1
-#     while n_rlf <= step_number:
-#         current_bp = gene_r_start - n_rlf * calculation_step
-#         if current_bp < 0:
-#             current_bp = 0
-#         rlf_subs_list.append(current_bp)
-#         n_rlf += 1
-#     #print('\nrlf_subs_list:')
-#     #print(rlf_subs_list)
-#     n_rlf = 0
-#     while n_rlf <= step_number-1:
-#         if n_rlf == 0:
-#             current_rlf_seq = recipient_contig_seq[rlf_subs_list[n_rlf]:gene_r_start]
-#         else:
-#             current_rlf_seq = recipient_contig_seq[rlf_subs_list[n_rlf]:rlf_subs_list[n_rlf-1]]
-#
-#         current_rlf_id = '%s_rlf%s' % (recipient_gene, n_rlf + 1)
-#         if len(current_rlf_seq) > seq_len_cutoff_for_export:
-#             current_rlf_description = ''
-#             current_rlf_handle = '%s/%s.fasta' % (os.getcwd(), current_rlf_id)
-#             export_dna_record(current_rlf_seq, current_rlf_id, current_rlf_description, current_rlf_handle)
-#         subseq_length_dict[current_rlf_id] = len(current_rlf_seq)
-#         #print(current_rlf_id)
-#         #print(len(current_rlf_seq))
-#         n_rlf += 1
-#
-#     # get subsequences of recipient contig right flanking region
-#     rrf_subs_list = []
-#     n_rrf = 1
-#     while n_rrf <= step_number:
-#         current_bp = gene_r_end + n_rrf * calculation_step
-#         if current_bp > len(recipient_contig_seq):
-#             current_bp = len(recipient_contig_seq)
-#         rrf_subs_list.append(current_bp)
-#         n_rrf += 1
-#     #print('\nrrf_subs_list')
-#     #print(rrf_subs_list)
-#     n_rrf = 0
-#     while n_rrf <= step_number-1:
-#         if n_rrf == 0:
-#             current_rrf_seq = recipient_contig_seq[gene_r_end:rrf_subs_list[n_rrf]]
-#         else:
-#             current_rrf_seq = recipient_contig_seq[rrf_subs_list[n_rrf-1]:rrf_subs_list[n_rrf]]
-#         current_rrf_id = '%s_rrf%s' % (recipient_gene, n_rrf + 1)
-#         if len(current_rrf_seq) > seq_len_cutoff_for_export:
-#             current_rrf_description = ''
-#             current_rrf_handle = '%s/%s.fasta' % (os.getcwd(), current_rrf_id)
-#             export_dna_record(current_rrf_seq, current_rrf_id, current_rrf_description, current_rrf_handle)
-#         subseq_length_dict[current_rrf_id] = len(current_rrf_seq)
-#         #print(current_rrf_id)
-#         #print(len(current_rrf_seq))
-#         n_rrf += 1
-#
-#     # get subsequences of donor contig left flanking region
-#     dlf_subs_list = []
-#     n_dlf = 1
-#     while n_dlf <= step_number:
-#         current_bp = gene_d_start - n_dlf * calculation_step
-#         if current_bp < 0:
-#             current_bp = 0
-#         dlf_subs_list.append(current_bp)
-#         n_dlf += 1
-#     #print('\ndlf_subs_list:')
-#     #print(dlf_subs_list)
-#     n_dlf = 0
-#     while n_dlf <= step_number-1:
-#         if n_dlf == 0:
-#             current_dlf_seq = donor_contig_seq[dlf_subs_list[n_dlf]:gene_d_start]
-#         else:
-#             current_dlf_seq = donor_contig_seq[dlf_subs_list[n_dlf]:dlf_subs_list[n_dlf-1]]
-#         current_dlf_id = '%s_dlf%s' % (donor_gene, n_dlf + 1)
-#         if len(current_dlf_seq) > seq_len_cutoff_for_export:
-#             current_dlf_description = ''
-#             current_dlf_handle = '%s/%s.fasta' % (os.getcwd(), current_dlf_id)
-#             export_dna_record(current_dlf_seq, current_dlf_id, current_dlf_description, current_dlf_handle)
-#         subseq_length_dict[current_dlf_id] = len(current_dlf_seq)
-#         #print(current_dlf_id)
-#         #print(len(current_dlf_seq))
-#         n_dlf += 1
-#
-#     # get subsequences of donor contig right flanking region
-#     drf_subs_list = []
-#     n_drf = 1
-#     while n_drf <= step_number:
-#         current_bp = gene_d_end + n_drf * calculation_step
-#         if current_bp > len(donor_contig_seq):
-#             current_bp = len(donor_contig_seq)
-#         drf_subs_list.append(current_bp)
-#         n_drf += 1
-#     #print('\ndrf_subs_list:')
-#     #print(drf_subs_list)
-#     n_drf = 0
-#     while n_drf <= step_number-1:
-#         if n_drf == 0:
-#             current_drf_seq = donor_contig_seq[gene_d_end:drf_subs_list[n_drf]]
-#         else:
-#             current_drf_seq = donor_contig_seq[drf_subs_list[n_drf-1]:drf_subs_list[n_drf]]
-#         current_drf_id = '%s_drf%s' % (donor_gene, n_drf + 1)
-#         if len(current_drf_seq) > seq_len_cutoff_for_export:
-#             current_drf_description = ''
-#             current_drf_handle = '%s/%s.fasta' % (os.getcwd(), current_drf_id)
-#             export_dna_record(current_drf_seq, current_drf_id, current_drf_description, current_drf_handle)
-#         subseq_length_dict[current_drf_id] = len(current_drf_seq)
-#         #print(current_drf_id)
-#         #print(len(current_drf_seq))
-#         n_drf += 1
-#     #print('')
-#     #print(subseq_length_dict)
-#
-#     # run pair-wise blast
-#     blast_parameters = '-evalue 1e-5 -outfmt 6 -task blastn'
-#     n = 1
-#     alignment_length_cutoff = round(float(calculation_step) / 10)
-#     recipient_left_iden_profile = []
-#     recipient_right_iden_profile = []
-#     while n <= step_number:
-#         query_l = '%s/%s_rlf%s.fasta' % (os.getcwd(), recipient_gene, n)
-#         query_l_length = subseq_length_dict['%s_rlf%s' % (recipient_gene, n)]
-#         query_r = '%s/%s_rrf%s.fasta' % (os.getcwd(), recipient_gene, n)
-#         query_r_length = subseq_length_dict['%s_rrf%s' % (recipient_gene, n)]
-#         donor_l = '%s/%s_dlf%s.fasta' % (os.getcwd(), donor_gene, n)
-#         donor_l_length = subseq_length_dict['%s_dlf%s' % (donor_gene, n)]
-#         donor_r = '%s/%s_drf%s.fasta' % (os.getcwd(), donor_gene, n)
-#         donor_r_length = subseq_length_dict['%s_drf%s' % (donor_gene, n)]
-#         #print()
-#         #print('%s\t%s' % (query_l, query_l_length))
-#         #print('%s\t%s' % (query_r, query_r_length))
-#         #print('%s\t%s' % (donor_l, donor_l_length))
-#         #print('%s\t%s' % (donor_r, donor_r_length))
-#
-#         # run pair-wise blast
-#         if gene_r_strand == gene_d_strand:
-#             output_1 = '%s/%s_rlf%s___%s_dlf%s.tab' % (os.getcwd(), recipient_gene, n, donor_gene, n)
-#             output_2 = '%s/%s_rrf%s___%s_drf%s.tab' % (os.getcwd(), recipient_gene, n, donor_gene, n)
-#             command_blast_1 = '%s -query %s -subject %s -out %s %s' % (pwd_blastn_exe, query_l, donor_l, output_1, blast_parameters)
-#             if (query_l_length > seq_len_cutoff_for_export) and (donor_l_length > seq_len_cutoff_for_export):
-#                 os.system(command_blast_1)
-#             command_blast_2 = '%s -query %s -subject %s -out %s %s' % (pwd_blastn_exe, query_r, donor_r, output_2, blast_parameters)
-#             if (query_r_length > seq_len_cutoff_for_export) and (donor_r_length > seq_len_cutoff_for_export):
-#                 os.system(command_blast_2)
-#
-#         if gene_r_strand != gene_d_strand:
-#             output_1 = '%s/%s_rlf%s___%s_drf%s.tab' % (os.getcwd(), recipient_gene, n, donor_gene, n)
-#             output_2 = '%s/%s_rrf%s___%s_dlf%s.tab' % (os.getcwd(), recipient_gene, n, donor_gene, n)
-#             command_blast_1 = '%s -query %s -subject %s -out %s %s' % (pwd_blastn_exe, query_l, donor_r, output_1, blast_parameters)
-#             if (query_l_length > seq_len_cutoff_for_export) and (donor_r_length > seq_len_cutoff_for_export):
-#                 os.system(command_blast_1)
-#             command_blast_2 = '%s -query %s -subject %s -out %s %s' % (pwd_blastn_exe, query_r, donor_l, output_2, blast_parameters)
-#             if (query_r_length > seq_len_cutoff_for_export) and (donor_l_length > seq_len_cutoff_for_export):
-#                 os.system(command_blast_2)
-#
-#         # get recipient_left_iden_profile
-#         if not os.path.isfile(output_1):
-#             recipient_left_iden_profile.append(['No_sequence'])
-#         elif os.path.isfile(output_1) and (os.path.getsize(output_1) == 0):
-#             recipient_left_iden_profile.append(['No_similarity'])
-#         elif os.path.getsize(output_1) > 0:
-#             identity_l_list = []
-#             for each_line_1 in open(output_1):
-#                 each_line_1_split = each_line_1.strip().split('\t')
-#                 identity_1 = round(float(each_line_1_split[2]))
-#                 alignment_length_1 = int(each_line_1_split[3])
-#                 if alignment_length_1 >= alignment_length_cutoff:
-#                     identity_l_list.append(identity_1)
-#             if identity_l_list == []:
-#                 recipient_left_iden_profile.append(['No_similarity'])
-#             else:
-#                 recipient_left_iden_profile.append(identity_l_list)
-#
-#         # get recipient_right_iden_profile
-#         if not os.path.isfile(output_2):
-#             recipient_right_iden_profile.append(['No_sequence'])
-#         elif os.path.isfile(output_2) and (os.path.getsize(output_2) == 0):
-#             recipient_right_iden_profile.append(['No_similarity'])
-#         elif os.path.getsize(output_2) > 0:
-#             identity_r_list = []
-#             for each_line_2 in open(output_2):
-#                 each_line_2_split = each_line_2.strip().split('\t')
-#                 identity_2 = round(float(each_line_2_split[2]))
-#                 alignment_length_2 = int(each_line_2_split[3])
-#                 if alignment_length_2 >= alignment_length_cutoff:
-#                     identity_r_list.append(identity_2)
-#             if identity_r_list == []:
-#                 recipient_right_iden_profile.append(['No_similarity'])
-#             else:
-#                 recipient_right_iden_profile.append(identity_r_list)
-#         n += 1
-#
-#     #print('recipient_left_iden_profile: %s' % recipient_left_iden_profile)
-#     #print('recipient_right_iden_profile: %s' % recipient_right_iden_profile)
-#
-#     # analyze flanking profile
-#     recipient_left_iden_profile_uniq = uniq_list(recipient_left_iden_profile)
-#     recipient_right_iden_profile_uniq = uniq_list(recipient_right_iden_profile)
-#     #print(recipient_left_iden_profile_uniq)
-#     #print(recipient_right_iden_profile_uniq)
-#     confidence_level = ''
-#
-#     if (['No_sequence'] not in recipient_left_iden_profile) and (['No_sequence'] not in recipient_right_iden_profile):
-#         if (recipient_left_iden_profile[-1] == ['No_similarity']) and (recipient_right_iden_profile[-1] == ['No_similarity']): # non-end match
-#             confidence_level = 'high'
-#         elif (recipient_left_iden_profile[-1] != ['No_similarity']) or (recipient_right_iden_profile[-1] != ['No_similarity']): # matched to the end
-#             confidence_level = 'low'
-#         else:
-#             confidence_level = 'low'
-#
-#     elif (['No_sequence'] in recipient_left_iden_profile) and (['No_sequence'] not in recipient_right_iden_profile):
-#         if (len(recipient_left_iden_profile_uniq) > 1) and (recipient_right_iden_profile_uniq[-1] == ['No_similarity']):
-#             if recipient_left_iden_profile_uniq[-2] == ['No_similarity']:
-#                 confidence_level = 'high'
-#             else:
-#                 confidence_level = 'low'
-#         else:
-#             confidence_level = 'low'
-#
-#     elif (['No_sequence'] not in recipient_left_iden_profile) and (['No_sequence'] in recipient_right_iden_profile):
-#         if (recipient_left_iden_profile_uniq[-1] == ['No_similarity']) and (len(recipient_right_iden_profile_uniq) > 1):
-#             if recipient_right_iden_profile_uniq[-2] == ['No_similarity']:
-#                 confidence_level = 'high'
-#             else:
-#                 confidence_level = 'low'
-#         else:
-#             confidence_level = 'low'
-#
-#     elif (['No_sequence'] in recipient_left_iden_profile) and (['No_sequence'] in recipient_right_iden_profile):
-#         if (len(recipient_left_iden_profile_uniq) > 1) and (len(recipient_right_iden_profile_uniq) > 1):
-#             if (recipient_left_iden_profile_uniq[-2] == ['No_similarity']) and (recipient_right_iden_profile_uniq[-2] == ['No_similarity']):
-#                 confidence_level = 'high'
-#             else:
-#                 confidence_level = 'low'
-#         else:
-#             confidence_level = 'low'
-#
-#
-#     #print('\tconfidence level: %s' % confidence_level)
-#     #print('left:\t%s' % recipient_left_iden_profile)
-#     #print('right:\t%s' % recipient_right_iden_profile)
-#     return confidence_level
-
-
 def get_gbk_blast_act(candidates_file, gbk_file, flanking_length, end_seq_length, name_to_group_number_dict, path_to_output_act_folder, pwd_blastn_exe, keep_temp):
 
     matches = open(candidates_file)
@@ -1146,36 +914,95 @@ def add_direction(input_file, candidate2identity_dict, output_file):
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('-cfg',
+parser.add_argument('-c',
+                    required=False,
+                    type=int,
+                    default=70,
+                    help='blast coverage cutoff')
+
+parser.add_argument('-l',
+                    required=False,
+                    type=int,
+                    default=200,
+                    help='alignment length cutoff')
+
+parser.add_argument('-f',
+                    required=False,
+                    type=int,
+                    default=3000,
+                    help='the length of flanking sequences to plot')
+
+parser.add_argument('-i',
+                    required=False,
+                    type=int,
+                    default=90,
+                    help='identity percentile')
+
+parser.add_argument('-b',
+                    required=False,
+                    type=int,
+                    default=1000,
+                    help='the minimal length to be considered as end break')
+
+parser.add_argument('-g',
                     required=True,
-                    help='configuration file')
+                    help='clustering results')
+
+parser.add_argument('-a',
+                    required=True,
+                    help='Prokka output')
+
+parser.add_argument('-n',
+                    required=False,
+                    help='all vs all blast results')
+
+# parser.add_argument('-o',
+#                     required=True,
+#                     help='orthologs folder')
+#
+# parser.add_argument('-m',
+#                     required=True,
+#                     help='phylo.hmm')
+#
+# parser.add_argument('-p',
+#                     action="store_true",
+#                     required=False,
+#                     help='plot tree')
+
+parser.add_argument('-t',
+                    action="store_true",
+                    required=False,
+                    help='keep temporary files')
+
+parser.add_argument('-blast',
+                    action="store_true",
+                    required=False,
+                    help='run blast step or not')
+
+parser.add_argument('-blastn',
+                    required=False,
+                    default='blastn',
+                    help='path to blastn executable')
+
+parser.add_argument('-makeblastdb',
+                    required=False,
+                    default='makeblastdb',
+                    help='path to makeblastdb executable')
 
 args = vars(parser.parse_args())
-pwd_cfg_file = args['cfg']
 
-# check whether config file exist
-if not os.path.isfile(pwd_cfg_file):
-    print('config file not found')
-    exit()
-
-# get parameters in config file
-config = SafeConfigParser()
-config.read(pwd_cfg_file)
-grouping_file =             config.get('FILES_AND_PARAMETERS', 'grouping_file')
-cover_cutoff =          int(config.get('FILES_AND_PARAMETERS', 'cover_cutoff'))
-flanking_length =       int(config.get('FILES_AND_PARAMETERS', 'flanking_length'))
-identity_percentile =   int(config.get('FILES_AND_PARAMETERS', 'identity_percentile'))
-align_len_cutoff =      int(config.get('FILES_AND_PARAMETERS', 'align_len_cutoff'))
-# calculation_step =      int(config.get('FILES_AND_PARAMETERS', 'calculation_step'))
-ending_match_length =   int(config.get('FILES_AND_PARAMETERS', 'ending_match_length'))
-run_blastn =            int(config.get('FILES_AND_PARAMETERS', 'run_blastn'))
-prokka_output =             config.get('FILES_AND_PARAMETERS', 'prokka_outputs')
-keep_temp =             int(config.get('FILES_AND_PARAMETERS', 'keep_temporary_files'))
-pwd_blastn_exe =            config.get('DEPENDENCIES', 'path_to_blastn_executable')
-pwd_makeblastdb_exe =       config.get('DEPENDENCIES', 'path_to_makeblastdb_executable')
-blast_results = ''
-if run_blastn == 0:
-    blast_results =         config.get('FILES_AND_PARAMETERS', 'blast_results')
+cluster_file = args['g']
+cover_cutoff = args['c']
+flanking_length = args['f']
+identity_percentile = args['i']
+align_len_cutoff = args['l']
+ending_match_length = args['b']
+run_blastn = args['blast']
+prokka_output = args['a']
+keep_temp = args['t']
+pwd_blastn_exe = args['blastn']
+pwd_makeblastdb_exe = args['makeblastdb']
+blast_results = args['n']
 
 ############################################### Define folder/file name ################################################
 
@@ -1183,6 +1010,7 @@ print('Define folder/file names and create output folder')
 op_folder = 'output_ip%s_al%sbp_c%s_e%sbp' % (str(identity_percentile), str(align_len_cutoff), str(cover_cutoff), str(ending_match_length))
 wd = os.getcwd()
 
+grouping_file =                                     'grouping.txt'
 iden_distrib_plot_folder =                          'identity_distribution'
 qual_idens_file =                                   'qualified_identities.txt'
 qual_idens_file_gg =                                'qualified_identities_gg.txt'
@@ -1217,6 +1045,7 @@ pwd_op_cans_only_gene_with_direction_end_break =    '%s/%s/%s'    % (wd, op_fold
 pwd_op_candidates_seq =                             '%s/%s/%s'    % (wd, op_folder, op_candidates_seq)
 pwd_gbk_subset_file =                               '%s/%s/%s'    % (wd, op_folder, gbk_subset_file)
 pwd_op_act_folder =                                 '%s/%s/%s'    % (wd, op_folder, op_act_folder_name)
+pwd_cluster_file =                                  '%s/%s'       % (wd, cluster_file)
 pwd_grouping_file =                                 '%s/%s'       % (wd, grouping_file)
 pwd_gbk_file =                                      '%s/%s'       % (wd, 'combined.gbk')
 pwd_blast_results = ''
@@ -1224,6 +1053,9 @@ if run_blastn == 0:
     pwd_blast_results =                             '%s/%s'       % (wd, blast_results)
 if run_blastn == 1:
     pwd_blast_results =                             '%s/%s'       % (wd, 'all_vs_all_ffn.tab')
+
+# get grouping file from cluster file
+cluster_2_grouping_file(pwd_cluster_file, pwd_grouping_file)
 
 # check whether file exist
 unfound_inputs = []

@@ -459,31 +459,31 @@ for each_bin in grouping_profile:
 
 ################################################### Create folders #####################################################
 
-# create output_tree_folder, gene_tree_seq and gene_tree_txt folder
-if not os.path.isdir(pwd_op_tree_folder):
-    os.mkdir(pwd_op_tree_folder)
-    os.mkdir(pwd_tree_folder)
-    if plot_tree == 1:
-        os.mkdir(pwd_tree_plots_folder)
-else:
-    shutil.rmtree(pwd_op_tree_folder)
-    shutil.rmtree(pwd_op_tree_folder)
-    os.mkdir(pwd_op_tree_folder)
-    os.mkdir(pwd_tree_folder)
-    if plot_tree == 1:
-        os.mkdir(pwd_tree_plots_folder)
-
-# prepare Ranger-DTL working directory
-if not os.path.exists(pwd_ranger_wd):
-    os.makedirs(pwd_ranger_wd)
-    os.makedirs(pwd_ranger_inputs_folder)
-    os.makedirs(pwd_ranger_outputs_folder)
-else:
-    shutil.rmtree(pwd_ranger_wd)
-    shutil.rmtree(pwd_ranger_wd)
-    os.makedirs(pwd_ranger_wd)
-    os.makedirs(pwd_ranger_inputs_folder)
-    os.makedirs(pwd_ranger_outputs_folder)
+# # create output_tree_folder, gene_tree_seq and gene_tree_txt folder
+# if not os.path.isdir(pwd_op_tree_folder):
+#     os.mkdir(pwd_op_tree_folder)
+#     os.mkdir(pwd_tree_folder)
+#     if plot_tree == 1:
+#         os.mkdir(pwd_tree_plots_folder)
+# else:
+#     shutil.rmtree(pwd_op_tree_folder)
+#     shutil.rmtree(pwd_op_tree_folder)
+#     os.mkdir(pwd_op_tree_folder)
+#     os.mkdir(pwd_tree_folder)
+#     if plot_tree == 1:
+#         os.mkdir(pwd_tree_plots_folder)
+#
+# # prepare Ranger-DTL working directory
+# if not os.path.exists(pwd_ranger_wd):
+#     os.makedirs(pwd_ranger_wd)
+#     os.makedirs(pwd_ranger_inputs_folder)
+#     os.makedirs(pwd_ranger_outputs_folder)
+# else:
+#     shutil.rmtree(pwd_ranger_wd)
+#     shutil.rmtree(pwd_ranger_wd)
+#     os.makedirs(pwd_ranger_wd)
+#     os.makedirs(pwd_ranger_inputs_folder)
+#     os.makedirs(pwd_ranger_outputs_folder)
 
 
 ####################################################### Main Code ######################################################
@@ -495,8 +495,8 @@ get_species_tree_wd = '%s/%s' % (wd, 'get_species_tree_wd')
 if (os.path.isdir(get_species_tree_wd)) and (len(os.listdir(get_species_tree_wd)) > 1):
     print('get_species_tree_wd folder detected, will skip the alignment step')
 else:
-    os.system('rm -r ' + get_species_tree_wd)
-    os.mkdir(get_species_tree_wd)
+    #os.system('rm -r ' + get_species_tree_wd)
+    #os.mkdir(get_species_tree_wd)
     get_species_tree_alignment(get_species_tree_wd, pwd_prokka, pwd_phylo_hmm, pwd_hmmsearch_exe, pwd_mafft_exe)
     all_input_genomes = [i for i in os.listdir(pwd_prokka) if os.path.isdir(pwd_prokka + '/' + i)]
     get_species_tree_newick(get_species_tree_wd, all_input_genomes, pwd_fasttree_exe, wd, 'species_tree_all')
@@ -540,26 +540,22 @@ for each_candidates in candidates_list:
         seq_file_name_prefix = '___'.join(each_candidates) + '_gene_tree'
         seq_file_name = '%s.seq' % seq_file_name_prefix
         pwd_seq_file = '%s/%s' % (pwd_tree_folder, seq_file_name)
-        output_handle = open(pwd_seq_file, "w")
-        for seq_record in SeqIO.parse(pwd_ffn_file, 'fasta'):
-            if seq_record.id in gene_member:
-                aa_object = seq_record.seq.translate()
-                aa_record = SeqRecord(aa_object)
-                aa_record.id = seq_record.id
-                aa_record.description = seq_record.description
-                SeqIO.write(aa_record, output_handle, 'fasta')
-        output_handle.close()
+        # output_handle = open(pwd_seq_file, "w")
+        # for seq_record in SeqIO.parse(pwd_ffn_file, 'fasta'):
+        #     if seq_record.id in gene_member:
+        #         SeqIO.write(seq_record, output_handle, 'fasta')
+        # output_handle.close()
 
 
 ############################################ get gene tree and species tree ############################################
 
         # run mafft
         pwd_seq_file_1st_aln = '%s/%s.aln' % (pwd_tree_folder, seq_file_name_prefix)
-        os.system('%s --quiet --maxiterate 1000 --globalpair %s > %s'% (pwd_mafft_exe, pwd_seq_file, pwd_seq_file_1st_aln))
+        #os.system('%s --quiet --maxiterate 1000 --globalpair %s > %s'% (pwd_mafft_exe, pwd_seq_file, pwd_seq_file_1st_aln))
 
         # run fasttree
         pwd_gene_tree_newick = '%s/%s.newick' % (pwd_tree_folder, seq_file_name_prefix)
-        os.system('%s -quiet %s > %s' % (pwd_fasttree_exe, pwd_seq_file_1st_aln, pwd_gene_tree_newick))
+        #os.system('%s -nt -quiet %s > %s' % (pwd_fasttree_exe, pwd_seq_file_1st_aln, pwd_gene_tree_newick))
 
         # plot gene tree
         if plot_tree == 1:
@@ -567,7 +563,7 @@ for each_candidates in candidates_list:
 
         # get species tree subset
         species_tree_file_name = '___'.join(each_candidates) + '_species_tree'
-        get_species_tree_newick(get_species_tree_wd, genome_subset, pwd_fasttree_exe, pwd_tree_folder, species_tree_file_name)
+        #get_species_tree_newick(get_species_tree_wd, genome_subset, pwd_fasttree_exe, pwd_tree_folder, species_tree_file_name)
 
         # plot species tree
         if plot_tree == 1:
@@ -582,31 +578,31 @@ for each_candidates in candidates_list:
         ranger_outputs_file_name = process_name + '_ranger_output.txt'
         pwd_ranger_inputs = '%s/%s' % (pwd_ranger_inputs_folder, ranger_inputs_file_name)
         pwd_ranger_outputs = '%s/%s' % (pwd_ranger_outputs_folder, ranger_outputs_file_name)
-        ranger_inputs_file = open(pwd_ranger_inputs, 'w')
+        #ranger_inputs_file = open(pwd_ranger_inputs, 'w')
 
         # read in species tree
         pwd_species_tree_newick = '%s/%s_species_tree.newick' % (pwd_tree_folder, process_name)
-        species_tree = Tree(pwd_species_tree_newick, format=1)
-        species_tree.resolve_polytomy(recursive=True) # solving multifurcations
+        #species_tree = Tree(pwd_species_tree_newick, format=1)
+        #species_tree.resolve_polytomy(recursive=True) # solving multifurcations
 
         # read in gene tree
-        pwd_gene_tree_newick = '%s/%s_gene_tree.newick' % (pwd_tree_folder, process_name)
-        gene_tree = Tree(pwd_gene_tree_newick, format=1)
-        gene_tree.resolve_polytomy(recursive=True) # solving multifurcations
+        #pwd_gene_tree_newick = '%s/%s_gene_tree.newick' % (pwd_tree_folder, process_name)
+        #gene_tree = Tree(pwd_gene_tree_newick, format=1)
+        #gene_tree.resolve_polytomy(recursive=True) # solving multifurcations
 
         # change gene tree leaf name for Ranger-DTL
-        for each_gr_leaf in gene_tree:
-            each_gr_leaf_name_split = each_gr_leaf.name.split('_')
-            each_gr_leaf.name = '_'.join(each_gr_leaf.name.split('_')[:-1])
+        # for each_gr_leaf in gene_tree:
+        #     each_gr_leaf_name_split = each_gr_leaf.name.split('_')
+        #     each_gr_leaf.name = '_'.join(each_gr_leaf.name.split('_')[:-1])
 
         # write species tree and gene tree to Ranger-DTL input file
-        ranger_inputs_file.write('%s\n[&U]%s\n' % (species_tree.write(format=9), gene_tree.write(format=9)))
-        ranger_inputs_file.close()
+        #ranger_inputs_file.write('%s\n[&U]%s\n' % (species_tree.write(format=9), gene_tree.write(format=9)))
+        #ranger_inputs_file.close()
 
         # run Ranger-DTL
         ranger_parameters = '-q -D 2 -T 3 -L 1'
         ranger_cmd = '%s %s -i %s -o %s' % (pwd_ranger_exe, ranger_parameters, pwd_ranger_inputs, pwd_ranger_outputs)
-        os.system(ranger_cmd)
+        #os.system(ranger_cmd)
 
         # parse prediction result
         ranger_result = open(pwd_ranger_outputs)

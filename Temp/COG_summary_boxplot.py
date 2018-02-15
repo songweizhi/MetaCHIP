@@ -15,8 +15,6 @@ import matplotlib as mpl
 mpl.use('Agg')
 
 
-
-
 def turn_to_percentage(number_list):
     number_list_percent = []
     for each_element in number_list:

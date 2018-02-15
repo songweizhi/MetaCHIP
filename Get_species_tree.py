@@ -69,7 +69,8 @@ def treeMaker(path_to_prokka, path_to_hmm, pwd_hmmsearch_exe, pwd_mafft_exe, pwd
                 else:
                     file_out = open(tmp_folder + '/' + hmm_id + '.fasta', 'a+')
                     file_out.write('>' + f + '\n')
-                    seq = str(proteinSequence[hmm_name][hmm_pos1:hmm_pos2])
+                    if hmm_name != '':
+                        seq = str(proteinSequence[hmm_name][hmm_pos1:hmm_pos2])
                     file_out.write(str(seq) + '\n')
                     file_out.close()
                     hmm_id = splitLine[4]
@@ -81,7 +82,8 @@ def treeMaker(path_to_prokka, path_to_hmm, pwd_hmmsearch_exe, pwd_mafft_exe, pwd
             else:
                 file_out = open(tmp_folder + '/' + hmm_id + '.fasta', 'a+')
                 file_out.write('>' + f + '\n')
-                seq = str(proteinSequence[hmm_name][hmm_pos1:hmm_pos2])
+                if hmm_name != '':
+                    seq = str(proteinSequence[hmm_name][hmm_pos1:hmm_pos2])
                 file_out.write(str(seq) + '\n')
                 file_out.close()
 

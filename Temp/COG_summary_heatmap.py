@@ -8,9 +8,7 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 
-
 # python3 ~/PycharmProjects/MetaCHIP/Temp/COG_summary_heatmap.py -in func_stats_files -out PBTR_ML.jpg -in_percent
-
 
 def turn_to_percentage(number_list):
     number_list_percent = []

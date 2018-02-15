@@ -93,7 +93,7 @@ Output files:
 
 1. All identified candidates (this file will be used as input for the second step).
 
-        Gene_1	Gene_2	Genome_1_ID	Genome_2_ID	Identity	End_break	Direction
+        Gene_1	Gene_2	Genome_1_ID	Genome_2_ID	Identity    End_break	Direction
         AAM_03063	BAD_01456	A_1	B_1	100.0	no	AAM<-BAD
         AMAU_05759	BHS_02873	A_4	B_4	79.02	no	AMAU<-BHS
         BAD_00475	AAM_01658	B_1	A_1	74.354	no	BAD<-AAM
