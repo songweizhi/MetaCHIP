@@ -29,7 +29,7 @@ from string import ascii_uppercase
 # if run_blast = 1, there is no need to provide the blast results
 # output folder format
 # endbreak checked twice, remove one
-# add group number to output folder
+# add the number of groups to output folder
 
 
 def get_group_index_list():
@@ -715,14 +715,12 @@ def get_gbk_blast_act(candidates_file, gbk_file, flanking_length, end_seq_length
     for match in matches:
         total += 1
 
-    matches = open(candidates_file)
     n = 1
     candidates_2_endbreak_dict = {}
     candidates_2_endlocation_dict = {}
 
-    for match in matches:
-        match = match.strip()
-        genes = match.split('\t')[:-2]
+    for match in open(candidates_file):
+        genes = match.strip().split('\t')[:-1]
         folder_name = '___'.join(genes)
         stdout.write("\rProcessing %dth of %d HGT candidates: %s" % (n, total, folder_name))
         os.mkdir('%s/%s' % (path_to_output_act_folder, folder_name))
@@ -888,7 +886,7 @@ def get_gbk_blast_act(candidates_file, gbk_file, flanking_length, end_seq_length
     return candidates_2_endbreak_dict
 
 
-def add_direction(input_file, candidate2identity_dict, output_file):
+def remove_bidirection(input_file, candidate2identity_dict, output_file):
     input = open(input_file)
     output = open(output_file, 'w')
 
@@ -919,15 +917,12 @@ def add_direction(input_file, candidate2identity_dict, output_file):
     for each in non_overlap_list:
         each_split = each.split('\t')
         each_concatenated = '%s___%s' % (each_split[0], each_split[1])
-        output.write('%s\t%s<--%s\t%s\n' % (each, '_'.join(each_split[0].split('_')[:-1]), '_'.join(each_split[1].split('_')[:-1]), candidate2identity_dict[each_concatenated]))
+        output.write('%s\t%s\n' % (each, candidate2identity_dict[each_concatenated]))
     for each in overlap_list:
         each_concatenated = '%s___%s' % (each.split('\t')[0], each.split('\t')[1])
-        output.write('%s\tN/A\t%s\n' % (each, candidate2identity_dict[each_concatenated]))
-
+        output.write('%s\t%s\n' % (each, candidate2identity_dict[each_concatenated]))
     output.close()
 
-
-############################################## Read in configuration file ##############################################
 
 parser = argparse.ArgumentParser()
 
@@ -995,7 +990,6 @@ parser.add_argument('-makeblastdb',
 
 args = vars(parser.parse_args())
 
-#cluster_file = args['g']
 grouping_file = args['g']
 cover_cutoff = args['c']
 flanking_length = args['f']
@@ -1015,7 +1009,6 @@ print('Define folder/file names and create output folder')
 op_folder = 'output_ip%s_al%sbp_c%s_e%sbp' % (str(identity_percentile), str(align_len_cutoff), str(cover_cutoff), str(ending_match_length))
 wd = os.getcwd()
 
-#grouping_file =                                     'grouping.txt'
 iden_distrib_plot_folder =                          'identity_distribution'
 qual_idens_file =                                   'qualified_identities.txt'
 qual_idens_file_gg =                                'qualified_identities_gg.txt'
@@ -1027,8 +1020,8 @@ subjects_in_one_line_filename =                     'subjects_in_one_line.txt'
 group_pair_iden_cutoff_file_name =                  'identity_cutoff.txt'
 op_candidates_with_group_file_name =                'HGT_candidates_with_group.txt'
 op_candidates_only_gene_file_name =                 'HGT_candidates_only_id.txt'
-op_candidates_only_gene_file_name_with_direction =  'HGT_candidates_with_direction.txt'
-op_candidates_only_gene_with_direction_end_break =  'HGT_candidates.txt'
+op_candidates_only_gene_file_name_uniq =            'HGT_candidates_uniq.txt'
+op_candidates_only_gene_uniq_end_break =            'HGT_candidates.txt'
 op_candidates_seq =                                 'HGT_candidates.fasta'
 gbk_subset_file =                                   'combined_subset.gbk'
 op_act_folder_name =                                'Flanking_regions'
@@ -1045,12 +1038,11 @@ pwd_subjects_in_one_line =                          '%s/%s/%s'    % (wd, op_fold
 pwd_group_pair_iden_cutoff_file =                   '%s/%s/%s'    % (wd, op_folder, group_pair_iden_cutoff_file_name)
 pwd_op_candidates_with_group_file =                 '%s/%s/%s'    % (wd, op_folder, op_candidates_with_group_file_name)
 pwd_op_candidates_only_gene_file =                  '%s/%s/%s'    % (wd, op_folder, op_candidates_only_gene_file_name)
-pwd_op_candidates_only_gene_file_with_direction =   '%s/%s/%s'    % (wd, op_folder, op_candidates_only_gene_file_name_with_direction)
-pwd_op_cans_only_gene_with_direction_end_break =    '%s/%s/%s'    % (wd, op_folder, op_candidates_only_gene_with_direction_end_break)
+pwd_op_candidates_only_gene_file_uniq =             '%s/%s/%s'    % (wd, op_folder, op_candidates_only_gene_file_name_uniq)
+pwd_op_cans_only_gene_uniq_end_break =              '%s/%s/%s'    % (wd, op_folder, op_candidates_only_gene_uniq_end_break)
 pwd_op_candidates_seq =                             '%s/%s/%s'    % (wd, op_folder, op_candidates_seq)
 pwd_gbk_subset_file =                               '%s/%s/%s'    % (wd, op_folder, gbk_subset_file)
 pwd_op_act_folder =                                 '%s/%s/%s'    % (wd, op_folder, op_act_folder_name)
-#pwd_cluster_file =                                  '%s/%s'       % (wd, cluster_file)
 pwd_grouping_file =                                 '%s/%s'       % (wd, grouping_file)
 pwd_gbk_file =                                      '%s/%s'       % (wd, 'combined.gbk')
 pwd_blast_results = ''
@@ -1058,9 +1050,6 @@ if run_blastn == 0:
     pwd_blast_results =                             '%s/%s'       % (wd, blast_results)
 if run_blastn == 1:
     pwd_blast_results =                             '%s/%s'       % (wd, 'all_vs_all_ffn.tab')
-
-# get grouping file from cluster file
-#cluster_2_grouping_file(pwd_cluster_file, pwd_grouping_file)
 
 # check whether file exist
 unfound_inputs = []
@@ -1121,7 +1110,7 @@ for each_bin in grouping:
 
 ####################################################### Main code ######################################################
 
-sleep(1.5)
+sleep(1)
 print('Plotting overall identity distribution')
 
 # get qualified identities after alignment length and coverage filter (self-match excluded)
@@ -1134,7 +1123,7 @@ os.makedirs(pwd_iden_distrib_plot_folder)
 all_identities_plot_title = 'All_vs_All'
 plot_identity_list(all_identities, 'None', all_identities_plot_title, pwd_iden_distrib_plot_folder)
 
-sleep(1.5)
+sleep(1)
 print('\nPlotting identity distributions')
 
 # replace query and subject name with query_group-subject_group and sort new file
@@ -1192,7 +1181,7 @@ for each_identity_g in qualified_identities_g:
 do()
 group_pair_iden_cutoff_file.close()
 
-sleep(1.5)
+sleep(1)
 print('\nAnalyzing Blast matches to get HGT candidates')
 
 # add group information to qualified identities and sort it according to group.
@@ -1219,10 +1208,10 @@ get_hits_group(pwd_qual_idens_with_group_sorted, pwd_subjects_in_one_line)
 # get HGT candidates
 get_candidates(pwd_subjects_in_one_line, pwd_op_candidates_with_group_file, pwd_op_candidates_only_gene_file, group_pair_iden_cutoff_dict)
 
-sleep(1.5)
+sleep(1)
 print('Get HGT candidates finished and exported to %s and %s' % (op_candidates_with_group_file_name, op_candidates_only_gene_file_name))
 
-# add direction and identity to output file
+# remove bidirection and add identity to output file
 candidate2identity_dict = {}
 for each_candidate_pair in open(pwd_op_candidates_with_group_file):
     each_candidate_pair_split = each_candidate_pair.strip().split('\t')
@@ -1232,19 +1221,17 @@ for each_candidate_pair in open(pwd_op_candidates_with_group_file):
     candidate2identity_key = '%s___%s' % (recipient_gene, donor_gene)
     candidate2identity_dict[candidate2identity_key] = identity
 
-add_direction(pwd_op_candidates_only_gene_file, candidate2identity_dict, pwd_op_candidates_only_gene_file_with_direction)
-
+remove_bidirection(pwd_op_candidates_only_gene_file, candidate2identity_dict, pwd_op_candidates_only_gene_file_uniq)
 
 #################################################### Get ACT images ####################################################
 
-sleep(1.5)
+sleep(1)
 print('Preparing subset of combined gbk file for ACT plotting')
 
 # get gene list of all candidates
 all_candidates_genes = []
-matches = open(pwd_op_candidates_only_gene_file_with_direction)
-for match in matches:
-    match_split = match.strip().split('\t')[:-2]
+for match in open(pwd_op_candidates_only_gene_file):
+    match_split = match.strip().split('\t')
     for gene in match_split:
         if gene not in all_candidates_genes:
             all_candidates_genes.append(gene)
@@ -1273,13 +1260,13 @@ os.makedirs('%s/0_plots_with_end_break' % pwd_op_act_folder)
 os.makedirs('%s/0_plots' % pwd_op_act_folder)
 
 # plot flanking regions
-candidates_2_endbreak_dict = get_gbk_blast_act(pwd_op_candidates_only_gene_file_with_direction, pwd_gbk_subset_file, flanking_length, ending_match_length, name_to_group_number_dict, pwd_op_act_folder, pwd_blastn_exe, keep_temp)
+candidates_2_endbreak_dict = get_gbk_blast_act(pwd_op_candidates_only_gene_file_uniq, pwd_gbk_subset_file, flanking_length, ending_match_length, name_to_group_number_dict, pwd_op_act_folder, pwd_blastn_exe, keep_temp)
 
 # add end break information to output file
-output_file = open(pwd_op_cans_only_gene_with_direction_end_break, 'w')
+output_file = open(pwd_op_cans_only_gene_uniq_end_break, 'w')
 output_file.write('Gene_1\tGene_2\tGenome_1_ID\tGenome_2_ID\tIdentity\tEnd_break\n')
 all_candidate_genes = []
-for each_candidate in open(pwd_op_candidates_only_gene_file_with_direction):
+for each_candidate in open(pwd_op_candidates_only_gene_file_uniq):
     each_candidate_split = each_candidate.strip().split('\t')
     recipient_gene = each_candidate_split[0]
     recipient_genome = '_'.join(recipient_gene.split('_')[:-1])
@@ -1287,7 +1274,7 @@ for each_candidate in open(pwd_op_candidates_only_gene_file_with_direction):
     donor_gene = each_candidate_split[1]
     donor_genome = '_'.join(donor_gene.split('_')[:-1])
     donor_genome_group_id = name_to_group_number_dict[donor_genome]
-    identity = each_candidate_split[3]
+    identity = each_candidate_split[2]
     concatenated = '%s___%s' % (recipient_gene, donor_gene)
     end_break = candidates_2_endbreak_dict[concatenated]
     # write to output files
@@ -1295,19 +1282,29 @@ for each_candidate in open(pwd_op_candidates_only_gene_file_with_direction):
         output_file.write('%s\t%s\t%s\t%s\t%s\t%s\n' % (recipient_gene, donor_gene, recipient_genome_group_id, donor_genome_group_id, identity, 'yes' ))
     else:
         output_file.write('%s\t%s\t%s\t%s\t%s\t%s\n' % (recipient_gene, donor_gene, recipient_genome_group_id, donor_genome_group_id, identity, 'no'))
-
 output_file.close()
+
+# get qualified HGT candidates
+qualified_HGT_candidates = []
+for each_candidate_2 in open(pwd_op_cans_only_gene_uniq_end_break):
+    each_candidate_2_split = each_candidate_2.strip().split('\t')
+    end_break_2 = each_candidate_2_split[5]
+    if end_break_2 == 'no':
+        if each_candidate_2_split[0] not in qualified_HGT_candidates:
+            qualified_HGT_candidates.append(each_candidate_2_split[0])
+        if each_candidate_2_split[1] not in qualified_HGT_candidates:
+            qualified_HGT_candidates.append(each_candidate_2_split[1])
 
 # export sequences of candidate genes
 candidates_seq_handle = open(pwd_op_candidates_seq, 'w')
 for each_seq in SeqIO.parse('combined.ffn', 'fasta'):
-    if each_seq.id in all_candidates_genes:
+    if each_seq.id in qualified_HGT_candidates:
         SeqIO.write(each_seq, candidates_seq_handle, 'fasta')
 candidates_seq_handle.close()
 
 # remove temporary files
 if keep_temp == 0:
-    sleep(1.5)
+    sleep(1)
     print('\nRemove temporary files... ')
     os.remove(pwd_qual_iden_file)
     os.remove(pwd_qual_iden_file_gg)
@@ -1316,9 +1313,9 @@ if keep_temp == 0:
     os.remove(pwd_qual_idens_with_group_sorted)
     os.remove(pwd_subjects_in_one_line)
     os.remove(pwd_gbk_subset_file)
-    os.remove(pwd_op_candidates_only_gene_file_with_direction)
+    os.remove(pwd_op_candidates_only_gene_file_uniq)
     os.remove(pwd_op_candidates_with_group_file)
     os.remove(pwd_op_candidates_only_gene_file)
 
-sleep(1.5)
+sleep(1)
 print('\nAll done!')
