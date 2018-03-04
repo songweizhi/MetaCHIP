@@ -4,7 +4,6 @@ import re
 import glob
 import shutil
 import argparse
-from ConfigParser import SafeConfigParser
 from ete3 import Tree
 from Bio import SeqIO
 from Bio.Seq import Seq
@@ -304,37 +303,81 @@ def plot_species_tree(tree_newick, tree_type, gene_name, tree_file_name, name_li
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('-cfg',
+parser.add_argument('-c',
+                    required=False,
+                    type=int,
+                    default=70,
+                    help='blast coverage cutoff')
+
+parser.add_argument('-l',
+                    required=False,
+                    type=int,
+                    default=200,
+                    help='alignment length cutoff')
+
+parser.add_argument('-i',
+                    required=False,
+                    type=int,
+                    default=90,
+                    help='identity percentile')
+
+parser.add_argument('-b',
+                    required=False,
+                    type=int,
+                    default=1000,
+                    help='the minimal length to be considered as end break')
+
+parser.add_argument('-a',
                     required=True,
-                    help='path to configuration file')
+                    help='Prokka output')
+
+parser.add_argument('-o',
+                    required=True,
+                    help='orthologs folder')
+
+parser.add_argument('-p',
+                    action="store_true",
+                    required=False,
+                    help='plot tree')
+
+parser.add_argument('-m',
+                    required=True,
+                    help='phylo.hmm')
+
+parser.add_argument('-ranger',
+                    required=False,
+                    default='/srv/scratch/z5039045/Softwares/Ranger-DTL/ranger-dtl-U.linux',
+                    help='path to Ranger executable')
+
+parser.add_argument('-hmmsearch',
+                    required=False,
+                    default='/share/apps/hmmer/3.1b2/bin/hmmsearch',
+                    help='path to hmmsearch executable')
+
+parser.add_argument('-mafft',
+                    required=False,
+                    default='/share/apps/mafft/7.310/bin/mafft',
+                    help='path to Mafft executable')
+
+parser.add_argument('-fasttree',
+                    required=False,
+                    default='/share/apps/fasttree/2.1.7/fasttree',
+                    help='path to FastTree executable')
 
 args = vars(parser.parse_args())
-pwd_cfg_file = args['cfg']
-
-# check whether config file exist
-if not os.path.isfile(pwd_cfg_file):
-    print('config file not found')
-    exit()
-
-config = SafeConfigParser()
-config.read(pwd_cfg_file)
-
-grouping_file =              config.get('FILES_AND_PARAMETERS', 'grouping_file')
-cover_cutoff =               config.get('FILES_AND_PARAMETERS', 'cover_cutoff')
-align_len_cutoff =           config.get('FILES_AND_PARAMETERS', 'align_len_cutoff')
-identity_percentile =    int(config.get('FILES_AND_PARAMETERS', 'identity_percentile'))
-ending_match_length =    int(config.get('FILES_AND_PARAMETERS', 'ending_match_length'))
-prokka_output =              config.get('FILES_AND_PARAMETERS', 'prokka_outputs')
-ortholog_group_folder_name = config.get('FILES_AND_PARAMETERS', 'orthologs_folder')
-plot_tree =              int(config.get('FILES_AND_PARAMETERS', 'plot_tree'))
-pwd_phylo_hmm =              config.get('FILES_AND_PARAMETERS', 'phylo_hmm')
-pwd_ranger_exe =             config.get('DEPENDENCIES', 'path_to_ranger_executable')
-pwd_hmmsearch_exe =          config.get('DEPENDENCIES', 'path_to_hmmsearch_executable')
-pwd_mafft_exe =              config.get('DEPENDENCIES', 'path_to_mafft_executable')
-pwd_fasttree_exe =           config.get('DEPENDENCIES', 'path_to_fasttree_executable')
-# pwd_gblocks_exe = config['DEPENDENCIES']['path_to_gblocks_executable']
-# pwd_alignment_filter_script = config['DEPENDENCIES']['path_to_alignment_filter_script']
-# programs_for_HGT_prediction = config['DEPENDENCIES']['programs_for_HGT_prediction'].split(' ')
+grouping_file = 'grouping.txt'
+cover_cutoff = args['c']
+align_len_cutoff = args['l']
+identity_percentile = args['i']
+ending_match_length = args['b']
+prokka_output = args['a']
+ortholog_group_folder_name = args['o']
+plot_tree = args['p']
+pwd_phylo_hmm = args['m']
+pwd_ranger_exe = args['ranger']
+pwd_hmmsearch_exe = args['hmmsearch']
+pwd_mafft_exe = args['mafft']
+pwd_fasttree_exe = args['fasttree']
 
 ############################################### Define folder/file name ################################################
 
@@ -400,7 +443,7 @@ if len(unfound_inputs) > 0:
 candidates_file = open(pwd_candidates_file)
 candidates_list = []
 for match_group in candidates_file:
-    if not match_group.startswith('Recipient'):
+    if not match_group.startswith('Gene_1'):
         match_group_split = match_group.strip().split('\t')[:2]
         candidates_list.append(match_group_split)
 
@@ -412,12 +455,9 @@ clusters = []
 for cluster_o in clusters_original:
     if "\'" in cluster_o:
         cmd_line_name_fna = cluster_o.replace('\'', '\\\'')
-        #cmd_line_name_faa = cmd_line_name_fna.replace('.fna', '.faa')
         cluster_new_fna = cluster_o.replace('\'', '')
-        #cluster_new_faa = cluster_new_fna.replace('.fna', '.faa')
         clusters.append(cluster_new_fna)
         os.system('mv %s/%s %s/%s' % (pwd_ortholog_group_folder, cmd_line_name_fna, pwd_ortholog_group_folder, cluster_new_fna))
-        #os.system('mv %s/%s %s/%s' % (pwd_ortholog_group_folder, cmd_line_name_faa, pwd_ortholog_group_folder, cluster_new_faa))
     else:
         clusters.append(cluster_o)
 
@@ -536,6 +576,7 @@ for each_candidates in candidates_list:
                 gene_member.append(each_g)
             if each_g_genome not in genome_subset:
                 genome_subset.append(each_g_genome)
+
         # get sequences of othorlog group to build gene tree
         seq_file_name_prefix = '___'.join(each_candidates) + '_gene_tree'
         seq_file_name = '%s.seq' % seq_file_name_prefix
@@ -621,6 +662,7 @@ for each_candidates in candidates_list:
                     predicted_transfer = donor_p + '-->' + recipient_p
                     predicted_transfers.append(predicted_transfer)
         candidate_2_predictions_dict[process_name] = predicted_transfers
+
         # get two possible transfer situation
         candidate_split_group = []
         candidate_split_gene = process_name.split('___')
@@ -727,7 +769,7 @@ combined_output_handle.write('Gene_1\tGene_2\tGenome_1_ID\tGenome_2_ID\tIdentity
 
 validated_candidate_list = []
 for match_group in open(pwd_candidates_file):
-    if not match_group.startswith('Recipient'):
+    if not match_group.startswith('Gene_1'):
         match_group_split = match_group.strip().split('\t')
         recipient_gene = match_group_split[0]
         donor_gene = match_group_split[1]

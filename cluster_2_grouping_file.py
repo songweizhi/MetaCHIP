@@ -1,7 +1,13 @@
 import os
-from string import ascii_uppercase
+import argparse
 import itertools
+from string import ascii_uppercase
 
+usage = """
+
+python /srv/scratch/z5039045/Scripts/cluster_2_grouping_file.py -c grouping_out.txt -g grouping.txt
+
+"""
 
 def get_group_index_list():
     def iter_all_strings():
@@ -45,26 +51,36 @@ def cluster_2_grouping_file(cluster_file, grouping_file):
 
         if current_cluster_name == '':
             current_cluster_name = cluster_name
-            grouping_file_handle.write('%s_%s, %s\n' % (group_index_list[group_index_no], n, genome_name))
+            grouping_file_handle.write('%s_%s,%s\n' % (group_index_list[group_index_no], n, genome_name))
             n += 1
         elif current_cluster_name == cluster_name:
-            grouping_file_handle.write('%s_%s, %s\n' % (group_index_list[group_index_no], n, genome_name))
+            grouping_file_handle.write('%s_%s,%s\n' % (group_index_list[group_index_no], n, genome_name))
             n += 1
         elif current_cluster_name != cluster_name:
             current_cluster_name = cluster_name
             group_index_no += 1
             n = 1
-            grouping_file_handle.write('%s_%s, %s\n' % (group_index_list[group_index_no], n, genome_name))
+            grouping_file_handle.write('%s_%s,%s\n' % (group_index_list[group_index_no], n, genome_name))
             n += 1
 
     os.remove(t1)
     os.remove(t1_sorted)
 
 
-os.chdir('/Users/songweizhi/Desktop/tree/phylo')
+parser = argparse.ArgumentParser()
 
-cluster_file = 'out.txt'
-grouping_file = 'grouping.txt'
+parser.add_argument('-c',
+                    required=True,
+                    help='cluster file')
+
+parser.add_argument('-g',
+                    required=True,
+                    help='grouping file')
+
+args = vars(parser.parse_args())
+
+cluster_file = args['c']
+grouping_file = args['g']
 
 cluster_2_grouping_file(cluster_file, grouping_file)
 
