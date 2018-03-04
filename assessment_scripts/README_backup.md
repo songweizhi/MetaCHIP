@@ -15,6 +15,7 @@ Dependencies:
 + [Matplotlib](http://matplotlib.org)
 + [Pillow 3.3.1](https://pypi.python.org/pypi/Pillow/3.3.1)
 + [ReportLab](http://www.reportlab.com)
++ [Gblocks 0.91b](http://molevol.cmima.csic.es/castresana/Gblocks.html)
 + [FastTree 2.1.9](http://www.microbesonline.org/fasttree/)
 + [Ranger-DTL 1.0](http://compbio.mit.edu/ranger-dtl/)
 + [Prokka](http://www.vicbioinformatics.com/software.prokka.shtml)
@@ -22,8 +23,32 @@ Dependencies:
 
 Prepare input files:
 ---
-1.
-1.
+
+1. Configuration file
+
+        [FILES_AND_PARAMETERS]
+        cover_cutoff = 70
+        align_len_cutoff = 200
+        flanking_length = 3000
+        identity_percentile = 90
+        ending_match_length = 1000
+        grouping_file = grouping.txt
+        prokka_outputs = prokka_output
+        run_blastn = 0
+        blast_results = all_vs_all_ffn.tab
+        orthologs_folder = orthologs_folder
+        plot_tree = 1
+        keep_temporary_files = 0
+
+        [DEPENDENCIES]
+        path_to_blastn_executable = blastn
+        path_to_makeblastdb_executable = makeblastdb
+        path_to_mafft_executable = mafft
+        path_to_hmmsearch_executable = hmmsearch
+        path_to_fasttree_executable = fasttree
+        path_to_ranger_executable = ranger-dtl-D.mac
+
+1. Complete/draft genomes (or bins obtained from metagenomics data) in multi-fasta format.
 1. Grouping of all input genomes (Group, Name, Taxonomy id).
     1. The genome name consists 2 parts, which are genus/sample name and strain name/bin number. The 2 parts must be separated by underscore.
     1. Genome group also consists two parts, the group name and genome No. in that group.
@@ -53,8 +78,13 @@ How to run it:
 + MetaCHIP scripts are implemented in python2.
 + All input files need to be placed in working directory!
 
+        # modules need to be loaded first
+        module load python/3.4.3
+        module load blast+/2.6.0
+        module load fasttree/2.1.7
+
         # first:
-        python MetaCHIP.py -g grouping.txt -a prokka_output -n all_vs_all_blast.tab
+        python MetaCHIP.py -cfg config.txt
         # then:
         python Explicit_Tree.py -cfg config.txt
 
