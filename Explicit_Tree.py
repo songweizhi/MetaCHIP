@@ -9,7 +9,7 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.Alphabet import IUPAC
 from Bio.SeqRecord import SeqRecord
-
+from datetime import datetime
 
 # to-do
 # what if hiden files are more than one (section: get species tree for all input genomes)
@@ -116,11 +116,13 @@ def get_species_tree_alignment(tmp_folder, path_to_prokka, path_to_hmm, pwd_hmms
 
 def get_species_tree_newick(tmp_folder, each_subset, pwd_fasttree_exe, tree_folder, tree_name):
     # concatenating the single alignments
+    #print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' concatenating the single alignments')
     concatAlignment = {}
     for element in each_subset:
         concatAlignment[element] = ''
 
     # Reading all single alignment files and append them to the concatenated alignment
+    #print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Reading all single alignment files and append them to the concatenated alignment')
     files = os.listdir(tmp_folder)
     fastaFiles = [i for i in files if i.endswith('.fasta')]
     for f in fastaFiles:
@@ -139,6 +141,7 @@ def get_species_tree_newick(tmp_folder, each_subset, pwd_fasttree_exe, tree_fold
                 concatAlignment[element] += '-' * alignmentLength
 
     # writing alignment to file
+    #print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' writing alignment to file')
     pwd_alignment_file = '%s/%s.aln' % (tree_folder, tree_name)
     pwd_newick_file = '%s/%s.newick' % (tree_folder, tree_name)
 
@@ -149,8 +152,8 @@ def get_species_tree_newick(tmp_folder, each_subset, pwd_fasttree_exe, tree_fold
     file_out.close()
 
     # calling fasttree for tree calculation
+    #print('%s calling fasttree for tree calculation' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     os.system('%s -quiet %s > %s' % (pwd_fasttree_exe, pwd_alignment_file, pwd_newick_file))
-
     # Decomment the two following lines if tree is rooted but should be unrooted
     # phyloTree = dendropy.Tree.get(path='phylogenticTree.phy', schema='newick', rooting='force-unrooted')
     # dendropy.Tree.write_to_path(phyloTree, 'phylogenticTree_unrooted.phy', 'newick')
@@ -364,6 +367,12 @@ parser.add_argument('-fasttree',
                     default='/share/apps/fasttree/2.1.7/fasttree',
                     help='path to FastTree executable')
 
+parser.add_argument('-blastp',
+                    required=False,
+                    default='blastp',
+                    help='path to FastTree executable')
+
+
 args = vars(parser.parse_args())
 grouping_file = 'grouping.txt'
 cover_cutoff = args['c']
@@ -378,6 +387,8 @@ pwd_ranger_exe = args['ranger']
 pwd_hmmsearch_exe = args['hmmsearch']
 pwd_mafft_exe = args['mafft']
 pwd_fasttree_exe = args['fasttree']
+pwd_blastp_exe = args['blastp']
+
 
 ############################################### Define folder/file name ################################################
 
@@ -507,7 +518,6 @@ if not os.path.isdir(pwd_op_tree_folder):
         os.mkdir(pwd_tree_plots_folder)
 else:
     shutil.rmtree(pwd_op_tree_folder)
-    shutil.rmtree(pwd_op_tree_folder)
     os.mkdir(pwd_op_tree_folder)
     os.mkdir(pwd_tree_folder)
     if plot_tree == 1:
@@ -529,11 +539,11 @@ else:
 ####################################################### Main Code ######################################################
 
 # get species tree for all input genomes
-print('Building species tree for all input genomes')
+print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Building species tree for all input genomes')
 get_species_tree_wd = '%s/%s' % (wd, 'get_species_tree_wd')
 
 if (os.path.isdir(get_species_tree_wd)) and (len(os.listdir(get_species_tree_wd)) > 1):
-    print('get_species_tree_wd folder detected, will skip the alignment step')
+    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' get_species_tree_wd folder detected, will skip the alignment step')
 else:
     os.system('rm -r ' + get_species_tree_wd)
     os.mkdir(get_species_tree_wd)
@@ -545,11 +555,11 @@ candidate_2_predictions_dict = {}
 candidate_2_possible_direction_dict = {}
 
 # get gene tree for each orthologous and run Ranger-DTL
-print('Get gene tree for each orthologous and run Ranger-DTL')
+print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Get gene tree for each orthologous and run Ranger-DTL')
 n = 1
 for each_candidates in candidates_list:
     process_name = '___'.join(each_candidates)
-    print("Processing %sth of %s candidates: %s" % (str(n), str(len(candidates_list)), process_name))
+    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + " Processing %sth of %s candidates: %s" % (str(n), str(len(candidates_list)), process_name))
 
     # get ortholog_list for each match pairs
     ortholog_list = [] # ortholog_list == gene_member, need to modify!!!!!
@@ -557,7 +567,7 @@ for each_candidates in candidates_list:
         if (each_candidates[0] in clusters_dict[each]) or (each_candidates[1] in clusters_dict[each]):
             ortholog_list += clusters_dict[each]
     if len(ortholog_list) == 0:
-        print('No orthologes for the current HGT candidates')
+        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' No orthologes for the current HGT candidates')
         candidate_2_predictions_dict[process_name] = []
         candidate_2_possible_direction_dict[process_name] = []
     else:
@@ -577,6 +587,12 @@ for each_candidates in candidates_list:
             if each_g_genome not in genome_subset:
                 genome_subset.append(each_g_genome)
 
+        #print(each_candidates)
+        #print('Gene number: %s' % len(gene_member))
+        #print('Genome number: %s' % len(genome_subset))
+        #print(gene_member)
+        #print(genome_subset)
+
         # get sequences of othorlog group to build gene tree
         seq_file_name_prefix = '___'.join(each_candidates) + '_gene_tree'
         seq_file_name = '%s.seq' % seq_file_name_prefix
@@ -591,14 +607,92 @@ for each_candidates in candidates_list:
                 SeqIO.write(aa_record, output_handle, 'fasta')
         output_handle.close()
 
+        #keep only the best match from each genome
+        # set tree folder as current wd
+        current_wd = os.getcwd()
+        os.chdir(pwd_tree_folder)
+
+        HGT_genome_1 = '_'.join(each_candidates[0].split('_')[:-1])
+        HGT_genome_2 = '_'.join(each_candidates[1].split('_')[:-1])
+        blast_output = '%s___%s_gene_tree_blast.tab' % (each_candidates[0], each_candidates[1])
+        blast_output_sorted = '%s___%s_gene_tree_blast_sorted.tab' % (each_candidates[0], each_candidates[1])
+
+        # get the sequence of HGTs
+        gene_tree_seq = '%s___%s_gene_tree.seq' % (each_candidates[0], each_candidates[1])
+        gene_tree_seq_uniq = '%s___%s_gene_tree_uniq.seq' % (each_candidates[0], each_candidates[1])
+        self_seq = '%s___%s_gene_tree_selfseq.seq' % (each_candidates[0], each_candidates[1])
+        non_self_seq = '%s___%s_gene_tree_nonselfseq.seq' % (each_candidates[0], each_candidates[1])
+        self_seq_handle = open(self_seq, 'w')
+        non_self_seq_handle = open(non_self_seq, 'w')
+        for each_seq in SeqIO.parse(gene_tree_seq, 'fasta'):
+            each_seq_genome_id = '_'.join(each_seq.id.split('_')[:-1])
+            if each_seq.id in each_candidates:
+                SeqIO.write(each_seq, self_seq_handle, 'fasta')
+            elif (each_seq_genome_id != HGT_genome_1) and (each_seq_genome_id != HGT_genome_2):
+                SeqIO.write(each_seq, non_self_seq_handle, 'fasta')
+        self_seq_handle.close()
+        non_self_seq_handle.close()
+
+        # run blast
+        os.system('%s -query %s -subject %s -outfmt 6 -out %s' % (pwd_blastp_exe, self_seq, non_self_seq, blast_output))
+        os.system('cat %s | sort > %s' % (blast_output, blast_output_sorted))
+
+        # get best match from each genome
+        current_query_subject_genome = ''
+        current_bit_score = 0
+        current_best_match = ''
+        best_match_list = []
+        for each_hit in open(blast_output_sorted):
+            each_hit_split = each_hit.strip().split('\t')
+            query = each_hit_split[0]
+            subject = each_hit_split[1]
+            subject_genome = '_'.join(subject.split('_')[:-1])
+            query_subject_genome = '%s___%s' % (query, subject_genome)
+            bit_score = float(each_hit_split[11])
+            if current_query_subject_genome == '':
+                current_query_subject_genome = query_subject_genome
+                current_bit_score = bit_score
+                current_best_match = subject
+            elif current_query_subject_genome == query_subject_genome:
+                if bit_score > current_bit_score:
+                    current_bit_score = bit_score
+                    current_best_match = subject
+            elif current_query_subject_genome != query_subject_genome:
+                best_match_list.append(current_best_match)
+                current_query_subject_genome = query_subject_genome
+                current_bit_score = bit_score
+                current_best_match = subject
+        best_match_list.append(current_best_match)
+
+        # export sequences
+        gene_tree_seq_all = best_match_list + each_candidates
+        gene_tree_seq_uniq_handle = open(gene_tree_seq_uniq, 'w')
+        for each_seq2 in SeqIO.parse(gene_tree_seq, 'fasta'):
+            if each_seq2.id in gene_tree_seq_all:
+                SeqIO.write(each_seq2, gene_tree_seq_uniq_handle, 'fasta')
+        gene_tree_seq_uniq_handle.close()
+
+        # remove temp files
+        os.remove(self_seq)
+        os.remove(non_self_seq)
+        os.remove(blast_output)
+        os.remove(blast_output_sorted)
+        os.remove(pwd_seq_file)
+
+        # forward back to previous wd
+        os.chdir(current_wd)
 
 ############################################ get gene tree and species tree ############################################
 
         # run mafft
+        #print(os.getcwd())
+        #print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Running mafft for gene tree')
+        pwd_seq_file_uniq = '%s/%s' % (pwd_tree_folder, gene_tree_seq_uniq)
         pwd_seq_file_1st_aln = '%s/%s.aln' % (pwd_tree_folder, seq_file_name_prefix)
-        os.system('%s --quiet --maxiterate 1000 --globalpair %s > %s'% (pwd_mafft_exe, pwd_seq_file, pwd_seq_file_1st_aln))
+        os.system('%s --quiet --maxiterate 1000 --globalpair %s > %s'% (pwd_mafft_exe, pwd_seq_file_uniq, pwd_seq_file_1st_aln))
 
         # run fasttree
+        #print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Running fasttree for gene tree')
         pwd_gene_tree_newick = '%s/%s.newick' % (pwd_tree_folder, seq_file_name_prefix)
         os.system('%s -quiet %s > %s' % (pwd_fasttree_exe, pwd_seq_file_1st_aln, pwd_gene_tree_newick))
 
@@ -607,6 +701,7 @@ for each_candidates in candidates_list:
             plot_gene_tree(pwd_gene_tree_newick, 'Gene Tree', process_name, process_name + '_gene_tree', each_candidates, pwd_tree_folder)
 
         # get species tree subset
+        #print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' extracting species subset')
         species_tree_file_name = '___'.join(each_candidates) + '_species_tree'
         get_species_tree_newick(get_species_tree_wd, genome_subset, pwd_fasttree_exe, pwd_tree_folder, species_tree_file_name)
 
@@ -647,6 +742,7 @@ for each_candidates in candidates_list:
         # run Ranger-DTL
         ranger_parameters = '-q -D 2 -T 3 -L 1'
         ranger_cmd = '%s %s -i %s -o %s' % (pwd_ranger_exe, ranger_parameters, pwd_ranger_inputs, pwd_ranger_outputs)
+        #print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + 'Running ranger')
         os.system(ranger_cmd)
 
         # parse prediction result
@@ -806,4 +902,5 @@ for each_candidate in SeqIO.parse(pwd_candidates_seq_file, 'fasta'):
 combined_output_validated_fasta_handle.close()
 
 
-print('\nAll done!')
+print('\nAll done for Tree approach!')
+

@@ -8,7 +8,7 @@ from string import ascii_uppercase
 
 usage = """
 
-python /srv/scratch/z5039045/Scripts/cluster_2_grouping_file.py -t species_tree.newick -c grouping_out.txt -g grouping.txt
+python /srv/scratch/z5039045/Scripts/cluster_to_grouping_file.py -t species_tree.newick -c grouping_out.txt -g grouping.txt
 
 """
 

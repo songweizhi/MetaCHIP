@@ -20,6 +20,7 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 from scipy.stats import gaussian_kde
 from string import ascii_uppercase
+from datetime import datetime
 
 
 # To-do list
@@ -1005,7 +1006,7 @@ blast_results = args['n']
 
 ############################################### Define folder/file name ################################################
 
-print('Define folder/file names and create output folder')
+print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Define folder/file names and create output folder')
 op_folder = 'output_ip%s_al%sbp_c%s_e%sbp' % (str(identity_percentile), str(align_len_cutoff), str(cover_cutoff), str(ending_match_length))
 wd = os.getcwd()
 
@@ -1022,7 +1023,8 @@ op_candidates_with_group_file_name =                'HGT_candidates_with_group.t
 op_candidates_only_gene_file_name =                 'HGT_candidates_only_id.txt'
 op_candidates_only_gene_file_name_uniq =            'HGT_candidates_uniq.txt'
 op_candidates_only_gene_uniq_end_break =            'HGT_candidates.txt'
-op_candidates_seq =                                 'HGT_candidates.fasta'
+op_candidates_seq_nc =                              'HGT_candidates_nc.fasta'
+op_candidates_seq_aa =                              'HGT_candidates_aa.fasta'
 gbk_subset_file =                                   'combined_subset.gbk'
 op_act_folder_name =                                'Flanking_regions'
 
@@ -1040,7 +1042,8 @@ pwd_op_candidates_with_group_file =                 '%s/%s/%s'    % (wd, op_fold
 pwd_op_candidates_only_gene_file =                  '%s/%s/%s'    % (wd, op_folder, op_candidates_only_gene_file_name)
 pwd_op_candidates_only_gene_file_uniq =             '%s/%s/%s'    % (wd, op_folder, op_candidates_only_gene_file_name_uniq)
 pwd_op_cans_only_gene_uniq_end_break =              '%s/%s/%s'    % (wd, op_folder, op_candidates_only_gene_uniq_end_break)
-pwd_op_candidates_seq =                             '%s/%s/%s'    % (wd, op_folder, op_candidates_seq)
+pwd_op_candidates_seq_nc =                          '%s/%s/%s'    % (wd, op_folder, op_candidates_seq_nc)
+pwd_op_candidates_seq_aa =                          '%s/%s/%s'    % (wd, op_folder, op_candidates_seq_aa)
 pwd_gbk_subset_file =                               '%s/%s/%s'    % (wd, op_folder, gbk_subset_file)
 pwd_op_act_folder =                                 '%s/%s/%s'    % (wd, op_folder, op_act_folder_name)
 pwd_grouping_file =                                 '%s/%s'       % (wd, grouping_file)
@@ -1082,7 +1085,7 @@ if run_blastn == 1:
     makeblastdb_cmd = '%s -in blastdb/combined.ffn -dbtype nucl -parse_seqids' % pwd_makeblastdb_exe
     os.system(makeblastdb_cmd)
     blast_parameters = '-evalue 1e-5 -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen" -task blastn'
-    print('Running blastn, be patient...')
+    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Running blastn, be patient...')
     os.system('%s -query combined.ffn -db blastdb/combined.ffn -out %s %s' % (pwd_blastn_exe, pwd_blast_results, blast_parameters))
 
 # create outputs folder
@@ -1124,7 +1127,7 @@ all_identities_plot_title = 'All_vs_All'
 plot_identity_list(all_identities, 'None', all_identities_plot_title, pwd_iden_distrib_plot_folder)
 
 sleep(1)
-print('\nPlotting identity distributions')
+print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Plotting identity distributions')
 
 # replace query and subject name with query_group-subject_group and sort new file
 qualified_identities = open(pwd_qual_iden_file)
@@ -1182,7 +1185,7 @@ do()
 group_pair_iden_cutoff_file.close()
 
 sleep(1)
-print('\nAnalyzing Blast matches to get HGT candidates')
+print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Analyzing Blast matches to get HGT candidates')
 
 # add group information to qualified identities and sort it according to group.
 qualified_identities_no_cutoff = open(pwd_qual_iden_file)
@@ -1209,7 +1212,7 @@ get_hits_group(pwd_qual_idens_with_group_sorted, pwd_subjects_in_one_line)
 get_candidates(pwd_subjects_in_one_line, pwd_op_candidates_with_group_file, pwd_op_candidates_only_gene_file, group_pair_iden_cutoff_dict)
 
 sleep(1)
-print('Get HGT candidates finished and exported to %s and %s' % (op_candidates_with_group_file_name, op_candidates_only_gene_file_name))
+print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Get HGT candidates finished and exported to %s and %s' % (op_candidates_with_group_file_name, op_candidates_only_gene_file_name))
 
 # remove bidirection and add identity to output file
 candidate2identity_dict = {}
@@ -1226,7 +1229,7 @@ remove_bidirection(pwd_op_candidates_only_gene_file, candidate2identity_dict, pw
 #################################################### Get ACT images ####################################################
 
 sleep(1)
-print('Preparing subset of combined gbk file for ACT plotting')
+print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Preparing subset of combined gbk file for ACT plotting')
 
 # get gene list of all candidates
 all_candidates_genes = []
@@ -1252,7 +1255,7 @@ for record in SeqIO.parse(pwd_gbk_file, 'genbank'):
 gbk_subset.close()
 
 sleep(1)
-print('Get gbk files, run Blast, and plot flanking regions')
+print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Get gbk files, run Blast, and plot flanking regions')
 
 # create folder to hold ACT output
 os.makedirs(pwd_op_act_folder)
@@ -1295,12 +1298,17 @@ for each_candidate_2 in open(pwd_op_cans_only_gene_uniq_end_break):
         if each_candidate_2_split[1] not in qualified_HGT_candidates:
             qualified_HGT_candidates.append(each_candidate_2_split[1])
 
-# export sequences of candidate genes
-candidates_seq_handle = open(pwd_op_candidates_seq, 'w')
+# export nc and aa sequence of candidate HGTs
+candidates_seq_nc_handle = open(pwd_op_candidates_seq_nc, 'w')
+candidates_seq_aa_handle = open(pwd_op_candidates_seq_aa, 'w')
 for each_seq in SeqIO.parse('combined.ffn', 'fasta'):
     if each_seq.id in qualified_HGT_candidates:
-        SeqIO.write(each_seq, candidates_seq_handle, 'fasta')
-candidates_seq_handle.close()
+        SeqIO.write(each_seq, candidates_seq_nc_handle, 'fasta')
+        each_seq_aa = each_seq
+        each_seq_aa.seq = each_seq.seq.translate()
+        SeqIO.write(each_seq_aa, candidates_seq_aa_handle, 'fasta')
+candidates_seq_nc_handle.close()
+candidates_seq_aa_handle.close()
 
 # remove temporary files
 if keep_temp == 0:
@@ -1318,4 +1326,4 @@ if keep_temp == 0:
     os.remove(pwd_op_candidates_only_gene_file)
 
 sleep(1)
-print('\nAll done!')
+print('\nDone for best-match approach! You may also want to run the explicit tree approach for further validation.')

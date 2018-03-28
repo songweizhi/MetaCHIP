@@ -3,8 +3,8 @@ from Bio.Seq import Seq
 from Bio.Alphabet import generic_rna
 
 
-output_protein_handle = open('/Users/songweizhi/Desktop/translate/HGT_candidates_aa.fasta', 'w')
-for each in SeqIO.parse('/Users/songweizhi/Desktop/translate/HGT_candidates.fasta', 'fasta'):
+output_protein_handle = open('/Users/songweizhi/Desktop/HGT_candidates_aa.fasta', 'w')
+for each in SeqIO.parse('/Users/songweizhi/Desktop/HGT_candidates.fasta', 'fasta'):
     print(each.seq)
     aa = each.seq.translate()
     print(aa)
