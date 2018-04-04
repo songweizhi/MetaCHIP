@@ -453,6 +453,7 @@ pwd_tree_plots_folder =          '%s/%s'         % (pwd_op_tree_folder, tree_plo
 pwd_gene_tree_newick_folder =    '%s/%s'         % (pwd_op_tree_folder, gene_tree_newick_folder)
 pwd_species_tree_folder_plot =   '%s/%s'         % (pwd_op_tree_folder, species_tree_folder_plot)
 pwd_species_tree_folder_ranger = '%s/%s'         % (pwd_op_tree_folder, species_tree_folder_ranger)
+pwd_grouping_file_with_id =      '%s/%s/%s'      % (wd, op_folder, 'grouping_with_id.txt')
 
 # check whether file exist
 unfound_inputs = []
@@ -502,14 +503,13 @@ for cluster in clusters:
 
 
 # get bin_record_list and genome name list
-grouping_profile = open(pwd_grouping_file)
 bin_record_list = []
 genome_name_list = []
 name_to_group_number_dict = {}
 name_to_group_number_without_underscore_dict = {}
 bin_group_list = []
 bin_group_without_underscore_list = []
-for each_bin in grouping_profile:
+for each_bin in open(pwd_grouping_file_with_id):
     each_bin_split = each_bin.strip().split(',')
     bin_group = each_bin_split[0]
     bin_group_without_underscore = bin_group.split('_')[0] + bin_group.split('_')[1]

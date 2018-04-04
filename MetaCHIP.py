@@ -3,7 +3,6 @@ import os
 import shutil
 import argparse
 import itertools
-from sys import stdout
 from time import sleep
 from Bio import SeqIO
 from Bio.Seq import Seq
@@ -968,49 +967,45 @@ def remove_bidirection(input_file, candidate2identity_dict, output_file):
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('-c',
+parser.add_argument('-g',
+                    required=True,
+                    help='grouping file')
+
+parser.add_argument('-cov',
                     required=False,
                     type=int,
                     default=70,
                     help='blast coverage cutoff')
 
-parser.add_argument('-l',
+parser.add_argument('-al',
                     required=False,
                     type=int,
                     default=200,
                     help='alignment length cutoff')
 
-parser.add_argument('-f',
+parser.add_argument('-flk',
                     required=False,
                     type=int,
                     default=3000,
                     help='the length of flanking sequences to plot')
 
-parser.add_argument('-i',
+parser.add_argument('-ip',
                     required=False,
                     type=int,
                     default=90,
                     help='identity percentile')
 
-parser.add_argument('-b',
+parser.add_argument('-eb',
                     required=False,
                     type=int,
                     default=1000,
                     help='the minimal length to be considered as end break')
 
-parser.add_argument('-g',
-                    required=True,
-                    help='grouping file')
-
-# parser.add_argument('-a',
-#                     required=True,
-#                     help='Prokka output')
-
 parser.add_argument('-n',
                     required=False,
                     help='all vs all blast results')
 
-parser.add_argument('-t',
+parser.add_argument('-tmp',
                     action="store_true",
                     required=False,
                     help='keep temporary files')
@@ -1033,14 +1028,13 @@ parser.add_argument('-makeblastdb',
 args = vars(parser.parse_args())
 
 grouping_file = args['g']
-cover_cutoff = args['c']
-flanking_length = args['f']
-identity_percentile = args['i']
-align_len_cutoff = args['l']
-ending_match_length = args['b']
+cover_cutoff = args['cov']
+flanking_length = args['flk']
+identity_percentile = args['ip']
+align_len_cutoff = args['al']
+ending_match_length = args['eb']
 run_blastn = args['blast']
-#prokka_output = args['a']
-keep_temp = args['t']
+keep_temp = args['tmp']
 pwd_blastn_exe = args['blastn']
 pwd_makeblastdb_exe = args['makeblastdb']
 blast_results = args['n']
@@ -1068,10 +1062,11 @@ op_candidates_only_gene_file_name_uniq =            'HGT_candidates_uniq.txt'
 op_candidates_only_gene_uniq_end_break =            'HGT_candidates.txt'
 op_candidates_seq_nc =                              'HGT_candidates_nc.fasta'
 op_candidates_seq_aa =                              'HGT_candidates_aa.fasta'
-gbk_subset_file =                                   'combined_subset.gbk'
 op_act_folder_name =                                'Flanking_regions'
+ffn_file =                                          'combined.ffn'
+gbk_file =                                          'combined.gbk'
+gbk_subset_file =                                   'combined_subset.gbk'
 
-#pwd_prokka_output =                                 '%s/%s'       % (wd, prokka_output)
 pwd_iden_distrib_plot_folder =                      '%s/%s/%s'    % (wd, op_folder, iden_distrib_plot_folder)
 pwd_qual_iden_file =                                '%s/%s/%s'    % (wd, op_folder, qual_idens_file)
 pwd_qual_iden_file_gg =                             '%s/%s/%s'    % (wd, op_folder, qual_idens_file_gg)
@@ -1090,7 +1085,8 @@ pwd_op_candidates_seq_aa =                          '%s/%s/%s'    % (wd, op_fold
 pwd_gbk_subset_file =                               '%s/%s/%s'    % (wd, op_folder, gbk_subset_file)
 pwd_op_act_folder =                                 '%s/%s/%s'    % (wd, op_folder, op_act_folder_name)
 pwd_grouping_file_with_id =                         '%s/%s/%s'    % (wd, op_folder, 'grouping_with_id.txt')
-pwd_gbk_file =                                      '%s/%s'       % (wd, 'combined.gbk')
+pwd_ffn_file =                                      '%s/%s'       % (wd, ffn_file)
+pwd_gbk_file =                                      '%s/%s'       % (wd, gbk_file)
 pwd_blast_results = ''
 if run_blastn == 0:
     pwd_blast_results =                             '%s/%s'       % (wd, blast_results)
@@ -1124,12 +1120,12 @@ if run_blastn == 1:
         shutil.rmtree('blastdb')
     os.mkdir('blastdb')
 
-    os.system('cp combined.ffn ./blastdb/')
-    makeblastdb_cmd = '%s -in blastdb/combined.ffn -dbtype nucl -parse_seqids' % pwd_makeblastdb_exe
+    os.system('cp %s ./blastdb/' % pwd_ffn_file)
+    makeblastdb_cmd = '%s -in blastdb/%s -dbtype nucl -parse_seqids' % (ffn_file, pwd_makeblastdb_exe)
     os.system(makeblastdb_cmd)
     blast_parameters = '-evalue 1e-5 -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen" -task blastn'
     print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Running blastn, be patient...')
-    os.system('%s -query combined.ffn -db blastdb/combined.ffn -out %s %s' % (pwd_blastn_exe, pwd_blast_results, blast_parameters))
+    os.system('%s -query %s -db blastdb/%s -out %s %s' % (pwd_blastn_exe, pwd_ffn_file, ffn_file, pwd_blast_results, blast_parameters))
 
 # create outputs folder
 if os.path.isdir(op_folder):
@@ -1343,7 +1339,7 @@ for each_candidate_2 in open(pwd_op_cans_only_gene_uniq_end_break):
 # export nc and aa sequence of candidate HGTs
 candidates_seq_nc_handle = open(pwd_op_candidates_seq_nc, 'w')
 candidates_seq_aa_handle = open(pwd_op_candidates_seq_aa, 'w')
-for each_seq in SeqIO.parse('combined.ffn', 'fasta'):
+for each_seq in SeqIO.parse(pwd_ffn_file, 'fasta'):
     if each_seq.id in qualified_HGT_candidates:
         SeqIO.write(each_seq, candidates_seq_nc_handle, 'fasta')
         each_seq_aa = each_seq
