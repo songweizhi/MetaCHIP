@@ -20,6 +20,7 @@ from datetime import datetime
 # for orthology groups, file name should be the protein name
 # no ''' in input file name
 # plot inter node of species tree
+# multiple threads
 
 
 class BinRecord(object):
@@ -28,6 +29,19 @@ class BinRecord(object):
         self.name = name
         self.group = group
         self.group_without_underscore = group_without_underscore
+
+
+def get_number_of_group(grouping_file):
+
+    group_list = []
+    for each_genome in open(grouping_file):
+        each_genome_split = each_genome.strip().split(',')
+        group_id = each_genome_split[0]
+        if group_id not in group_list:
+            group_list.append(group_id)
+    number_of_group = len(group_list)
+
+    return number_of_group
 
 
 def export_dna_record(gene_seq, gene_id, gene_description, output_handle):
@@ -116,13 +130,11 @@ def get_species_tree_alignment(tmp_folder, path_to_prokka, path_to_hmm, pwd_hmms
 
 def get_species_tree_newick(tmp_folder, each_subset, pwd_fasttree_exe, tree_folder, tree_name):
     # concatenating the single alignments
-    #print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' concatenating the single alignments')
     concatAlignment = {}
     for element in each_subset:
         concatAlignment[element] = ''
 
     # Reading all single alignment files and append them to the concatenated alignment
-    #print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Reading all single alignment files and append them to the concatenated alignment')
     files = os.listdir(tmp_folder)
     fastaFiles = [i for i in files if i.endswith('.fasta')]
     for f in fastaFiles:
@@ -141,7 +153,6 @@ def get_species_tree_newick(tmp_folder, each_subset, pwd_fasttree_exe, tree_fold
                 concatAlignment[element] += '-' * alignmentLength
 
     # writing alignment to file
-    #print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' writing alignment to file')
     pwd_alignment_file = '%s/%s.aln' % (tree_folder, tree_name)
     pwd_newick_file = '%s/%s.newick' % (tree_folder, tree_name)
 
@@ -152,7 +163,6 @@ def get_species_tree_newick(tmp_folder, each_subset, pwd_fasttree_exe, tree_fold
     file_out.close()
 
     # calling fasttree for tree calculation
-    #print('%s calling fasttree for tree calculation' % datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     os.system('%s -quiet %s > %s' % (pwd_fasttree_exe, pwd_alignment_file, pwd_newick_file))
     # Decomment the two following lines if tree is rooted but should be unrooted
     # phyloTree = dendropy.Tree.get(path='phylogenticTree.phy', schema='newick', rooting='force-unrooted')
@@ -306,6 +316,10 @@ def plot_species_tree(tree_newick, tree_type, gene_name, tree_file_name, name_li
 
 parser = argparse.ArgumentParser()
 
+parser.add_argument('-g',
+                    required=True,
+                    help='grouping file')
+
 parser.add_argument('-c',
                     required=False,
                     type=int,
@@ -374,7 +388,7 @@ parser.add_argument('-blastp',
 
 
 args = vars(parser.parse_args())
-grouping_file = 'grouping.txt'
+grouping_file = args['g']
 cover_cutoff = args['c']
 align_len_cutoff = args['l']
 identity_percentile = args['i']
@@ -398,7 +412,8 @@ if plot_tree == 1:
     from PIL import Image, ImageDraw, ImageFont
 
 wd = os.getcwd()
-op_folder = 'output_ip%s_al%sbp_c%s_e%sbp' % (str(identity_percentile), str(align_len_cutoff), str(cover_cutoff), str(ending_match_length))
+pwd_grouping_file = '%s/%s' % (wd, grouping_file)
+op_folder = 'output_ip%s_al%sbp_c%s_e%sbp_g%s' % (str(identity_percentile), str(align_len_cutoff), str(cover_cutoff), str(ending_match_length), get_number_of_group(pwd_grouping_file))
 
 tree_folder =                'tree_folder'
 tree_plots_folder =          'tree_plots'
@@ -408,25 +423,26 @@ species_tree_folder_ranger = 'species_tree'
 ranger_inputs_folder_name =  'Ranger_input'
 ranger_outputs_folder_name = 'Ranger_output'
 candidates_file_name =       'HGT_candidates.txt'
-candidates_seq_file_name =   'HGT_candidates.fasta'
+candidates_seq_file_name =   'HGT_candidates_nc.fasta'
 
 candidates_file_name_ET =    'HGT_candidates_ET.txt'
 candidates_file_name_ET_validated = 'HGT_candidates_ET_validated.txt'
-candidates_file_name_ET_validated_fasta = 'HGT_candidates_ET_validated.fasta'
+candidates_file_name_ET_validated_fasta_nc = 'HGT_candidates_ET_validated_nc.fasta'
+candidates_file_name_ET_validated_fasta_aa = 'HGT_candidates_ET_validated_aa.fasta'
 
 ranger_wd_name =             'Ranger-DTL_wd'
 output_tree_folder_name =    'Explicit_tree_output'
 tree_image_folder_name =     'combined_tree_images'
 ffn_file =                   'combined.ffn'
 pwd_prokka =                     '%s/%s'         % (wd, prokka_output)
-pwd_grouping_file =              '%s/%s'         % (wd, grouping_file)
 pwd_ffn_file =                   '%s/%s'         % (wd, ffn_file)
 pwd_ortholog_group_folder =      '%s/%s'         % (wd, ortholog_group_folder_name)
 pwd_candidates_file =            '%s/%s/%s'      % (wd, op_folder, candidates_file_name)
 pwd_candidates_seq_file =        '%s/%s/%s'      % (wd, op_folder, candidates_seq_file_name)
 pwd_candidates_file_ET =         '%s/%s/%s'      % (wd, op_folder, candidates_file_name_ET)
 pwd_candidates_file_ET_validated ='%s/%s/%s'      % (wd, op_folder, candidates_file_name_ET_validated)
-pwd_candidates_file_ET_validated_fasta ='%s/%s/%s'      % (wd, op_folder, candidates_file_name_ET_validated_fasta)
+pwd_candidates_file_ET_validated_fasta_nc = '%s/%s/%s' % (wd, op_folder, candidates_file_name_ET_validated_fasta_nc)
+pwd_candidates_file_ET_validated_fasta_aa = '%s/%s/%s' % (wd, op_folder, candidates_file_name_ET_validated_fasta_aa)
 pwd_ranger_wd =                  '%s/%s/%s/%s/'  % (wd, op_folder, output_tree_folder_name, ranger_wd_name)
 pwd_ranger_inputs_folder =       '%s/%s'         % (pwd_ranger_wd, ranger_inputs_folder_name)
 pwd_ranger_outputs_folder =      '%s/%s'         % (pwd_ranger_wd, ranger_outputs_folder_name)
@@ -461,7 +477,6 @@ for match_group in candidates_file:
 
 # get all ortholog groups
 clusters_original = [os.path.basename(file_name) for file_name in glob.glob('%s/*.fna' % pwd_ortholog_group_folder)]
-# remove " ' " from ortholog group name
 clusters = []
 for cluster_o in clusters_original:
     if "\'" in cluster_o:
@@ -587,12 +602,6 @@ for each_candidates in candidates_list:
             if each_g_genome not in genome_subset:
                 genome_subset.append(each_g_genome)
 
-        #print(each_candidates)
-        #print('Gene number: %s' % len(gene_member))
-        #print('Genome number: %s' % len(genome_subset))
-        #print(gene_member)
-        #print(genome_subset)
-
         # get sequences of othorlog group to build gene tree
         seq_file_name_prefix = '___'.join(each_candidates) + '_gene_tree'
         seq_file_name = '%s.seq' % seq_file_name_prefix
@@ -607,8 +616,8 @@ for each_candidates in candidates_list:
                 SeqIO.write(aa_record, output_handle, 'fasta')
         output_handle.close()
 
-        #keep only the best match from each genome
-        # set tree folder as current wd
+###################################### keep only the best match from each genome #######################################
+
         current_wd = os.getcwd()
         os.chdir(pwd_tree_folder)
 
@@ -682,31 +691,27 @@ for each_candidates in candidates_list:
         # forward back to previous wd
         os.chdir(current_wd)
 
+########################################################################################################################
+
+
 ############################################ get gene tree and species tree ############################################
 
-        # run mafft
-        #print(os.getcwd())
-        #print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Running mafft for gene tree')
+        # run mafft and fasttree to get gene tree
         pwd_seq_file_uniq = '%s/%s' % (pwd_tree_folder, gene_tree_seq_uniq)
         pwd_seq_file_1st_aln = '%s/%s.aln' % (pwd_tree_folder, seq_file_name_prefix)
-        os.system('%s --quiet --maxiterate 1000 --globalpair %s > %s'% (pwd_mafft_exe, pwd_seq_file_uniq, pwd_seq_file_1st_aln))
-
-        # run fasttree
-        #print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Running fasttree for gene tree')
         pwd_gene_tree_newick = '%s/%s.newick' % (pwd_tree_folder, seq_file_name_prefix)
+        os.system('%s --quiet --maxiterate 1000 --globalpair %s > %s'% (pwd_mafft_exe, pwd_seq_file_uniq, pwd_seq_file_1st_aln))
         os.system('%s -quiet %s > %s' % (pwd_fasttree_exe, pwd_seq_file_1st_aln, pwd_gene_tree_newick))
 
-        # plot gene tree
-        if plot_tree == 1:
-            plot_gene_tree(pwd_gene_tree_newick, 'Gene Tree', process_name, process_name + '_gene_tree', each_candidates, pwd_tree_folder)
-
         # get species tree subset
-        #print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' extracting species subset')
         species_tree_file_name = '___'.join(each_candidates) + '_species_tree'
         get_species_tree_newick(get_species_tree_wd, genome_subset, pwd_fasttree_exe, pwd_tree_folder, species_tree_file_name)
 
-        # plot species tree
+        # plot  tree
         if plot_tree == 1:
+            # plot gene tree
+            plot_gene_tree(pwd_gene_tree_newick, 'Gene Tree', process_name, process_name + '_gene_tree', each_candidates, pwd_tree_folder)
+            # plot species tree
             pwd_species_tree_newick_file = '%s/%s.newick' % (pwd_tree_folder, species_tree_file_name)
             plot_species_tree(pwd_species_tree_newick_file, 'Species Tree', process_name, process_name + '_species_tree', each_candidates_bin_name, pwd_tree_folder)
 
@@ -742,7 +747,6 @@ for each_candidates in candidates_list:
         # run Ranger-DTL
         ranger_parameters = '-q -D 2 -T 3 -L 1'
         ranger_cmd = '%s %s -i %s -o %s' % (pwd_ranger_exe, ranger_parameters, pwd_ranger_inputs, pwd_ranger_outputs)
-        #print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + 'Running ranger')
         os.system(ranger_cmd)
 
         # parse prediction result
@@ -879,28 +883,28 @@ for match_group in open(pwd_candidates_file):
         for each_prediction in candidate_2_predictions_dict[concatenated]:
             if each_prediction in possible_direction:
                 validated_prediction = each_prediction
-
         if (end_break == 'no') and (validated_prediction != 'N/A'):
-
             if recipient_gene not in validated_candidate_list:
                 validated_candidate_list.append(recipient_gene)
             if donor_gene not in validated_candidate_list:
                 validated_candidate_list.append(donor_gene)
-
             combined_output_validated_handle.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\n' % (recipient_gene, donor_gene, recipient_genome_id, donor_genome_id, identity, end_break, validated_prediction))
-
         combined_output_handle.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\n' % (recipient_gene, donor_gene, recipient_genome_id, donor_genome_id, identity, end_break, validated_prediction))
 
 combined_output_handle.close()
 combined_output_validated_handle.close()
 
 # export the sequence of validated candidates
-combined_output_validated_fasta_handle = open(pwd_candidates_file_ET_validated_fasta, 'w')
+combined_output_validated_fasta_nc_handle = open(pwd_candidates_file_ET_validated_fasta_nc, 'w')
+combined_output_validated_fasta_aa_handle = open(pwd_candidates_file_ET_validated_fasta_aa, 'w')
 for each_candidate in SeqIO.parse(pwd_candidates_seq_file, 'fasta'):
     if each_candidate.id in validated_candidate_list:
-        SeqIO.write(each_candidate, combined_output_validated_fasta_handle, 'fasta')
-combined_output_validated_fasta_handle.close()
-
+        each_candidate_aa = each_candidate
+        each_candidate_aa.seq = each_candidate_aa.seq.translate()
+        SeqIO.write(each_candidate, combined_output_validated_fasta_nc_handle, 'fasta')
+        SeqIO.write(each_candidate_aa, combined_output_validated_fasta_aa_handle, 'fasta')
+combined_output_validated_fasta_nc_handle.close()
+combined_output_validated_fasta_aa_handle.close()
 
 print('\nAll done for Tree approach!')
 

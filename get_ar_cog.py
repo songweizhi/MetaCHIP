@@ -1,9 +1,15 @@
 
 # annotation results
-cog_annotation_results = '/Users/songweizhi/Desktop/COG_and_KO/CF_protein-id_cog.txt'
+#cog_annotation_results = '/Users/songweizhi/Desktop/COG_and_KO/CF_protein-id_cog.txt'
 #cog_annotation_results = '/Users/songweizhi/Desktop/COG_and_KO/NorthSea_protein-id_cog.txt'
 #cog_annotation_results = '/Users/songweizhi/Desktop/COG_and_KO/Hospital_protein-id_cog.txt'
 #cog_annotation_results = '/Users/songweizhi/Desktop/COG_and_KO/MetaBAT_protein-id_cog.txt'
+
+
+#cog_annotation_results = '/Users/songweizhi/Desktop/COG_and_KO/CF_ET_protein-id_cog.txt'
+#cog_annotation_results = '/Users/songweizhi/Desktop/COG_and_KO/NorthSea_ET_protein-id_cog.txt'
+#cog_annotation_results = '/Users/songweizhi/Desktop/COG_and_KO/Hospital_ET_protein-id_cog.txt'
+cog_annotation_results = '/Users/songweizhi/Desktop/COG_and_KO/MetaBAT_ET_protein-id_cog.txt'
 
 
 # db files

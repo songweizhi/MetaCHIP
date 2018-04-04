@@ -23,14 +23,24 @@ from string import ascii_uppercase
 from datetime import datetime
 
 
-# To-do list
 # requirement for contig id
 # bin name splitter for direction information
 # check the m0 group for the big differentces
 # if run_blast = 1, there is no need to provide the blast results
-# output folder format
 # endbreak checked twice, remove one
-# add the number of groups to output folder
+
+
+def get_number_of_group(grouping_file):
+
+    group_list = []
+    for each_genome in open(grouping_file):
+        each_genome_split = each_genome.strip().split(',')
+        group_id = each_genome_split[0]
+        if group_id not in group_list:
+            group_list.append(group_id)
+    number_of_group = len(group_list)
+
+    return number_of_group
 
 
 def get_group_index_list():
@@ -47,6 +57,28 @@ def get_group_index_list():
         if s == 'ZZ':
             break
     return group_index_list
+
+
+def index_grouping_file(input_file, output_file):
+
+    output_grouping_with_index = open(output_file, 'w')
+    current_group = ''
+    current_index = 1
+    for each_genome in open(input_file):
+        each_genome_split = each_genome.strip().split(',')
+        group_id = each_genome_split[0]
+        genome_id = each_genome_split[1]
+        if current_group == '':
+            current_group = group_id
+            current_index = 1
+            output_grouping_with_index.write('%s_%s,%s\n' % (group_id, current_index, genome_id))
+        elif current_group == group_id:
+            current_index += 1
+            output_grouping_with_index.write('%s_%s,%s\n' % (group_id, current_index, genome_id))
+        elif current_group != group_id:
+            current_group = group_id
+            current_index = 1
+            output_grouping_with_index.write('%s_%s,%s\n' % (group_id, current_index, genome_id))
 
 
 def cluster_2_grouping_file(cluster_file, grouping_file):
@@ -114,9 +146,9 @@ def get_all_identity_list(blast_results, genome_list, alignment_length_cutoff, c
     counted_match = []
     n = 1
     float("{0:.2f}".format(total_match_number/1000))
-    print('Filtering blast matches with the following criteria: Query name != Subject name, Alignment length >= %sbp and coverage >= %s%s' % (alignment_length_cutoff, coverage_cutoff, '%'))
+    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Filtering blast matches with the following criteria: Query name != Subject name, Alignment length >= %sbp and coverage >= %s%s' % (alignment_length_cutoff, coverage_cutoff, '%'))
     for match in matches:
-        stdout.write('\r%s x 1000 blast matches detected in total, filtering the %s x 1000th' % (float("{0:.2f}".format(total_match_number/1000)), float("{0:.2f}".format(n/1000))))
+        #print('\r%s x 1000 blast matches detected in total, filtering the %s x 1000th' % (float("{0:.2f}".format(total_match_number/1000)), float("{0:.2f}".format(n/1000))))
         match_split = match.strip().split('\t')
         query = match_split[0]
         subject = match_split[1]
@@ -140,9 +172,7 @@ def get_all_identity_list(blast_results, genome_list, alignment_length_cutoff, c
             if (query_bin_name != subject_bin_name) and (align_len >= int(alignment_length_cutoff)) and (coverage_q >= int(coverage_cutoff)) and (coverage_s >= int(coverage_cutoff)):
                 out_temp.write(match)
                 # remove the same match but with swapped query-subject position
-                if (query_name_subject_name in counted_match) or (subject_name_query_name in counted_match):
-                    pass
-                else:
+                if (query_name_subject_name not in counted_match) and (subject_name_query_name not in counted_match):
                     all_identities.append(identity)
                     counted_match.append(query_name_subject_name)
         n += 1
@@ -170,10 +200,10 @@ def do():
             plot_identity_list(current_group_pair_identities, 'None', current_group_pair_name, pwd_iden_distrib_plot_folder)
         else:
             plot_identity_list(current_group_pair_identities, current_group_pair_identity_cut_off, current_group_pair_name, pwd_iden_distrib_plot_folder)
-        stdout.write("\rProcessing %dth group-pair: %s, plotting..." % (ploted_group, current_group_pair_name,))
+        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + " Plotting identity distribution (%dth): %s" % (ploted_group, current_group_pair_name,))
     else:
         unploted_groups.write('%s\t%s\n' % (current_group_pair_name, len(current_group_pair_identities)))
-        stdout.write("\rProcessing %dth group-pair: %s, blast match number < %d, skipped" % (ploted_group, current_group_pair_name, minimum_plot_number))
+        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + " Plotting identity distribution (%dth): %s, blast match number < %d, skipped" % (ploted_group, current_group_pair_name, minimum_plot_number))
 
 
 def get_hits_group(input_file_name, output_file_name):
@@ -285,12 +315,17 @@ def get_candidates(targets_group_file, gene_with_g_file_name, gene_only_name_fil
             # get the number of subjects from self-group and non_self_group
             self_group_subject_list = []
             non_self_group_subject_list = []
+            #print(non_self_group_subject_list)
             for each_subject in subjects_list:
-                each_subject_g = each_subject[0]
+
+                #print(each_subject)
+                #each_subject_g = each_subject[0]
+                each_subject_g = each_subject.split('|')[0].split('_')[0]
                 if each_subject_g == query_g:
                     self_group_subject_list.append(each_subject)
                 else:
                     non_self_group_subject_list.append(each_subject)
+
 
             # if only the self-match was found in self-group, all matched from other groups, if any, will be ignored
             if len(self_group_subject_list) == 0:
@@ -305,8 +340,9 @@ def get_candidates(targets_group_file, gene_with_g_file_name, gene_only_name_fil
                 # get the number the groups
                 non_self_group_subject_list_uniq = []
                 for each_g in non_self_group_subject_list:
-                    if each_g[0] not in non_self_group_subject_list_uniq:
-                        non_self_group_subject_list_uniq.append(each_g[0])
+                    each_g_group = each_g.split('|')[0].split('_')[0]
+                    if each_g_group not in non_self_group_subject_list_uniq:
+                        non_self_group_subject_list_uniq.append(each_g_group)
 
                 # if all non-self-group subjects come from the same group
                 if len(non_self_group_subject_list_uniq) == 1:
@@ -317,7 +353,7 @@ def get_candidates(targets_group_file, gene_with_g_file_name, gene_only_name_fil
                     sg_subject_number = 0
                     for each_sg_subject in self_group_subject_list:
                         each_sg_subject_iden = float(each_sg_subject.split('|')[2])
-                        if each_sg_subject_iden > sg_maximum :
+                        if each_sg_subject_iden > sg_maximum:
                             sg_maximum = each_sg_subject_iden
                         sg_sum += each_sg_subject_iden
                         sg_subject_number += 1
@@ -373,8 +409,12 @@ def get_candidates(targets_group_file, gene_with_g_file_name, gene_only_name_fil
                         nsg_sum = 0
                         nsg_subject_number = 0
                         for each_nsg_subject in non_self_group_subject_list:
+                            #print(non_self_group_subject_list)
                             each_nsg_subject_iden = float(each_nsg_subject.split('|')[2])
-                            if each_nsg_subject[0] == each_nsg:
+                            #print(each_nsg_subject)
+                            #print(each_nsg_subject[0])
+                            each_nsg_subject_group = each_nsg_subject.split('|')[0].split('_')[0]
+                            if each_nsg_subject_group == each_nsg:
                                 if each_nsg_subject_iden > nsg_maximum:
                                     nsg_maximum = each_nsg_subject_iden
                                     nsg_maximum_gene = each_nsg_subject
@@ -409,6 +449,7 @@ def get_candidates(targets_group_file, gene_with_g_file_name, gene_only_name_fil
                         if candidate_iden >= qg_sg_iden_cutoff:
                             output_1.write('%s\t%s\n' % (query, nsg_maximum_gene_name_dict[maximum_average_g]))
                             output_2.write('%s\t%s\n' % (query_gene_name, nsg_maximum_gene_name_dict[maximum_average_g].split('|')[1]))
+
     output_1.close()
     output_2.close()
 
@@ -723,7 +764,7 @@ def get_gbk_blast_act(candidates_file, gbk_file, flanking_length, end_seq_length
     for match in open(candidates_file):
         genes = match.strip().split('\t')[:-1]
         folder_name = '___'.join(genes)
-        stdout.write("\rProcessing %dth of %d HGT candidates: %s" % (n, total, folder_name))
+        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + " Plotting flanking region (%d/%d): %s" % (n, total, folder_name))
         os.mkdir('%s/%s' % (path_to_output_act_folder, folder_name))
 
         dict_value_list = []
@@ -959,11 +1000,11 @@ parser.add_argument('-b',
 
 parser.add_argument('-g',
                     required=True,
-                    help='clustering results')
+                    help='grouping file')
 
-parser.add_argument('-a',
-                    required=True,
-                    help='Prokka output')
+# parser.add_argument('-a',
+#                     required=True,
+#                     help='Prokka output')
 
 parser.add_argument('-n',
                     required=False,
@@ -998,7 +1039,7 @@ identity_percentile = args['i']
 align_len_cutoff = args['l']
 ending_match_length = args['b']
 run_blastn = args['blast']
-prokka_output = args['a']
+#prokka_output = args['a']
 keep_temp = args['t']
 pwd_blastn_exe = args['blastn']
 pwd_makeblastdb_exe = args['makeblastdb']
@@ -1007,8 +1048,10 @@ blast_results = args['n']
 ############################################### Define folder/file name ################################################
 
 print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Define folder/file names and create output folder')
-op_folder = 'output_ip%s_al%sbp_c%s_e%sbp' % (str(identity_percentile), str(align_len_cutoff), str(cover_cutoff), str(ending_match_length))
+
 wd = os.getcwd()
+pwd_grouping_file = '%s/%s' % (wd, grouping_file)
+op_folder = 'output_ip%s_al%sbp_c%s_e%sbp_g%s' % (str(identity_percentile), str(align_len_cutoff), str(cover_cutoff), str(ending_match_length), get_number_of_group(pwd_grouping_file))
 
 iden_distrib_plot_folder =                          'identity_distribution'
 qual_idens_file =                                   'qualified_identities.txt'
@@ -1028,7 +1071,7 @@ op_candidates_seq_aa =                              'HGT_candidates_aa.fasta'
 gbk_subset_file =                                   'combined_subset.gbk'
 op_act_folder_name =                                'Flanking_regions'
 
-pwd_prokka_output =                                 '%s/%s'       % (wd, prokka_output)
+#pwd_prokka_output =                                 '%s/%s'       % (wd, prokka_output)
 pwd_iden_distrib_plot_folder =                      '%s/%s/%s'    % (wd, op_folder, iden_distrib_plot_folder)
 pwd_qual_iden_file =                                '%s/%s/%s'    % (wd, op_folder, qual_idens_file)
 pwd_qual_iden_file_gg =                             '%s/%s/%s'    % (wd, op_folder, qual_idens_file_gg)
@@ -1046,7 +1089,7 @@ pwd_op_candidates_seq_nc =                          '%s/%s/%s'    % (wd, op_fold
 pwd_op_candidates_seq_aa =                          '%s/%s/%s'    % (wd, op_folder, op_candidates_seq_aa)
 pwd_gbk_subset_file =                               '%s/%s/%s'    % (wd, op_folder, gbk_subset_file)
 pwd_op_act_folder =                                 '%s/%s/%s'    % (wd, op_folder, op_act_folder_name)
-pwd_grouping_file =                                 '%s/%s'       % (wd, grouping_file)
+pwd_grouping_file_with_id =                         '%s/%s/%s'    % (wd, op_folder, 'grouping_with_id.txt')
 pwd_gbk_file =                                      '%s/%s'       % (wd, 'combined.gbk')
 pwd_blast_results = ''
 if run_blastn == 0:
@@ -1055,25 +1098,25 @@ if run_blastn == 1:
     pwd_blast_results =                             '%s/%s'       % (wd, 'all_vs_all_ffn.tab')
 
 # check whether file exist
-unfound_inputs = []
-for each_input in [pwd_grouping_file, pwd_prokka_output]:
-    if (not os.path.isfile(each_input)) and (not os.path.isdir(each_input)):
-        unfound_inputs.append(each_input)
-
-if run_blastn == 0:
-    if not os.path.isfile(pwd_blast_results):
-        unfound_inputs.append(pwd_blast_results)
-
-if len(unfound_inputs) > 0:
-    for each_unfound in unfound_inputs:
-        print('%s not found' % each_unfound)
-    exit()
+# unfound_inputs = []
+# for each_input in [pwd_grouping_file, pwd_prokka_output]:
+#     if (not os.path.isfile(each_input)) and (not os.path.isdir(each_input)):
+#         unfound_inputs.append(each_input)
+#
+# if run_blastn == 0:
+#     if not os.path.isfile(pwd_blast_results):
+#         unfound_inputs.append(pwd_blast_results)
+#
+# if len(unfound_inputs) > 0:
+#     for each_unfound in unfound_inputs:
+#         print('%s not found' % each_unfound)
+#     exit()
 
 ########################################################################################################################
 
-# Prepare input files
-os.system('cat %s/*/*.gbk > %s' % (pwd_prokka_output, pwd_gbk_file)) # get combined gbk file
-os.system('cat %s/%s/*/*.ffn > combined.ffn' % (wd, prokka_output)) # get combined ffn file
+# # Prepare input files
+# os.system('cat %s/*/*.gbk > %s' % (pwd_prokka_output, pwd_gbk_file)) # get combined gbk file
+# os.system('cat %s/%s/*/*.ffn > combined.ffn' % (wd, prokka_output)) # get combined ffn file
 
 # run blastn if specified
 if run_blastn == 1:
@@ -1097,12 +1140,16 @@ if os.path.isdir(op_folder):
 else:
     os.makedirs(op_folder)
 
+
+# index grouping file
+index_grouping_file(pwd_grouping_file, pwd_grouping_file_with_id)
+
+
 # create genome_group_dict and genome_list
-grouping = open(pwd_grouping_file)
 genome_name_list = []
 name_to_group_number_dict = {}
 name_to_group_dict = {}
-for each_bin in grouping:
+for each_bin in open(pwd_grouping_file_with_id):
     each_bin_split = each_bin.strip().split(',')
     bin_name = each_bin_split[1]
     bin_group_number = each_bin_split[0]
@@ -1114,7 +1161,7 @@ for each_bin in grouping:
 ####################################################### Main code ######################################################
 
 sleep(1)
-print('Plotting overall identity distribution')
+print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Plotting overall identity distribution')
 
 # get qualified identities after alignment length and coverage filter (self-match excluded)
 all_identities = get_all_identity_list(pwd_blast_results, genome_name_list, align_len_cutoff, cover_cutoff, pwd_qual_iden_file)
@@ -1126,8 +1173,6 @@ os.makedirs(pwd_iden_distrib_plot_folder)
 all_identities_plot_title = 'All_vs_All'
 plot_identity_list(all_identities, 'None', all_identities_plot_title, pwd_iden_distrib_plot_folder)
 
-sleep(1)
-print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Plotting identity distributions')
 
 # replace query and subject name with query_group-subject_group and sort new file
 qualified_identities = open(pwd_qual_iden_file)
@@ -1202,6 +1247,7 @@ for qualified_identity in qualified_identities_no_cutoff:
     file_write = '%s|%s\t%s|%s|%s\n' % (name_to_group_number_dict[query_bin], query, name_to_group_number_dict[subject_bin], subject, str(identity))
     qualified_matches_with_group.write(file_write)
 qualified_matches_with_group.close()
+
 # sort qualified_matches_with_group
 os.system('cat %s | sort > %s' % (pwd_qual_idens_with_group, pwd_qual_idens_with_group_sorted))
 
@@ -1210,9 +1256,6 @@ get_hits_group(pwd_qual_idens_with_group_sorted, pwd_subjects_in_one_line)
 
 # get HGT candidates
 get_candidates(pwd_subjects_in_one_line, pwd_op_candidates_with_group_file, pwd_op_candidates_only_gene_file, group_pair_iden_cutoff_dict)
-
-sleep(1)
-print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Get HGT candidates finished and exported to %s and %s' % (op_candidates_with_group_file_name, op_candidates_only_gene_file_name))
 
 # remove bidirection and add identity to output file
 candidate2identity_dict = {}
@@ -1229,7 +1272,7 @@ remove_bidirection(pwd_op_candidates_only_gene_file, candidate2identity_dict, pw
 #################################################### Get ACT images ####################################################
 
 sleep(1)
-print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Preparing subset of combined gbk file for ACT plotting')
+print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Preparing subset of combined.gbk file for flanking region plotting')
 
 # get gene list of all candidates
 all_candidates_genes = []
@@ -1242,7 +1285,6 @@ for match in open(pwd_op_candidates_only_gene_file):
 # get subset of combined gbk file
 gbk_subset = open(pwd_gbk_subset_file, 'w')
 records_recorded = []
-
 for record in SeqIO.parse(pwd_gbk_file, 'genbank'):
     record_id = record.id
     for gene_f in record.features:
@@ -1254,8 +1296,6 @@ for record in SeqIO.parse(pwd_gbk_file, 'genbank'):
                         records_recorded.append(record_id)
 gbk_subset.close()
 
-sleep(1)
-print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Get gbk files, run Blast, and plot flanking regions')
 
 # create folder to hold ACT output
 os.makedirs(pwd_op_act_folder)
@@ -1267,24 +1307,26 @@ candidates_2_endbreak_dict = get_gbk_blast_act(pwd_op_candidates_only_gene_file_
 
 # add end break information to output file
 output_file = open(pwd_op_cans_only_gene_uniq_end_break, 'w')
-output_file.write('Gene_1\tGene_2\tGenome_1_ID\tGenome_2_ID\tIdentity\tEnd_break\n')
+output_file.write('Gene_1\tGene_2\tGene_1_group\tGene_2_group\tIdentity(nc)\tEnd_break\n')
 all_candidate_genes = []
 for each_candidate in open(pwd_op_candidates_only_gene_file_uniq):
     each_candidate_split = each_candidate.strip().split('\t')
     recipient_gene = each_candidate_split[0]
     recipient_genome = '_'.join(recipient_gene.split('_')[:-1])
     recipient_genome_group_id = name_to_group_number_dict[recipient_genome]
+    recipient_genome_group = recipient_genome_group_id.split('_')[0]
     donor_gene = each_candidate_split[1]
     donor_genome = '_'.join(donor_gene.split('_')[:-1])
     donor_genome_group_id = name_to_group_number_dict[donor_genome]
+    donor_genome_group = donor_genome_group_id.split('_')[0]
     identity = each_candidate_split[2]
     concatenated = '%s___%s' % (recipient_gene, donor_gene)
     end_break = candidates_2_endbreak_dict[concatenated]
     # write to output files
     if end_break == 1:
-        output_file.write('%s\t%s\t%s\t%s\t%s\t%s\n' % (recipient_gene, donor_gene, recipient_genome_group_id, donor_genome_group_id, identity, 'yes' ))
+        output_file.write('%s\t%s\t%s\t%s\t%s\t%s\n' % (recipient_gene, donor_gene, recipient_genome_group, donor_genome_group, identity, 'yes' ))
     else:
-        output_file.write('%s\t%s\t%s\t%s\t%s\t%s\n' % (recipient_gene, donor_gene, recipient_genome_group_id, donor_genome_group_id, identity, 'no'))
+        output_file.write('%s\t%s\t%s\t%s\t%s\t%s\n' % (recipient_gene, donor_gene, recipient_genome_group, donor_genome_group, identity, 'no'))
 output_file.close()
 
 # get qualified HGT candidates
@@ -1313,7 +1355,7 @@ candidates_seq_aa_handle.close()
 # remove temporary files
 if keep_temp == 0:
     sleep(1)
-    print('\nRemove temporary files... ')
+    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Remove temporary files... ')
     os.remove(pwd_qual_iden_file)
     os.remove(pwd_qual_iden_file_gg)
     os.remove(pwd_qual_iden_file_gg_sorted)
@@ -1326,4 +1368,5 @@ if keep_temp == 0:
     os.remove(pwd_op_candidates_only_gene_file)
 
 sleep(1)
-print('\nDone for best-match approach! You may also want to run the explicit tree approach for further validation.')
+print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Done for Best-match approach prediction!')
+print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' You may want to run the Explicit tree approach for further validation.')
