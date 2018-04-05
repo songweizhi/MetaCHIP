@@ -910,10 +910,7 @@ def get_gbk_blast_act(candidates_file, gbk_file, flanking_length, end_seq_length
         os.chdir(path_to_output_act_folder)
 
         if end_break == True:
-            os.system('mv %s.eps 0_plots_with_end_break/' % folder_name)
-            os.chdir(current_wd)
-        else:
-            os.system('mv %s.eps 0_plots/' % folder_name)
+            os.system('mv %s.eps 0_end_break/' % folder_name)
             os.chdir(current_wd)
 
         # remove temporary folder
@@ -971,11 +968,23 @@ parser.add_argument('-g',
                     required=True,
                     help='grouping file')
 
+parser.add_argument('-ffn',
+                    required=True,
+                    help='combined ffn file')
+
+parser.add_argument('-gbk',
+                    required=True,
+                    help='combined gbk file')
+
+parser.add_argument('-blastall',
+                    required=True,
+                    help='all vs all blast results')
+
 parser.add_argument('-cov',
                     required=False,
                     type=int,
                     default=70,
-                    help='blast coverage cutoff')
+                    help='coverage cutoff')
 
 parser.add_argument('-al',
                     required=False,
@@ -1001,10 +1010,6 @@ parser.add_argument('-eb',
                     default=1000,
                     help='the minimal length to be considered as end break')
 
-parser.add_argument('-n',
-                    required=False,
-                    help='all vs all blast results')
-
 parser.add_argument('-tmp',
                     action="store_true",
                     required=False,
@@ -1028,6 +1033,9 @@ parser.add_argument('-makeblastdb',
 args = vars(parser.parse_args())
 
 grouping_file = args['g']
+ffn_file = args['ffn']
+gbk_file = args['gbk']
+blast_results = args['blastall']
 cover_cutoff = args['cov']
 flanking_length = args['flk']
 identity_percentile = args['ip']
@@ -1037,7 +1045,7 @@ run_blastn = args['blast']
 keep_temp = args['tmp']
 pwd_blastn_exe = args['blastn']
 pwd_makeblastdb_exe = args['makeblastdb']
-blast_results = args['n']
+
 
 ############################################### Define folder/file name ################################################
 
@@ -1063,8 +1071,6 @@ op_candidates_only_gene_uniq_end_break =            'HGT_candidates.txt'
 op_candidates_seq_nc =                              'HGT_candidates_nc.fasta'
 op_candidates_seq_aa =                              'HGT_candidates_aa.fasta'
 op_act_folder_name =                                'Flanking_regions'
-ffn_file =                                          'combined.ffn'
-gbk_file =                                          'combined.gbk'
 gbk_subset_file =                                   'combined_subset.gbk'
 
 pwd_iden_distrib_plot_folder =                      '%s/%s/%s'    % (wd, op_folder, iden_distrib_plot_folder)
@@ -1157,7 +1163,7 @@ for each_bin in open(pwd_grouping_file_with_id):
 ####################################################### Main code ######################################################
 
 sleep(1)
-print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Plotting overall identity distribution')
+print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Plotting identity distribution between each pair of groups')
 
 # get qualified identities after alignment length and coverage filter (self-match excluded)
 all_identities = get_all_identity_list(pwd_blast_results, genome_name_list, align_len_cutoff, cover_cutoff, pwd_qual_iden_file)
@@ -1295,8 +1301,7 @@ gbk_subset.close()
 
 # create folder to hold ACT output
 os.makedirs(pwd_op_act_folder)
-os.makedirs('%s/0_plots_with_end_break' % pwd_op_act_folder)
-os.makedirs('%s/0_plots' % pwd_op_act_folder)
+os.makedirs('%s/0_end_break' % pwd_op_act_folder)
 
 # plot flanking regions
 candidates_2_endbreak_dict = get_gbk_blast_act(pwd_op_candidates_only_gene_file_uniq, pwd_gbk_subset_file, flanking_length, ending_match_length, name_to_group_number_dict, pwd_op_act_folder, pwd_blastn_exe, keep_temp)
@@ -1337,6 +1342,7 @@ for each_candidate_2 in open(pwd_op_cans_only_gene_uniq_end_break):
             qualified_HGT_candidates.append(each_candidate_2_split[1])
 
 # export nc and aa sequence of candidate HGTs
+print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Extracting nc and aa sequences for predicted HGTs')
 candidates_seq_nc_handle = open(pwd_op_candidates_seq_nc, 'w')
 candidates_seq_aa_handle = open(pwd_op_candidates_seq_aa, 'w')
 for each_seq in SeqIO.parse(pwd_ffn_file, 'fasta'):
@@ -1351,7 +1357,7 @@ candidates_seq_aa_handle.close()
 # remove temporary files
 if keep_temp == 0:
     sleep(1)
-    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Remove temporary files... ')
+    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Deleting temporary files')
     os.remove(pwd_qual_iden_file)
     os.remove(pwd_qual_iden_file_gg)
     os.remove(pwd_qual_iden_file_gg_sorted)

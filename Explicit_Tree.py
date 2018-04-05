@@ -320,25 +320,25 @@ parser.add_argument('-g',
                     required=True,
                     help='grouping file')
 
-parser.add_argument('-c',
+parser.add_argument('-cov',
                     required=False,
                     type=int,
                     default=70,
-                    help='blast coverage cutoff')
+                    help='coverage cutoff')
 
-parser.add_argument('-l',
+parser.add_argument('-al',
                     required=False,
                     type=int,
                     default=200,
                     help='alignment length cutoff')
 
-parser.add_argument('-i',
+parser.add_argument('-ip',
                     required=False,
                     type=int,
                     default=90,
                     help='identity percentile')
 
-parser.add_argument('-b',
+parser.add_argument('-eb',
                     required=False,
                     type=int,
                     default=1000,
@@ -386,13 +386,12 @@ parser.add_argument('-blastp',
                     default='blastp',
                     help='path to FastTree executable')
 
-
 args = vars(parser.parse_args())
 grouping_file = args['g']
-cover_cutoff = args['c']
-align_len_cutoff = args['l']
-identity_percentile = args['i']
-ending_match_length = args['b']
+cover_cutoff = args['cov']
+align_len_cutoff = args['al']
+identity_percentile = args['ip']
+ending_match_length = args['eb']
 prokka_output = args['a']
 ortholog_group_folder_name = args['o']
 plot_tree = args['p']
@@ -415,25 +414,24 @@ wd = os.getcwd()
 pwd_grouping_file = '%s/%s' % (wd, grouping_file)
 op_folder = 'output_ip%s_al%sbp_c%s_e%sbp_g%s' % (str(identity_percentile), str(align_len_cutoff), str(cover_cutoff), str(ending_match_length), get_number_of_group(pwd_grouping_file))
 
-tree_folder =                'tree_folder'
-tree_plots_folder =          'tree_plots'
-gene_tree_newick_folder =    'gene_tree_newick'
-species_tree_folder_plot =   'species_tree_plot'
-species_tree_folder_ranger = 'species_tree'
-ranger_inputs_folder_name =  'Ranger_input'
-ranger_outputs_folder_name = 'Ranger_output'
-candidates_file_name =       'HGT_candidates.txt'
-candidates_seq_file_name =   'HGT_candidates_nc.fasta'
-
-candidates_file_name_ET =    'HGT_candidates_ET.txt'
-candidates_file_name_ET_validated = 'HGT_candidates_ET_validated.txt'
+tree_folder =                                'tree_folder'
+tree_plots_folder =                          'tree_plots'
+gene_tree_newick_folder =                    'gene_tree_newick'
+species_tree_folder_plot =                   'species_tree_plot'
+species_tree_folder_ranger =                 'species_tree'
+ranger_inputs_folder_name =                  'Ranger_input'
+ranger_outputs_folder_name =                 'Ranger_output'
+candidates_file_name =                       'HGT_candidates.txt'
+candidates_seq_file_name =                   'HGT_candidates_nc.fasta'
+candidates_file_name_ET =                    'HGT_candidates_ET.txt'
+candidates_file_name_ET_validated =          'HGT_candidates_ET_validated.txt'
 candidates_file_name_ET_validated_fasta_nc = 'HGT_candidates_ET_validated_nc.fasta'
 candidates_file_name_ET_validated_fasta_aa = 'HGT_candidates_ET_validated_aa.fasta'
+ranger_wd_name =                             'Ranger-DTL_wd'
+output_tree_folder_name =                    'Explicit_tree_output'
+tree_image_folder_name =                     'combined_tree_images'
+ffn_file =                                   'combined.ffn'
 
-ranger_wd_name =             'Ranger-DTL_wd'
-output_tree_folder_name =    'Explicit_tree_output'
-tree_image_folder_name =     'combined_tree_images'
-ffn_file =                   'combined.ffn'
 pwd_prokka =                     '%s/%s'         % (wd, prokka_output)
 pwd_ffn_file =                   '%s/%s'         % (wd, ffn_file)
 pwd_ortholog_group_folder =      '%s/%s'         % (wd, ortholog_group_folder_name)
