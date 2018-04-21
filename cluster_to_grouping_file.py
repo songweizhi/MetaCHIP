@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 
 import os
 import argparse
@@ -47,24 +48,19 @@ def cluster_2_grouping_file(cluster_file, grouping_file):
 
     current_cluster_name = ''
     group_index_no = 0
-    n = 1
     for each in open(t1_sorted):
         cluster_name = each.strip().split(',')[0]
         genome_name = each.strip().split(',')[1]
 
         if current_cluster_name == '':
             current_cluster_name = cluster_name
-            grouping_file_handle.write('%s_%s,%s\n' % (group_index_list[group_index_no], n, genome_name))
-            n += 1
+            grouping_file_handle.write('%s,%s\n' % (group_index_list[group_index_no], genome_name))
         elif current_cluster_name == cluster_name:
-            grouping_file_handle.write('%s_%s,%s\n' % (group_index_list[group_index_no], n, genome_name))
-            n += 1
+            grouping_file_handle.write('%s,%s\n' % (group_index_list[group_index_no], genome_name))
         elif current_cluster_name != cluster_name:
             current_cluster_name = cluster_name
             group_index_no += 1
-            n = 1
-            grouping_file_handle.write('%s_%s,%s\n' % (group_index_list[group_index_no], n, genome_name))
-            n += 1
+            grouping_file_handle.write('%s,%s\n' % (group_index_list[group_index_no], genome_name))
 
     os.remove(t1)
     os.remove(t1_sorted)
@@ -88,9 +84,14 @@ def add_grouping_to_tree(tree_file, id2name_dict):
     gene_tree.resolve_polytomy(recursive=True)  # solving multifurcations
 
     # change gene tree leaf name for Ranger-DTL
+    # for leaf_node in gene_tree:
+    #     leaf_node_name_new = '%s_%s' % (id2name_dict[leaf_node.name], leaf_node.name)
+    #     leaf_node.name = leaf_node_name_new
+
     for leaf_node in gene_tree:
-        leaf_node_name_new = '%s_%s' % (id2name_dict[leaf_node.name], leaf_node.name)
+        leaf_node_name_new = '%s' % (id2name_dict[leaf_node.name])
         leaf_node.name = leaf_node_name_new
+
 
     # write tree to new file
     tree_file_with_grouping_handle = open(tree_file_with_grouping, 'w')

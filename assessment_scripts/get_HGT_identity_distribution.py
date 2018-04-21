@@ -1,5 +1,5 @@
 
-metachip_output = '/Users/songweizhi/Desktop/HGT_candidates_ET_validated.txt'
+metachip_output = '/Users/songweizhi/Desktop/Human_gut_HGT_candidates.txt'
 
 list_0 = 0
 list_5 = 0

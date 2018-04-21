@@ -1,20 +1,17 @@
 
-# annotation results
-#cog_annotation_results = '/Users/songweizhi/Desktop/COG_and_KO/CF_protein-id_cog.txt'
-#cog_annotation_results = '/Users/songweizhi/Desktop/COG_and_KO/NorthSea_protein-id_cog.txt'
-#cog_annotation_results = '/Users/songweizhi/Desktop/COG_and_KO/Hospital_protein-id_cog.txt'
-#cog_annotation_results = '/Users/songweizhi/Desktop/COG_and_KO/MetaBAT_protein-id_cog.txt'
+usage = '''
 
+python /Users/songweizhi/PycharmProjects/MetaCHIP/get_AR_COGs.py
 
-#cog_annotation_results = '/Users/songweizhi/Desktop/COG_and_KO/CF_ET_protein-id_cog.txt'
-#cog_annotation_results = '/Users/songweizhi/Desktop/COG_and_KO/NorthSea_ET_protein-id_cog.txt'
-#cog_annotation_results = '/Users/songweizhi/Desktop/COG_and_KO/Hospital_ET_protein-id_cog.txt'
-cog_annotation_results = '/Users/songweizhi/Desktop/COG_and_KO/MetaBAT_ET_protein-id_cog.txt'
+'''
+
+# annotation resultpwds
+cog_annotation_results = 'protein-id_cog.txt'
 
 
 # db files
-type2cog_file = '/Users/songweizhi/Desktop/ARDBflatFiles/type2cog.tab'
-whog_file = '/Users/songweizhi/Desktop/whog'
+type2cog_file = '/Users/songweizhi/Softwares/ARDB/ARDBflatFiles/type2cog.tab'
+whog_file = '/Users/songweizhi/Softwares/COG_annotation_db/whog'
 
 # get AR related COGs
 ar_related_cogs = []
@@ -31,7 +28,6 @@ for each_cog in open(whog_file):
         each_cog_id = each_cog_split[1]
         each_cog_description = ' '.join(each_cog_split[2:])
         cog_id_description_dict[each_cog_id] = each_cog_description
-
 
 num = 0
 total_gene = 0

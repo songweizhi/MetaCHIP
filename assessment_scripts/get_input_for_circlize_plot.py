@@ -3,7 +3,7 @@ import argparse
 
 usage = """
 
-python /Users/songweizhi/PycharmProjects/MetaCHIP/get_input_for_circlize_plot.py -in HGT_candidates_ET_validated.txt
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/get_input_for_circlize_plot.py -in CF_HGT_candidates_ET_validated.txt 
 
 """
 

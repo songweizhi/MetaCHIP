@@ -1,50 +1,47 @@
-from Bio import SeqIO
-
-path_to_gbk_file = '/Users/songweizhi/Desktop/AAM.gbk'
-candidates = ['AAM_00001', 'AAM_00002', 'AAM_03075', 'AAM_03456', 'AAM_03457']
-
-records = SeqIO.parse(path_to_gbk_file, 'genbank')
-candidates_flanking_ranges = []
-candidates_list = []
-candidates_contig_list = []
-candidates_start_list = []
-candidates_end_list = []
-
-for record in records:
-    # get contig length
-    contig_length = 0
-    for each_gene in record.features:
-        if each_gene.type == 'source':
-            contig_length = int(each_gene.location.end)
-
-        elif 'locus_tag' in each_gene.qualifiers:
-            if each_gene.qualifiers["locus_tag"][0] in candidates:
-               # get new start position
-               each_gene_start = each_gene.location.start
-               each_gene_start_50000 = each_gene_start - 50000
-               if each_gene_start_50000 < 0:
-                   each_gene_start_50000 = 0
-               # get new end position
-               each_gene_end = each_gene.location.end
-               each_gene_end_50000 = each_gene.location.end + 50000
-               if each_gene_end_50000 > contig_length:
-                   each_gene_end_50000 = contig_length
-               # append to list
-               candidates_list.append(each_gene.qualifiers["locus_tag"][0])
-               candidates_contig_list.append(record.id)
-               candidates_start_list.append(each_gene_start_50000)
-               candidates_end_list.append(each_gene_end_50000)
-               candidates_flanking_ranges.append([each_gene.qualifiers["locus_tag"][0], record.id, each_gene_start_50000, each_gene_end_50000])
+import os
+from datetime import datetime
+from Bio import AlignIO
+from Bio.Phylo.TreeConstruction import DistanceCalculator
+from Bio.Phylo.TreeConstruction import DistanceTreeConstructor
+from ete3 import Tree, ClusterTree
 
 
-for each_candidate in candidates_flanking_ranges:
-    can_id = each_candidate[0]
-    can_contig_id = each_candidate[1]
-    can_start = each_candidate[2]
-    can_end = each_candidate[3]
+
+wd = '/Users/songweizhi/Desktop/tree_135_138'
+
+file_in = '/Users/songweizhi/Desktop/tree_135_138/taxon_assignment_lineage_c80.txt'
 
 
-records = SeqIO.parse(path_to_gbk_file, 'genbank')
-for record in records:
-    print(record)
 
+rank = 'd'
+
+
+def get_rank_assignment(rank, taxon_assignment_lineage_file):
+
+    rank_to_position_dict = {'d': 1, 'p': 2, 'c': 3, 'o': 4, 'f': 5, 'g': 6, 's': 7}
+    rank_position = rank_to_position_dict[rank]
+
+    assignment_dict = {}
+    for each in open(taxon_assignment_lineage_file):
+        each_split = each.strip().split('\t')
+        bin_name = each_split[0]
+        assignment = each_split[1].split(';')
+        assignment_no_num = []
+        for each_assign in assignment:
+            assignment_no_num.append(each_assign.split('(')[0])
+
+        new_assign = ''
+        if len(assignment_no_num) <= rank_position:
+            new_assign = assignment_no_num[-1]
+        elif len(assignment_no_num) > rank_position:
+            new_assign = assignment_no_num[rank_position-1]
+
+        assignment_dict[bin_name] = new_assign
+
+    return assignment_dict
+
+
+
+
+
+print(get_rank_assignment(rank, file_in))

@@ -1,23 +1,23 @@
-
 import os
 from datetime import datetime
 from Bio import AlignIO
 from Bio.Phylo.TreeConstruction import DistanceCalculator
 from Bio.Phylo.TreeConstruction import DistanceTreeConstructor
-from ete3 import Tree, ClusterTree
+from ete3 import Tree
+from matplotlib import pyplot as plt
+from scipy.cluster.hierarchy import dendrogram, linkage, cophenet, fcluster
+from scipy.spatial.distance import pdist
 import numpy as np
-from scipy.cluster.hierarchy import linkage
-from scipy.cluster.hierarchy import fcluster
-
-
 
 
 wd = '/Users/songweizhi/Desktop/get_distance_distribution'
 tree_plotter_R = '~/R_scripts/newick_tree/tree_plotter.R'
 os.chdir(wd)
 
-aln_file = 'species_tree2.aln'
-tree_file_out = 'species_tree2.newick'
+
+aln_file = 'species_tree3.aln'
+tree_file_out = 'species_tree.newick'
+pwd_png = 'species_tree.png'
 taxon_assignment = 'taxon_assignment.txt'
 
 
@@ -26,7 +26,6 @@ bin_id_to_taxon_dict = {}
 for each in open(taxon_assignment):
     each_split = each.strip().split(',')
     bin_id_to_taxon_dict[each_split[0]] = each_split[1]
-
 
 # read in tree file
 aln_handle = AlignIO.read(aln_file, "fasta")
@@ -47,9 +46,9 @@ tree_NJ = constructor.nj(distance_matrix)
 # turn to newick format and write out
 print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Turn to newick format and write out')
 tree_NJ_newick = Tree(tree_NJ.format('newick'),format=3)
-for each_leaf in tree_NJ_newick:
-    #print(each_leaf.name)
-    each_leaf.name = bin_id_to_taxon_dict[each_leaf.name]
+# for each_leaf in tree_NJ_newick:
+#     #print(each_leaf.name)
+#     each_leaf.name = bin_id_to_taxon_dict[each_leaf.name]
 
 
 tree_NJ_newick.write(format=3, outfile=tree_file_out)
@@ -72,12 +71,36 @@ for each_seq_1 in seq_name_list:
 
 all_distances_lol_array = np.array(all_distances_lol)
 
-print(all_distances_lol_array)
+#print(all_distances_lol_array)
 
 
-cluster = linkage(all_distances_lol_array, method='weighted')
+cluster = linkage(all_distances_lol_array, method='complete')
 
-flat_clusters = fcluster(cluster, 0.75, criterion='distance')
+
+def get_leaf_name(n):
+    leaf_name = seq_name_list[n]
+    taxon = bin_id_to_taxon_dict[leaf_name]
+    return taxon
+
+
+
+# calculate full dendrogram
+max_d = 1.5  # max_d as in max_distance
+plt.figure(figsize=(16, 10))
+plt.title('Hierarchical Clustering Dendrogram')
+#plt.xlabel('sample index')
+plt.ylabel('Distance')
+dendrogram(cluster, orientation='top', leaf_rotation=270, leaf_font_size=10, leaf_label_func=get_leaf_name, color_threshold = max_d)
+plt.axhline(y=max_d, c='k')
+plt.tight_layout()
+plt.savefig(pwd_png, dpi=300)
+plt.close()
+
+
+
+flat_clusters = fcluster(cluster, max_d, criterion='distance')
+print(flat_clusters)
+
 
 print(flat_clusters)
 

@@ -202,7 +202,7 @@ def do():
         print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + " Plotting identity distribution (%dth): %s" % (ploted_group, current_group_pair_name,))
     else:
         unploted_groups.write('%s\t%s\n' % (current_group_pair_name, len(current_group_pair_identities)))
-        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + " Plotting identity distribution (%dth): %s, blast match number < %d, skipped" % (ploted_group, current_group_pair_name, minimum_plot_number))
+        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + " Plotting identity distribution (%dth): %s, blast hits < %d, skipped" % (ploted_group, current_group_pair_name, minimum_plot_number))
 
 
 def get_hits_group(input_file_name, output_file_name):
