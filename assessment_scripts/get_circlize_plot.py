@@ -3,7 +3,7 @@ import argparse
 
 usage = """
 
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/get_input_for_circlize_plot.py -in CF_HGT_candidates_ET_validated.txt 
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/get_input_for_circlize_plot.py -in HGT_candidates_ET_validated.txt 
 
 """
 
@@ -13,8 +13,15 @@ parser.add_argument('-in',
                     required=True,
                     help='input file')
 
+parser.add_argument('-Rscript',
+                    required=False,
+                    default='~/R_scripts/for_plot/circos_HGT.R',
+                    help='Rscript')
+
 args = vars(parser.parse_args())
 input_file = args['in']
+circos_HGT_R = args['Rscript']
+
 
 name2id_dict = {}
 transfers = []
@@ -81,7 +88,9 @@ for each_3 in open('tmp1_sorted_count.txt'):
 all_group_id = sorted(all_group_id)
 
 input_file_name, input_file_ext = os.path.splitext(input_file)
-matrix_file = open('%s_matrix.csv' % input_file_name, 'w')
+matrix_filename = '%s_matrix.csv' % input_file_name
+circos_plot_name = '%s_circos.png' % input_file_name
+matrix_file = open(matrix_filename, 'w')
 matrix_file.write('\t' + '\t'.join(all_group_id) + '\n')
 for each_1 in all_group_id:
     row = [each_1]
@@ -94,7 +103,13 @@ for each_1 in all_group_id:
     matrix_file.write('\t'.join(row) + '\n')
 matrix_file.close()
 
+# get plot with R
+os.system('Rscript %s -m %s -p %s' % (circos_HGT_R, matrix_filename, circos_plot_name))
+
+# remove tmp files
 os.remove('tmp1.txt')
 os.remove('tmp1_sorted.txt')
 os.remove('tmp1_sorted_count.txt')
+os.remove(matrix_filename)
+
 print('Done!')

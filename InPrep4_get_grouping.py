@@ -183,7 +183,7 @@ all_distances_lol = get_distance_matrix(tree_file)
 all_distances_lol_array = np.array(all_distances_lol)
 
 # get linkage
-cluster = linkage(all_distances_lol_array, method='complete')
+cluster = linkage(all_distances_lol_array, method='single')
 
 # get maximum distance for clustering
 distance_list = []
@@ -266,6 +266,4 @@ add_group_to_tree_R = '~/R_scripts/newick_tree/add_group_to_tree.R'
 add_group_to_tree_R_cmd = 'Rscript %s -t %s -g %s > /dev/null' % (add_group_to_tree_R, tree_file, pwd_grouping_file)
 
 os.system(add_group_to_tree_R_cmd)
-
-
 
