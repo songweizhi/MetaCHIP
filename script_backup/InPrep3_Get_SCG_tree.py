@@ -2,7 +2,6 @@
 import os
 import re
 import argparse
-import dendropy
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.Alphabet import IUPAC
