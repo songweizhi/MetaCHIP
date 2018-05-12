@@ -22,7 +22,7 @@ def export_aa_record(gene_seq, gene_id, gene_description, output_handle):
     SeqIO.write(seq_record, output_handle, 'fasta')
 
 
-input_gbk_file = '/Users/songweizhi/Desktop/aaa/NorthSea_bin019.gbk'
+input_gbk_file = '/Users/songweizhi/Desktop/input_gbk_files/NorthSea_bin014.gbk'
 export_type = 'A'  # N or P or A
 
 
