@@ -18,7 +18,9 @@ Dependencies:
 + [FastTree 2.1.9](http://www.microbesonline.org/fasttree/)
 + [Ranger-DTL 1.0](http://compbio.mit.edu/ranger-dtl/)
 + [Prokka](http://www.vicbioinformatics.com/software.prokka.shtml)
-
++ [R](https://www.r-project.org)
++  R module: [optparse](https://cran.r-project.org/web/packages/optparse/index.html)
++  R module: [ape](https://cran.r-project.org/web/packages/ape/index.html)
 
 Prepare input files:
 ---

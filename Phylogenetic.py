@@ -897,12 +897,13 @@ combined_output_validated_fasta_nc_handle = open(pwd_candidates_file_ET_validate
 combined_output_validated_fasta_aa_handle = open(pwd_candidates_file_ET_validated_fasta_aa, 'w')
 for each_candidate in SeqIO.parse(pwd_candidates_seq_file, 'fasta'):
     if each_candidate.id in validated_candidate_list:
+        # output nc sequences
+        SeqIO.write(each_candidate, combined_output_validated_fasta_nc_handle, 'fasta')
+        # output aa sequences
         each_candidate_aa = each_candidate
         each_candidate_aa.seq = each_candidate_aa.seq.translate()
-        SeqIO.write(each_candidate, combined_output_validated_fasta_nc_handle, 'fasta')
         SeqIO.write(each_candidate_aa, combined_output_validated_fasta_aa_handle, 'fasta')
 combined_output_validated_fasta_nc_handle.close()
 combined_output_validated_fasta_aa_handle.close()
 
 print('\nAll done for Tree approach!')
-
