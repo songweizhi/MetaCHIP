@@ -16,9 +16,13 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.Alphabet import IUPAC
 from Bio.SeqRecord import SeqRecord
-from scipy.cluster.hierarchy import linkage
-from scipy.cluster.hierarchy import fcluster
-from scipy.cluster.hierarchy import dendrogram
+from scipy.cluster.hierarchy import linkage, fcluster, dendrogram
+
+
+# to do
+# selected_rank = 'c'
+# output_prefix = 'NorthSea'
+# add_group_to_tree_R = '~/R_scripts/newick_tree/add_group_to_tree.R'
 
 
 def export_dna_record(gene_seq, gene_id, gene_description, output_handle):

@@ -29,12 +29,12 @@ Prepare input files:
     1. Genome group also consists two parts, the group name and genome No. in that group.
     1. If your draft/complete genome haven’t been assigned taxonomy id. ...... How to determine taxonomy: Phylosift
 
-            A_1,ecklonia_bin31
-            A_12,phylospora_bin8
-            BA_1,delisea_bin26
-            BA_2,amphiroa_bin24
-            BA_3,ulva_bin102
-            BB_1,rock_bin3
+            A,ecklonia_bin31
+            A,phylospora_bin8
+            BA,delisea_bin26
+            BA,amphiroa_bin24
+            BA,ulva_bin102
+            BB,rock_bin3
 
 1. All_vs_All blast results
 
@@ -53,10 +53,16 @@ How to run it:
 + MetaCHIP scripts are implemented in python2.
 + All input files need to be placed in working directory!
 
-        # first:
-        python MetaCHIP.py -g grouping.txt -a prokka_output -n all_vs_all_blast.tab
-        # then:
-        python Explicit_Tree.py -cfg config.txt
+        # First, get SCG tree and grouping
+        $ python Get_tree_and_grouping.py -prokka_output prokka_output -hmm phylo.hmm
+
+        # You may want to manully modify the grouping profile based on the taxonomy classification of input bins
+
+        # Second, predict HGT with best-match approach
+        $ python Best-match.py -g grouping.txt -a prokka_output -n all_vs_all_blast.tab
+
+        # Third, predict HGT with phylogenetic approach
+        $ python Explicit_Tree.py -cfg config.txt
 
 Output files:
 ---
