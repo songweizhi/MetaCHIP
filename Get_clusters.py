@@ -95,7 +95,7 @@ def prodigal_parser(seq_file, sco_file, prefix, output_folder):
 
         # create SeqRecord
         current_sequence = Seq(id_to_sequence_dict[seq_id])
-        current_SeqRecord = SeqRecord(current_sequence)
+        current_SeqRecord = SeqRecord(current_sequence, id=seq_id)
         current_SeqRecord.seq.alphabet = generic_dna
         transl_table = seq_to_transl_table_dict[seq_id]
 
@@ -148,7 +148,6 @@ def prodigal_parser(seq_file, sco_file, prefix, output_folder):
 
             # Append Feature to SeqRecord
             current_SeqRecord.features.append(current_feature)
-
             gene_index += 1
 
         # export to gbk file

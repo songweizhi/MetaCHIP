@@ -496,7 +496,7 @@ def get_flanking_region(input_gbk_file, HGT_candidate, flanking_length):
     new_gbk_file = '%s/%s_%sbp_temp.gbk' % (wd, HGT_candidate, flanking_length)
     new_gbk_final_file = '%s/%s_%sbp.gbk' % (wd, HGT_candidate, flanking_length)
     new_fasta_final_file = '%s/%s_%sbp.fasta' % (wd, HGT_candidate, flanking_length)
-    output_plot = '%s/%s_%sbp.eps' % (wd, HGT_candidate, flanking_length)
+    #output_plot = '%s/%s_%sbp.eps' % (wd, HGT_candidate, flanking_length)
 
     # get flanking range of candidate
     input_gbk = SeqIO.parse(input_gbk_file, "genbank")
@@ -504,10 +504,11 @@ def get_flanking_region(input_gbk_file, HGT_candidate, flanking_length):
     new_end = 0
     contig_length = 0
     for record in input_gbk:
+        contig_length = len(record.seq)
         for gene in record.features:
             # get contig length
             if gene.type == 'source':
-                contig_length = int(gene.location.end)
+                pass
             # get new start and end points
             elif 'locus_tag' in gene.qualifiers:
                 if gene.qualifiers['locus_tag'][0] == HGT_candidate:
@@ -560,10 +561,10 @@ def get_flanking_region(input_gbk_file, HGT_candidate, flanking_length):
         new_seq = record.seq[new_start:new_end]
         new_contig_length = len(new_seq)
         new_record = SeqRecord(new_seq,
-                               id = record.id,
-                               name = record.name,
-                               description = record.description,
-                               annotations = record.annotations)
+                               id=record.id,
+                               name=record.name,
+                               description=record.description,
+                               annotations=record.annotations)
 
         # get new location
         new_record_features_2 = []
@@ -965,8 +966,6 @@ def remove_bidirection(input_file, candidate2identity_dict, output_file):
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('-gbk', required=True, help='input gbk folder')
-
 parser.add_argument('-p', required=True, help='output prefix')
 
 parser.add_argument('-g', required=False, default=None, help='grouping file')
@@ -991,7 +990,6 @@ parser.add_argument('-makeblastdb', required=False, default='makeblastdb', help=
 
 args = vars(parser.parse_args())
 
-input_gbk_folder = args['gbk']
 output_prefix = args['p']
 grouping_file = args['g']
 blast_results = args['blastall']
@@ -1010,11 +1008,14 @@ warnings.filterwarnings("ignore")
 
 MetaCHIP_wd = '%s_MetaCHIP_wd' % output_prefix
 
-faa_folder = '%s_faa_files' % output_prefix
-ffn_folder = '%s_ffn_files' % output_prefix
-pwd_faa_folder = '%s/%s' % (MetaCHIP_wd, faa_folder)
-pwd_ffn_folder = '%s/%s' % (MetaCHIP_wd, ffn_folder)
 
+ffn_folder =             '%s_ffn_files'       % output_prefix
+faa_folder =             '%s_faa_files'       % output_prefix
+gbk_folder =             '%s_gbk_files'       % output_prefix
+
+pwd_ffn_folder =             '%s/%s' % (MetaCHIP_wd, ffn_folder)
+pwd_faa_folder =             '%s/%s' % (MetaCHIP_wd, faa_folder)
+pwd_gbk_folder =             '%s/%s' % (MetaCHIP_wd, gbk_folder)
 
 combined_ffn_file = '%s_combined.ffn' % output_prefix
 combined_gbk_file = '%s_combined.gbk' % output_prefix
@@ -1024,7 +1025,7 @@ pwd_combined_gbk_file = '%s/%s' % (MetaCHIP_wd, combined_gbk_file)
 
 # get combined ffn and gbk files
 os.system('cat %s/*.ffn > %s' % (pwd_ffn_folder, pwd_combined_ffn_file))
-os.system('cat %s/*.gbk > %s' % (input_gbk_folder, pwd_combined_gbk_file))
+os.system('cat %s/*.gbk > %s' % (pwd_gbk_folder, pwd_combined_gbk_file))
 
 
 # get grouping file
@@ -1300,7 +1301,6 @@ os.makedirs(pwd_op_act_folder)
 os.makedirs('%s/0_end_break' % pwd_op_act_folder)
 
 # plot flanking regions
-print(os.getcwd())
 candidates_2_endbreak_dict = get_gbk_blast_act(pwd_op_candidates_only_gene_file_uniq, pwd_gbk_subset_file, flanking_length, ending_match_length, name_to_group_number_dict, pwd_op_act_folder, pwd_blastn_exe, keep_temp)
 
 # add end break information to output file
