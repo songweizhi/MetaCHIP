@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 import os
+import re
+import glob
 import shutil
+import warnings
 import argparse
 import itertools
 from time import sleep
@@ -22,11 +25,8 @@ from string import ascii_uppercase
 from datetime import datetime
 
 
-# requirement for contig id
-# bin name splitter for direction information
-# check the m0 group for the big differentces
-# if run_blast = 1, there is no need to provide the blast results
-# endbreak checked twice, remove one
+# add -f force option
+# generate HGT results folder later
 
 
 def get_number_of_group(grouping_file):
@@ -496,7 +496,7 @@ def get_flanking_region(input_gbk_file, HGT_candidate, flanking_length):
     new_gbk_file = '%s/%s_%sbp_temp.gbk' % (wd, HGT_candidate, flanking_length)
     new_gbk_final_file = '%s/%s_%sbp.gbk' % (wd, HGT_candidate, flanking_length)
     new_fasta_final_file = '%s/%s_%sbp.fasta' % (wd, HGT_candidate, flanking_length)
-    output_plot = '%s/%s_%sbp.eps' % (wd, HGT_candidate, flanking_length)
+    #output_plot = '%s/%s_%sbp.eps' % (wd, HGT_candidate, flanking_length)
 
     # get flanking range of candidate
     input_gbk = SeqIO.parse(input_gbk_file, "genbank")
@@ -504,10 +504,11 @@ def get_flanking_region(input_gbk_file, HGT_candidate, flanking_length):
     new_end = 0
     contig_length = 0
     for record in input_gbk:
+        contig_length = len(record.seq)
         for gene in record.features:
             # get contig length
             if gene.type == 'source':
-                contig_length = int(gene.location.end)
+                pass
             # get new start and end points
             elif 'locus_tag' in gene.qualifiers:
                 if gene.qualifiers['locus_tag'][0] == HGT_candidate:
@@ -560,10 +561,10 @@ def get_flanking_region(input_gbk_file, HGT_candidate, flanking_length):
         new_seq = record.seq[new_start:new_end]
         new_contig_length = len(new_seq)
         new_record = SeqRecord(new_seq,
-                               id = record.id,
-                               name = record.name,
-                               description = record.description,
-                               annotations = record.annotations)
+                               id=record.id,
+                               name=record.name,
+                               description=record.description,
+                               annotations=record.annotations)
 
         # get new location
         new_record_features_2 = []
@@ -907,6 +908,7 @@ def get_gbk_blast_act(candidates_file, gbk_file, flanking_length, end_seq_length
 
         end_break = get_end_break_value(dict_value_list, end_seq_length)
         candidates_2_endbreak_dict[folder_name] = end_break
+        os.chdir(current_wd)
         os.chdir(path_to_output_act_folder)
 
         if end_break == True:
@@ -964,96 +966,91 @@ def remove_bidirection(input_file, candidate2identity_dict, output_file):
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('-g',
-                    required=True,
-                    help='grouping file')
+parser.add_argument('-p', required=True, help='output prefix')
 
-parser.add_argument('-ffn',
-                    required=True,
-                    help='combined ffn file')
+parser.add_argument('-g', required=False, default=None, help='grouping file')
 
-parser.add_argument('-gbk',
-                    required=True,
-                    help='combined gbk file')
+parser.add_argument('-blastall', required=False, default=None, help='all vs all blast results')
 
-parser.add_argument('-blastall',
-                    required=True,
-                    help='all vs all blast results')
+parser.add_argument('-cov', required=False, type=int, default=70, help='coverage cutoff')
 
-parser.add_argument('-cov',
-                    required=False,
-                    type=int,
-                    default=70,
-                    help='coverage cutoff')
+parser.add_argument('-al', required=False, type=int, default=200, help='alignment length cutoff')
 
-parser.add_argument('-al',
-                    required=False,
-                    type=int,
-                    default=200,
-                    help='alignment length cutoff')
+parser.add_argument('-flk', required=False, type=int, default=3000, help='the length of flanking sequences to plot')
 
-parser.add_argument('-flk',
-                    required=False,
-                    type=int,
-                    default=3000,
-                    help='the length of flanking sequences to plot')
+parser.add_argument('-ip', required=False, type=int, default=90, help='identity percentile')
 
-parser.add_argument('-ip',
-                    required=False,
-                    type=int,
-                    default=90,
-                    help='identity percentile')
+parser.add_argument('-eb', required=False, type=int, default=1000, help='the minimal length to be considered as end break')
 
-parser.add_argument('-eb',
-                    required=False,
-                    type=int,
-                    default=1000,
-                    help='the minimal length to be considered as end break')
+parser.add_argument('-tmp', required=False, action="store_true", help='keep temporary files')
 
-parser.add_argument('-tmp',
-                    action="store_true",
-                    required=False,
-                    help='keep temporary files')
+parser.add_argument('-blastn', required=False, default='blastn', help='path to blastn executable')
 
-parser.add_argument('-blast',
-                    action="store_true",
-                    required=False,
-                    help='run blast step or not')
-
-parser.add_argument('-blastn',
-                    required=False,
-                    default='blastn',
-                    help='path to blastn executable')
-
-parser.add_argument('-makeblastdb',
-                    required=False,
-                    default='makeblastdb',
-                    help='path to makeblastdb executable')
+parser.add_argument('-makeblastdb', required=False, default='makeblastdb', help='path to makeblastdb executable')
 
 args = vars(parser.parse_args())
 
+output_prefix = args['p']
 grouping_file = args['g']
-ffn_file = args['ffn']
-gbk_file = args['gbk']
 blast_results = args['blastall']
 cover_cutoff = args['cov']
 flanking_length = args['flk']
 identity_percentile = args['ip']
 align_len_cutoff = args['al']
 ending_match_length = args['eb']
-run_blastn = args['blast']
 keep_temp = args['tmp']
 pwd_blastn_exe = args['blastn']
 pwd_makeblastdb_exe = args['makeblastdb']
 
 
+warnings.filterwarnings("ignore")
+
+
+MetaCHIP_wd = '%s_MetaCHIP_wd' % output_prefix
+
+
+ffn_folder =             '%s_ffn_files'       % output_prefix
+faa_folder =             '%s_faa_files'       % output_prefix
+gbk_folder =             '%s_gbk_files'       % output_prefix
+
+pwd_ffn_folder =             '%s/%s' % (MetaCHIP_wd, ffn_folder)
+pwd_faa_folder =             '%s/%s' % (MetaCHIP_wd, faa_folder)
+pwd_gbk_folder =             '%s/%s' % (MetaCHIP_wd, gbk_folder)
+
+combined_ffn_file = '%s_combined.ffn' % output_prefix
+combined_gbk_file = '%s_combined.gbk' % output_prefix
+pwd_combined_ffn_file = '%s/%s' % (MetaCHIP_wd, combined_ffn_file)
+pwd_combined_gbk_file = '%s/%s' % (MetaCHIP_wd, combined_gbk_file)
+
+
+# get combined ffn and gbk files
+os.system('cat %s/*.ffn > %s' % (pwd_ffn_folder, pwd_combined_ffn_file))
+os.system('cat %s/*.gbk > %s' % (pwd_gbk_folder, pwd_combined_gbk_file))
+
+
+# get grouping file
+if grouping_file == None:
+    grouping_file_re = '%s/%s_grouping_g*.txt' % (MetaCHIP_wd, output_prefix)
+    grouping_file_list = [os.path.basename(file_name) for file_name in glob.glob(grouping_file_re)]
+    #grouping_file_list = re.match(grouping_file_re)
+
+    if len(grouping_file_list) == 1:
+        grouping_file = '%s/%s' % (MetaCHIP_wd, grouping_file_list[0])
+
+    if len(grouping_file_list) != 1:
+        print('No or multiple grouping file found, please specify with "-g" option')
+        exit()
+
+pwd_grouping_file = grouping_file
+
 ############################################### Define folder/file name ################################################
 
 print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Define folder/file names and create output folder')
 
-wd = os.getcwd()
-pwd_grouping_file = '%s/%s' % (wd, grouping_file)
-op_folder = 'output_ip%s_al%sbp_c%s_e%sbp_g%s' % (str(identity_percentile), str(align_len_cutoff), str(cover_cutoff), str(ending_match_length), get_number_of_group(pwd_grouping_file))
+
+MetaCHIP_op_folder = '%s_HGTs_ip%s_al%sbp_c%s_e%sbp_g%s' % (output_prefix, str(identity_percentile), str(align_len_cutoff), str(cover_cutoff), str(ending_match_length), get_number_of_group(pwd_grouping_file))
+
+pwd_MetaCHIP_op_folder = '%s/%s' % (MetaCHIP_wd, MetaCHIP_op_folder)
 
 iden_distrib_plot_folder =                          'identity_distribution'
 qual_idens_file =                                   'qualified_identities.txt'
@@ -1073,31 +1070,34 @@ op_candidates_seq_aa =                              'HGT_candidates_aa.fasta'
 op_act_folder_name =                                'Flanking_regions'
 gbk_subset_file =                                   'combined_subset.gbk'
 
-pwd_iden_distrib_plot_folder =                      '%s/%s/%s'    % (wd, op_folder, iden_distrib_plot_folder)
-pwd_qual_iden_file =                                '%s/%s/%s'    % (wd, op_folder, qual_idens_file)
-pwd_qual_iden_file_gg =                             '%s/%s/%s'    % (wd, op_folder, qual_idens_file_gg)
-pwd_qual_iden_file_gg_sorted =                      '%s/%s/%s'    % (wd, op_folder, qual_idens_file_gg_sorted)
-pwd_unploted_groups_file =                          '%s/%s/%s/%s' % (wd, op_folder, iden_distrib_plot_folder, unploted_groups_file)
-pwd_qual_idens_with_group =                         '%s/%s/%s'    % (wd, op_folder, qual_idens_with_group_filename)
-pwd_qual_idens_with_group_sorted =                  '%s/%s/%s'    % (wd, op_folder, qual_idens_with_group_sorted_filename)
-pwd_subjects_in_one_line =                          '%s/%s/%s'    % (wd, op_folder, subjects_in_one_line_filename)
-pwd_group_pair_iden_cutoff_file =                   '%s/%s/%s'    % (wd, op_folder, group_pair_iden_cutoff_file_name)
-pwd_op_candidates_with_group_file =                 '%s/%s/%s'    % (wd, op_folder, op_candidates_with_group_file_name)
-pwd_op_candidates_only_gene_file =                  '%s/%s/%s'    % (wd, op_folder, op_candidates_only_gene_file_name)
-pwd_op_candidates_only_gene_file_uniq =             '%s/%s/%s'    % (wd, op_folder, op_candidates_only_gene_file_name_uniq)
-pwd_op_cans_only_gene_uniq_end_break =              '%s/%s/%s'    % (wd, op_folder, op_candidates_only_gene_uniq_end_break)
-pwd_op_candidates_seq_nc =                          '%s/%s/%s'    % (wd, op_folder, op_candidates_seq_nc)
-pwd_op_candidates_seq_aa =                          '%s/%s/%s'    % (wd, op_folder, op_candidates_seq_aa)
-pwd_gbk_subset_file =                               '%s/%s/%s'    % (wd, op_folder, gbk_subset_file)
-pwd_op_act_folder =                                 '%s/%s/%s'    % (wd, op_folder, op_act_folder_name)
-pwd_grouping_file_with_id =                         '%s/%s/%s'    % (wd, op_folder, 'grouping_with_id.txt')
-pwd_ffn_file =                                      '%s/%s'       % (wd, ffn_file)
-pwd_gbk_file =                                      '%s/%s'       % (wd, gbk_file)
-pwd_blast_results = ''
-if run_blastn == 0:
-    pwd_blast_results =                             '%s/%s'       % (wd, blast_results)
-if run_blastn == 1:
-    pwd_blast_results =                             '%s/%s'       % (wd, 'all_vs_all_ffn.tab')
+pwd_iden_distrib_plot_folder =                      '%s/%s/%s'    % (MetaCHIP_wd, MetaCHIP_op_folder, iden_distrib_plot_folder)
+pwd_qual_iden_file =                                '%s/%s/%s'    % (MetaCHIP_wd, MetaCHIP_op_folder, qual_idens_file)
+pwd_qual_iden_file_gg =                             '%s/%s/%s'    % (MetaCHIP_wd, MetaCHIP_op_folder, qual_idens_file_gg)
+pwd_qual_iden_file_gg_sorted =                      '%s/%s/%s'    % (MetaCHIP_wd, MetaCHIP_op_folder, qual_idens_file_gg_sorted)
+pwd_unploted_groups_file =                          '%s/%s/%s/%s' % (MetaCHIP_wd, MetaCHIP_op_folder, iden_distrib_plot_folder, unploted_groups_file)
+pwd_qual_idens_with_group =                         '%s/%s/%s'    % (MetaCHIP_wd, MetaCHIP_op_folder, qual_idens_with_group_filename)
+pwd_qual_idens_with_group_sorted =                  '%s/%s/%s'    % (MetaCHIP_wd, MetaCHIP_op_folder, qual_idens_with_group_sorted_filename)
+pwd_subjects_in_one_line =                          '%s/%s/%s'    % (MetaCHIP_wd, MetaCHIP_op_folder, subjects_in_one_line_filename)
+pwd_group_pair_iden_cutoff_file =                   '%s/%s/%s'    % (MetaCHIP_wd, MetaCHIP_op_folder, group_pair_iden_cutoff_file_name)
+pwd_op_candidates_with_group_file =                 '%s/%s/%s'    % (MetaCHIP_wd, MetaCHIP_op_folder, op_candidates_with_group_file_name)
+pwd_op_candidates_only_gene_file =                  '%s/%s/%s'    % (MetaCHIP_wd, MetaCHIP_op_folder, op_candidates_only_gene_file_name)
+pwd_op_candidates_only_gene_file_uniq =             '%s/%s/%s'    % (MetaCHIP_wd, MetaCHIP_op_folder, op_candidates_only_gene_file_name_uniq)
+pwd_op_cans_only_gene_uniq_end_break =              '%s/%s/%s'    % (MetaCHIP_wd, MetaCHIP_op_folder, op_candidates_only_gene_uniq_end_break)
+pwd_op_candidates_seq_nc =                          '%s/%s/%s'    % (MetaCHIP_wd, MetaCHIP_op_folder, op_candidates_seq_nc)
+pwd_op_candidates_seq_aa =                          '%s/%s/%s'    % (MetaCHIP_wd, MetaCHIP_op_folder, op_candidates_seq_aa)
+pwd_gbk_subset_file =                               '%s/%s/%s'    % (MetaCHIP_wd, MetaCHIP_op_folder, gbk_subset_file)
+pwd_op_act_folder =                                 '%s/%s/%s'    % (MetaCHIP_wd, MetaCHIP_op_folder, op_act_folder_name)
+pwd_grouping_file_with_id =                         '%s/%s/%s'    % (MetaCHIP_wd, MetaCHIP_op_folder, 'grouping_with_id.txt')
+
+
+blast_db_folder = '%s_blastdb' % output_prefix
+pwd_blast_db_folder = '%s/%s' % (MetaCHIP_wd, blast_db_folder)
+
+
+if blast_results != None:
+    pwd_blast_results = blast_results
+if blast_results == None:
+    pwd_blast_results =                             '%s/%s_all_vs_all_ffn.tab'       % (MetaCHIP_wd, output_prefix)
 
 # check whether file exist
 # unfound_inputs = []
@@ -1116,31 +1116,28 @@ if run_blastn == 1:
 
 ########################################################################################################################
 
-# # Prepare input files
-# os.system('cat %s/*/*.gbk > %s' % (pwd_prokka_output, pwd_gbk_file)) # get combined gbk file
-# os.system('cat %s/%s/*/*.ffn > combined.ffn' % (wd, prokka_output)) # get combined ffn file
-
 # run blastn if specified
-if run_blastn == 1:
-    if os.path.isdir('blastdb'):
-        shutil.rmtree('blastdb')
-    os.mkdir('blastdb')
+if blast_results == None:
+    if os.path.isdir(pwd_blast_db_folder):
+        shutil.rmtree(pwd_blast_db_folder)
+    os.mkdir(pwd_blast_db_folder)
 
-    os.system('cp %s ./blastdb/' % pwd_ffn_file)
-    makeblastdb_cmd = '%s -in blastdb/%s -dbtype nucl -parse_seqids' % (ffn_file, pwd_makeblastdb_exe)
+    os.system('cp %s %s' % (pwd_combined_ffn_file, pwd_blast_db_folder))
+    makeblastdb_cmd = '%s -in %s/%s -dbtype nucl -parse_seqids' % (pwd_makeblastdb_exe, pwd_blast_db_folder, combined_ffn_file)
     os.system(makeblastdb_cmd)
     blast_parameters = '-evalue 1e-5 -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen" -task blastn'
     print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Running blastn, be patient...')
-    os.system('%s -query %s -db blastdb/%s -out %s %s' % (pwd_blastn_exe, pwd_ffn_file, ffn_file, pwd_blast_results, blast_parameters))
+    os.system('%s -query %s -db %s/%s -out %s %s' % (pwd_blastn_exe, pwd_combined_ffn_file, pwd_blast_db_folder, combined_ffn_file, pwd_blast_results, blast_parameters))
+
 
 # create outputs folder
-if os.path.isdir(op_folder):
-    shutil.rmtree(op_folder, ignore_errors=True)
-    if os.path.isdir(op_folder):
-        shutil.rmtree(op_folder, ignore_errors=True)
-    os.makedirs(op_folder)
+if os.path.isdir(pwd_MetaCHIP_op_folder):
+    shutil.rmtree(pwd_MetaCHIP_op_folder, ignore_errors=True)
+    if os.path.isdir(pwd_MetaCHIP_op_folder):
+        shutil.rmtree(pwd_MetaCHIP_op_folder, ignore_errors=True)
+    os.makedirs(pwd_MetaCHIP_op_folder)
 else:
-    os.makedirs(op_folder)
+    os.makedirs(pwd_MetaCHIP_op_folder)
 
 
 # index grouping file
@@ -1287,7 +1284,7 @@ for match in open(pwd_op_candidates_only_gene_file):
 # get subset of combined gbk file
 gbk_subset = open(pwd_gbk_subset_file, 'w')
 records_recorded = []
-for record in SeqIO.parse(pwd_gbk_file, 'genbank'):
+for record in SeqIO.parse(pwd_combined_gbk_file, 'genbank'):
     record_id = record.id
     for gene_f in record.features:
         if 'locus_tag' in gene_f.qualifiers:
@@ -1345,7 +1342,7 @@ for each_candidate_2 in open(pwd_op_cans_only_gene_uniq_end_break):
 print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Extracting nc and aa sequences for predicted HGTs')
 candidates_seq_nc_handle = open(pwd_op_candidates_seq_nc, 'w')
 candidates_seq_aa_handle = open(pwd_op_candidates_seq_aa, 'w')
-for each_seq in SeqIO.parse(pwd_ffn_file, 'fasta'):
+for each_seq in SeqIO.parse(pwd_combined_ffn_file, 'fasta'):
     if each_seq.id in qualified_HGT_candidates:
         SeqIO.write(each_seq, candidates_seq_nc_handle, 'fasta')
         each_seq_aa = each_seq
@@ -1371,4 +1368,4 @@ if keep_temp == 0:
 
 sleep(1)
 print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Done for Best-match approach prediction!')
-print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' You may want to run the Explicit tree approach for further validation.')
+print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' You may want to run the Phylogenetic approach for further validation.')
