@@ -8,19 +8,24 @@ Publication
 
 Dependencies:
 ---
-+ [BioPython](https://github.com/biopython/biopython.github.io/)
-+ [ETE3](http://etetoolkit.org)
-+ [Numpy](http://www.numpy.org)
-+ [SciPy](https://www.scipy.org)
-+ [Matplotlib](http://matplotlib.org)
-+ [Pillow 3.3.1](https://pypi.python.org/pypi/Pillow/3.3.1)
-+ [ReportLab](http://www.reportlab.com)
++ Python package:
+[BioPython](https://github.com/biopython/biopython.github.io/),
+[ETE3](http://etetoolkit.org),
+[Numpy](http://www.numpy.org),
+[SciPy](https://www.scipy.org),
+[Matplotlib](http://matplotlib.org),
+[Pillow](https://pypi.python.org/pypi/Pillow/3.3.1),
+[ReportLab](http://www.reportlab.com)
++ [Prodigal](https://github.com/hyattpd/Prodigal)
++ [MAFFT](https://mafft.cbrc.jp/alignment/software/)
++ [HMMER](http://hmmer.org)
 + [FastTree 2.1.9](http://www.microbesonline.org/fasttree/)
 + [Ranger-DTL 1.0](http://compbio.mit.edu/ranger-dtl/)
 + [Prokka](http://www.vicbioinformatics.com/software.prokka.shtml)
 + [R](https://www.r-project.org)
-+  R module: [optparse](https://cran.r-project.org/web/packages/optparse/index.html)
-+  R module: [ape](https://cran.r-project.org/web/packages/ape/index.html)
++  R module:
+[optparse](https://cran.r-project.org/web/packages/optparse/index.html),
+[ape](https://cran.r-project.org/web/packages/ape/index.html)
 
 Prepare input files:
 ---

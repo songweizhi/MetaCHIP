@@ -14,8 +14,11 @@ from string import ascii_uppercase
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.Alphabet import IUPAC
+from Bio import SeqFeature as SF
 from Bio.SeqRecord import SeqRecord
 from Bio.Alphabet import generic_dna
+from Bio.SeqFeature import SeqFeature
+from Bio.SeqFeature import FeatureLocation
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
@@ -38,14 +41,125 @@ def export_aa_record(gene_seq, gene_id, gene_description, output_handle):
     SeqIO.write(seq_record, output_handle, 'fasta')
 
 
-def get_ffn_faa_from_gbk(prefix, input_gbk_folder, op_folder):
-    # create ffn and faa folder
-    faa_folder = '%s_faa_files' % prefix
-    ffn_folder = '%s_ffn_files' % prefix
-    pwd_faa_folder = '%s/%s' % (op_folder, faa_folder)
-    pwd_ffn_folder = '%s/%s' % (op_folder, ffn_folder)
-    os.mkdir(pwd_faa_folder)
-    os.mkdir(pwd_ffn_folder)
+def prodigal_parser(seq_file, sco_file, prefix, output_folder):
+
+    bin_ffn_file =     '%s.ffn' % prefix
+    bin_faa_file =     '%s.faa' % prefix
+    bin_gbk_file =     '%s.gbk' % prefix
+    pwd_bin_ffn_file = '%s/%s'  % (output_folder, bin_ffn_file)
+    pwd_bin_faa_file = '%s/%s'  % (output_folder, bin_faa_file)
+    pwd_bin_gbk_file = '%s/%s'  % (output_folder, bin_gbk_file)
+
+    # get sequence id list
+    id_to_sequence_dict = {}
+    sequence_id_list = []
+    for each_seq in SeqIO.parse(seq_file, 'fasta'):
+        id_to_sequence_dict[each_seq.id] = str(each_seq.seq)
+        sequence_id_list.append(each_seq.id)
+
+
+    # get sequence to cds dict and sequence to transl_table dict
+    current_seq_id = ''
+    current_transl_table = ''
+    current_seq_csd_list = []
+    seq_to_cds_dict = {}
+    seq_to_transl_table_dict = {}
+    for each_cds in open(sco_file):
+        if each_cds.startswith('# Sequence Data'):
+
+            # add to dict
+            if current_seq_id != '':
+                seq_to_cds_dict[current_seq_id] = current_seq_csd_list
+                seq_to_transl_table_dict[current_seq_id] = current_transl_table
+
+            # reset value
+            current_seq_id = each_cds.strip().split('=')[-1][1:-1]
+            current_transl_table = ''
+            current_seq_csd_list = []
+
+        elif each_cds.startswith('# Model Data'):
+            current_transl_table = each_cds.strip().split(';')[-2].split('=')[-1]
+
+        else:
+            current_seq_csd_list.append('_'.join(each_cds.strip().split('_')[1:]))
+
+    seq_to_cds_dict[current_seq_id] = current_seq_csd_list
+    seq_to_transl_table_dict[current_seq_id] = current_transl_table
+
+
+    bin_gbk_file_handle = open(pwd_bin_gbk_file, 'w')
+    bin_ffn_file_handle = open(pwd_bin_ffn_file, 'w')
+    bin_faa_file_handle = open(pwd_bin_faa_file, 'w')
+    gene_index = 1
+    for seq_id in sequence_id_list:
+
+        # create SeqRecord
+        current_sequence = Seq(id_to_sequence_dict[seq_id])
+        current_SeqRecord = SeqRecord(current_sequence)
+        current_SeqRecord.seq.alphabet = generic_dna
+        transl_table = seq_to_transl_table_dict[seq_id]
+
+        # add SeqFeature to SeqRecord
+        for cds in seq_to_cds_dict[seq_id]:
+
+            # define locus_tag id
+            locus_tag_id = '%s_%s' % (prefix, "{:0>5}".format(gene_index))
+
+            # define FeatureLocation
+            cds_split = cds.split('_')
+            cds_start = SF.ExactPosition(int(cds_split[0]))
+            cds_end = SF.ExactPosition(int(cds_split[1]))
+            cds_strand = cds_split[2]
+            current_strand = None
+            if cds_strand == '+':
+                current_strand = 1
+            if cds_strand == '-':
+                current_strand = -1
+            current_feature_location = FeatureLocation(cds_start, cds_end, strand=current_strand)
+
+            # get nc sequence
+            sequence_nc = ''
+            if cds_strand == '+':
+                sequence_nc = id_to_sequence_dict[seq_id][cds_start-1:cds_end]
+            if cds_strand == '-':
+                sequence_nc = str(Seq(id_to_sequence_dict[seq_id][cds_start-1:cds_end], generic_dna).reverse_complement())
+
+            # translate to aa sequence
+            sequence_aa = str(SeqRecord(Seq(sequence_nc)).seq.translate(table=transl_table))
+
+            # remove * at the end
+            sequence_aa = sequence_aa[:-1]
+
+            # export nc and aa sequences
+            export_dna_record(sequence_nc, locus_tag_id, '', bin_ffn_file_handle)
+            export_aa_record(sequence_aa, locus_tag_id, '', bin_faa_file_handle)
+
+            # Define feature type
+            current_feature_type = 'CDS'
+
+            # Define feature qualifiers
+            current_qualifiers_dict = {}
+            current_qualifiers_dict['locus_tag'] = locus_tag_id
+            current_qualifiers_dict['transl_table'] = transl_table
+            current_qualifiers_dict['translation'] = sequence_aa
+
+            # Create a SeqFeature
+            current_feature = SeqFeature(current_feature_location, type=current_feature_type, qualifiers=current_qualifiers_dict)
+
+            # Append Feature to SeqRecord
+            current_SeqRecord.features.append(current_feature)
+
+            gene_index += 1
+
+        # export to gbk file
+        SeqIO.write(current_SeqRecord, bin_gbk_file_handle, 'genbank')
+
+    bin_gbk_file_handle.close()
+    bin_ffn_file_handle.close()
+    bin_faa_file_handle.close()
+
+
+def get_ffn_faa_from_gbk(input_gbk_folder, pwd_ffn_folder, pwd_faa_folder):
 
     # get input gbk file list
     input_gbk_re = '%s/*.gbk' % input_gbk_folder
@@ -76,13 +190,13 @@ def get_ffn_faa_from_gbk(prefix, input_gbk_folder, op_folder):
                         seq_nc = str(Seq(nc_seq_rc, generic_dna).reverse_complement())
 
                     # get aa sequence
-                    seq_aa = feature.qualifiers['translation'][0]
+                    #seq_aa = feature.qualifiers['translation'][0]
                     feature_id = feature.qualifiers['locus_tag'][0]
                     feature_description = feature.qualifiers['product'][0]
 
                     # export to file
                     export_dna_record(seq_nc, feature_id, feature_description, output_ffn_handle)
-                    export_aa_record(seq_aa, feature_id, feature_description, output_faa_handle)
+                    #export_aa_record(seq_aa, feature_id, feature_description, output_faa_handle)
 
         output_ffn_handle.close()
         output_faa_handle.close()
@@ -185,42 +299,119 @@ def plot_clustering_dendrogram(cluster, leaf_font_size, leaf_label_func, color_t
     plt.close()
 
 
-os.chdir('/Users/songweizhi/Desktop/wd_new')
-input_gbk_folder = 'input_gbk_files'
-output_prefix = 'NorthSea'
-MetaCHIP_wd = '%s_MetaCHIP_wd' % output_prefix
+##################################################### CONFIGURATION ####################################################
 
+parser = argparse.ArgumentParser()
 
-pwd_hmmsearch_exe = '~/Softwares/hmmer/hmmer-3.1b2-macosx-intel/binaries/hmmsearch'
-path_to_hmm = '~/PycharmProjects/MetaCHIP/phylo.hmm'
-pwd_mafft_exe = 'mafft'
-pwd_fasttree_exe = '~/Softwares/FastTree/FastTree'
-taxon_classification_file = None
-selected_rank = 'c'
-max_d = None
-leaf_font_size = 6
-add_group_to_tree_R = '~/R_scripts/newick_tree/add_group_to_tree.R'
+parser.add_argument('-i', required=True, help='input sequence folder')
 
+parser.add_argument('-x', required=True, help='file extension of input sequences')
+
+parser.add_argument('-p', required=True, help='output prefix')
+
+parser.add_argument('-hmm', required=False, default='~/PycharmProjects/MetaCHIP/phylo.hmm' ,help='the phylo.hmm file')
+
+parser.add_argument('-dc', required=False, type=float, default=None, help='distance cutoff')
+
+parser.add_argument('-fs', required=False, type=int, default=6, help='leaf name font size')
+
+parser.add_argument('-taxon', required=False, default=None, help='taxon classification if available')
+
+parser.add_argument('-prodigal', required=False, default='prodigal', help='path to prodigal executable')
+
+parser.add_argument('-hmmsearch', required=False, default='~/Softwares/hmmer/hmmer-3.1b2-macosx-intel/binaries/hmmsearch', help='path to hmmsearch executable')
+
+parser.add_argument('-mafft', required=False, default='mafft', help='path to mafft executable')
+
+parser.add_argument('-fasttree', required=False, default='~/Softwares/FastTree/FastTree', help='path to fasttree executable')
+
+parser.add_argument('-Rscript', required=False, default='~/R_scripts/newick_tree/add_group_to_tree.R', help='path to add_group_to_tree.R')
+
+parser.add_argument('-tr', required=False, default='c', help='taxon_ranks')
+
+args = vars(parser.parse_args())
+
+input_genome_folder = args['i']
+file_extension = args['x']
+output_prefix = args['p']
+path_to_hmm = args['hmm']
+pwd_prodigal_exe = args['prodigal']
+pwd_hmmsearch_exe = args['hmmsearch']
+pwd_mafft_exe = args['mafft']
+pwd_fasttree_exe = args['fasttree']
+max_d = args['dc']
+leaf_font_size = args['fs']
+taxon_classification_file = args['taxon']
+add_group_to_tree_R = args['Rscript']
+taxon_rank = args['tr']
+
+########################################################################################################################
 
 # disable warnings
 warnings.filterwarnings("ignore")
 
-
 # create MetaCHIP outputs folder
+MetaCHIP_wd = '%s_MetaCHIP_wd' % output_prefix
+
+prodigal_output_folder = '%s_prodigal_output' % output_prefix
+ffn_folder =             '%s_ffn_files'       % output_prefix
+faa_folder =             '%s_faa_files'       % output_prefix
+gbk_folder =             '%s_gbk_files'       % output_prefix
+
+pwd_prodigal_output_folder = '%s/%s' % (MetaCHIP_wd, prodigal_output_folder)
+pwd_ffn_folder =             '%s/%s' % (MetaCHIP_wd, ffn_folder)
+pwd_faa_folder =             '%s/%s' % (MetaCHIP_wd, faa_folder)
+pwd_gbk_folder =             '%s/%s' % (MetaCHIP_wd, gbk_folder)
+
+
 if os.path.isdir(MetaCHIP_wd):
     shutil.rmtree(MetaCHIP_wd, ignore_errors=True)
     if os.path.isdir(MetaCHIP_wd):
         shutil.rmtree(MetaCHIP_wd, ignore_errors=True)
         if os.path.isdir(MetaCHIP_wd):
             shutil.rmtree(MetaCHIP_wd, ignore_errors=True)
-    os.makedirs(MetaCHIP_wd)
+    os.mkdir(MetaCHIP_wd)
+    os.mkdir(pwd_prodigal_output_folder)
+    os.mkdir(pwd_ffn_folder)
+    os.mkdir(pwd_faa_folder)
+    os.mkdir(pwd_gbk_folder)
 else:
-    os.makedirs(MetaCHIP_wd)
+    os.mkdir(MetaCHIP_wd)
+    os.mkdir(pwd_prodigal_output_folder)
+    os.mkdir(pwd_ffn_folder)
+    os.mkdir(pwd_faa_folder)
+    os.mkdir(pwd_gbk_folder)
 
-########################################## get ffn and faa file from gbk files #########################################
+##################################################### run prodigal #####################################################
 
-get_ffn_faa_from_gbk(output_prefix, input_gbk_folder, MetaCHIP_wd)
+# get input genome list
+input_genome_re = '%s/*.%s' % (input_genome_folder, file_extension)
+input_genome_file_list = [os.path.basename(file_name) for file_name in glob.glob(input_genome_re)]
 
+n = 1
+for input_genome in input_genome_file_list:
+
+    # report current processing
+    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Running Prodigal for %s/%s: %s' % (n, len(input_genome_file_list), input_genome))
+
+    # prepare command (according to Prokka)
+    input_genome_basename, input_genome_ext = os.path.splitext(input_genome)
+    pwd_input_genome = '%s/%s' % (input_genome_folder, input_genome)
+    pwd_output_sco = '%s/%s.sco' % (pwd_prodigal_output_folder, input_genome_basename)
+    prodigal_cmd = '%s -f sco -q -c -m -g 11 -p meta -i %s -o %s' % (pwd_prodigal_exe, pwd_input_genome, pwd_output_sco)
+
+    # run prodigal
+    os.system(prodigal_cmd)
+
+    # prepare ffn, faa and gbk files from prodigal output
+    prodigal_parser(pwd_input_genome, pwd_output_sco, input_genome_basename, pwd_prodigal_output_folder)
+
+    # move file to separate folders
+    os.system('mv %s/%s.ffn %s' % (pwd_prodigal_output_folder, input_genome_basename, pwd_ffn_folder))
+    os.system('mv %s/%s.faa %s' % (pwd_prodigal_output_folder, input_genome_basename, pwd_faa_folder))
+    os.system('mv %s/%s.gbk %s' % (pwd_prodigal_output_folder, input_genome_basename, pwd_gbk_folder))
+
+    n += 1
 
 ################################################### get species tree ###################################################
 
@@ -234,7 +425,7 @@ pwd_newick_tree_file =          '%s/%s'                     % (MetaCHIP_wd, newi
 os.mkdir(pwd_SCG_tree_wd)
 
 
-faa_file_re = '%s/%s_faa_files/*.faa' % (MetaCHIP_wd, output_prefix)
+faa_file_re = '%s/*.faa' % pwd_faa_folder
 faa_file_list = [os.path.basename(file_name) for file_name in glob.glob(faa_file_re)]
 faa_file_list = sorted(faa_file_list)
 
@@ -356,7 +547,7 @@ print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' The built species tree wa
 # get bin to taxon dict
 bin_to_taxon_dict = {}
 if taxon_classification_file != None:
-    bin_to_taxon_dict = get_rank_assignment_dict(selected_rank, taxon_classification_file)
+    bin_to_taxon_dict = get_rank_assignment_dict(taxon_rank, taxon_classification_file)
 
 # read in tree
 tree_in = Tree(pwd_newick_tree_file, format=3)
