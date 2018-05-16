@@ -312,39 +312,79 @@ def plot_species_tree(tree_newick, tree_type, gene_name, tree_file_name, name_li
     tree.render('%s/%s.png' % (tree_image_folder, tree_file_name), w = 900, units = 'px', tree_style = ts)
 
 
-############################################## input ##############################################
+############################################## Read in configuration file ##############################################
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('-p', required=True, help='output prefix')
+parser.add_argument('-g',
+                    required=True,
+                    help='grouping file')
 
-parser.add_argument('-g', required=True, help='grouping file')
+parser.add_argument('-cov',
+                    required=False,
+                    type=int,
+                    default=70,
+                    help='coverage cutoff')
 
-parser.add_argument('-cov', required=False, type=int, default=70, help='coverage cutoff')
+parser.add_argument('-al',
+                    required=False,
+                    type=int,
+                    default=200,
+                    help='alignment length cutoff')
 
-parser.add_argument('-al', required=False, type=int, default=200, help='alignment length cutoff')
+parser.add_argument('-ip',
+                    required=False,
+                    type=int,
+                    default=90,
+                    help='identity percentile')
 
-parser.add_argument('-ip', required=False, type=int, default=90, help='identity percentile')
+parser.add_argument('-eb',
+                    required=False,
+                    type=int,
+                    default=1000,
+                    help='the minimal length to be considered as end break')
 
-parser.add_argument('-eb', required=False, type=int, default=1000, help='the minimal length to be considered as end break')
+parser.add_argument('-a',
+                    required=True,
+                    help='Prokka output')
 
-parser.add_argument('-a', required=True, help='Prokka output')
+parser.add_argument('-o',
+                    required=True,
+                    help='orthologs folder')
 
-parser.add_argument('-o', required=True, help='orthologs folder')
+parser.add_argument('-p',
+                    action="store_true",
+                    required=False,
+                    help='plot tree')
 
-parser.add_argument('-pt', action="store_true", required=False, help='plot tree')
+parser.add_argument('-m',
+                    required=True,
+                    help='phylo.hmm')
 
-parser.add_argument('-m', required=False, help='~/PycharmProjects/MetaCHIP/phylo.hmm')
+parser.add_argument('-ranger',
+                    required=False,
+                    default='/srv/scratch/z5039045/Softwares/Ranger-DTL/ranger-dtl-U.linux',
+                    help='path to Ranger executable')
 
-parser.add_argument('-ranger', required=False, default='/Users/songweizhi/Softwares/Ranger-DTL/ranger-dtl-U.mac', help='path to Ranger executable')
+parser.add_argument('-hmmsearch',
+                    required=False,
+                    default='/share/apps/hmmer/3.1b2/bin/hmmsearch',
+                    help='path to hmmsearch executable')
 
-parser.add_argument('-hmmsearch', required=False, default='~/Softwares/hmmer/hmmer-3.1b2-macosx-intel/binaries/hmmsearch', help='path to hmmsearch executable')
+parser.add_argument('-mafft',
+                    required=False,
+                    default='/share/apps/mafft/7.310/bin/mafft',
+                    help='path to Mafft executable')
 
-parser.add_argument('-mafft', required=False, default='mafft', help='path to Mafft executable')
+parser.add_argument('-fasttree',
+                    required=False,
+                    default='/share/apps/fasttree/2.1.7/fasttree',
+                    help='path to FastTree executable')
 
-parser.add_argument('-fasttree', required=False, default='~/Softwares/FastTree/FastTree', help='path to FastTree executable')
-
-parser.add_argument('-blastp', required=False, default='blastp', help='path to FastTree executable')
+parser.add_argument('-blastp',
+                    required=False,
+                    default='blastp',
+                    help='path to FastTree executable')
 
 args = vars(parser.parse_args())
 grouping_file = args['g']
@@ -354,7 +394,7 @@ identity_percentile = args['ip']
 ending_match_length = args['eb']
 prokka_output = args['a']
 ortholog_group_folder_name = args['o']
-plot_tree = args['pt']
+plot_tree = args['p']
 pwd_phylo_hmm = args['m']
 pwd_ranger_exe = args['ranger']
 pwd_hmmsearch_exe = args['hmmsearch']

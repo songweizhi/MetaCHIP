@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import os
-import re
 import glob
 import shutil
 import warnings
@@ -26,8 +25,6 @@ from datetime import datetime
 
 
 # add -f force option
-# generate HGT results folder later
-
 
 def get_number_of_group(grouping_file):
 
@@ -764,7 +761,7 @@ def get_gbk_blast_act(candidates_file, gbk_file, flanking_length, end_seq_length
     for match in open(candidates_file):
         genes = match.strip().split('\t')[:-1]
         folder_name = '___'.join(genes)
-        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + " Plotting flanking region (%d/%d): %s" % (n, total, folder_name))
+        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + " Plotting flanking region for %d/%d: %s" % (n, total, folder_name))
         os.mkdir('%s/%s' % (path_to_output_act_folder, folder_name))
 
         dict_value_list = []
@@ -963,6 +960,7 @@ def remove_bidirection(input_file, candidate2identity_dict, output_file):
         output.write('%s\t%s\n' % (each, candidate2identity_dict[each_concatenated]))
     output.close()
 
+############################################## input ##############################################
 
 parser = argparse.ArgumentParser()
 

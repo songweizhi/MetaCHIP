@@ -2,7 +2,7 @@
 
 Publication
 ---
-+ Song W, Wemheuer B, Zhang S, Steensen K, Thomas T. (2018) MetaCHIP: community-level horizontal gene transfer identification through the combination of best-match and explicit phylogenetic tree approaches (under review)
++ Song W, Wemheuer B, Zhang S, Steensen K, Thomas T. (2018) MetaCHIP: community-level horizontal gene transfer identification through the combination of best-match and explicit phylogenetic tree approaches (submitted)
 
 + Contact: Weizhi Song (songwz03@gmail.com), Torsten Thomas(t.thomas@unsw.edu.au)
 
