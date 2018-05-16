@@ -8,23 +8,35 @@ Publication
 
 Dependencies:
 ---
-+ Python package:
-[BioPython](https://github.com/biopython/biopython.github.io/),
-[ETE3](http://etetoolkit.org),
-[Numpy](http://www.numpy.org),
-[SciPy](https://www.scipy.org),
-[Matplotlib](http://matplotlib.org),
-[Pillow](https://pypi.python.org/pypi/Pillow/3.3.1),
-[ReportLab](http://www.reportlab.com)
-+ [R](https://www.r-project.org) and its module:
-[optparse](https://cran.r-project.org/web/packages/optparse/index.html),
-[ape](https://cran.r-project.org/web/packages/ape/index.html)
-+ [Prodigal](https://github.com/hyattpd/Prodigal)
-+ [HMMER](http://hmmer.org)
-+ [MAFFT](https://mafft.cbrc.jp/alignment/software/)
-+ [FastTree 2.1.9](http://www.microbesonline.org/fasttree/)
-+ [Get_Homologues](https://github.com/eead-csic-compbio/get_homologues)
-+ [Ranger-DTL 1.0](http://compbio.mit.edu/ranger-dtl/)
+
+
+
+1. For Get_clusters.py
+    + Python package:
+    [BioPython](https://github.com/biopython/biopython.github.io/),
+    [ETE3](http://etetoolkit.org),
+    [Numpy](http://www.numpy.org),
+    [SciPy](https://www.scipy.org),
+    [Matplotlib](http://matplotlib.org)
+    + [R](https://www.r-project.org) and its module:
+    [optparse](https://cran.r-project.org/web/packages/optparse/index.html),
+    [ape](https://cran.r-project.org/web/packages/ape/index.html)
+    + [Prodigal](https://github.com/hyattpd/Prodigal)
+    + [HMMER](http://hmmer.org)
+    + [MAFFT](https://mafft.cbrc.jp/alignment/software/)
+    + [FastTree 2.1.9](http://www.microbesonline.org/fasttree/)
+
+1. For Best-match.py.py
+    + Python package:
+    [ReportLab](http://www.reportlab.com)
+    + [BLAST+](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download)
+
+1. For Phylogenetic.py
+    + Python package:
+    [ETE3](http://etetoolkit.org),
+    [Pillow](https://pypi.python.org/pypi/Pillow/3.3.1)
+    + [Get_Homologues](https://github.com/eead-csic-compbio/get_homologues)
+    + [Ranger-DTL 1.0](http://compbio.mit.edu/ranger-dtl/)
 
 Notes:
 ---
@@ -45,7 +57,7 @@ How to run it:
         $ python Best-match.py -p human_gut
 
         # Third, predict HGT with phylogenetic approach
-        $ python Explicit_Tree.py -cfg config.txt
+        $ python Phylogenetic.py -cfg config.txt
 
 Output files:
 ---
