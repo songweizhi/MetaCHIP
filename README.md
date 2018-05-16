@@ -26,16 +26,18 @@ Dependencies:
 + [Get_Homologues](https://github.com/eead-csic-compbio/get_homologues)
 + [Ranger-DTL 1.0](http://compbio.mit.edu/ranger-dtl/)
 
+Notes:
+---
+1. To get a reliable clusrering results of the input genome bins, their completeness need to be higher than 40%.
+2. You can use GTDB-Tk to get the taxonomy of your input genome bin to further refine the cluster results.
+
 Prepare input files:
 ---
-1.  The only input for MetaCHIP is a folder which holds all input genomes.
-1.  You can use GTDB-Tk to get the taxonomy of your genomes t help get a better grouping profile.
+1.  The only input for MetaCHIP is a folder which holds the sequence file of a set of genome bins.
 1.  Get_Homologues is needed to get the Ortholog groups within your input genomes.
 
 How to run it:
 ---
-
-+ All input files need to be placed in working directory!
 
         # First, get clusters
         $ python Get_clusters.py -i human_gut_bins -x fasta -p human_gut
