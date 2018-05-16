@@ -21,9 +21,7 @@ Dependencies:
 + [HMMER](http://hmmer.org)
 + [FastTree 2.1.9](http://www.microbesonline.org/fasttree/)
 + [Ranger-DTL 1.0](http://compbio.mit.edu/ranger-dtl/)
-+ [Prokka](http://www.vicbioinformatics.com/software.prokka.shtml)
-+ [R](https://www.r-project.org)
-+  R module:
++ [R](https://www.r-project.org) and its module:
 [optparse](https://cran.r-project.org/web/packages/optparse/index.html),
 [ape](https://cran.r-project.org/web/packages/ape/index.html)
 

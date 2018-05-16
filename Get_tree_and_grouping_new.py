@@ -363,7 +363,6 @@ pwd_ffn_folder =             '%s/%s' % (MetaCHIP_wd, ffn_folder)
 pwd_faa_folder =             '%s/%s' % (MetaCHIP_wd, faa_folder)
 pwd_gbk_folder =             '%s/%s' % (MetaCHIP_wd, gbk_folder)
 
-
 if os.path.isdir(MetaCHIP_wd):
     shutil.rmtree(MetaCHIP_wd, ignore_errors=True)
     if os.path.isdir(MetaCHIP_wd):
