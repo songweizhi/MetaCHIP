@@ -1393,3 +1393,6 @@ if keep_temp == 0:
 sleep(1)
 print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Done for Best-match approach prediction!')
 print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' You may want to run the Phylogenetic approach for further validation.')
+print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' All protein orthologs within the input genomes need to be obtained for the Phylogenetic approach, you can get it with the following commands:')
+print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' $ cd %s' % MetaCHIP_wd)
+print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' $ get_homologues.pl -f 70 -t 3 -S 70 -E 1e-05 -C 70 -G -n 16 -d %s' % gbk_folder)
