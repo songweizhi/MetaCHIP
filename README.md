@@ -65,7 +65,7 @@ How to run it:
         $ python Best-match.py -p human_gut
 
         # Third, predict HGT with phylogenetic approach
-        $ python Phylogenetic.py -cfg config.txt
+        $ python Phylogenetic.py -p human_gut
 
 Output files:
 ---
