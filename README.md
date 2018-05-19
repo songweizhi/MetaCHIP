@@ -83,13 +83,6 @@ Output files:
         BNM_02445	AMS_01681	B_5	A_5	77.961	no	BNM<-AMS
         BNM_02717	AAM_02737	B_5	A_1	74.47	no	BNM<-AAM
 
-1. Determined identity cut off for each group pairs.
-
-        A_B	71.71
-        A_C	67.15
-        A_D	67.92
-        ...
-
 1. Identity distribution plot for each group pair.
 
     ![identity_distribution](doc/images/identity_distribution.png)
