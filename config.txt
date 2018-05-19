@@ -1,0 +1,8 @@
+prodigal=prodigal
+hmmsearch=/Users/songweizhi/Softwares/hmmer/hmmer-3.1b2-macosx-intel/binaries/hmmsearch
+mafft=mafft
+fasttree=/Users/songweizhi/Softwares/FastTree/FastTree
+ranger=/Users/songweizhi/Softwares/Ranger-DTL/ranger-dtl-U.mac
+blastp=blastp
+blastn=blastn
+makeblastdb=makeblastdb

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os
+import sys
 import glob
 import shutil
 import warnings
@@ -25,6 +26,25 @@ from datetime import datetime
 
 
 # add -f force option
+
+
+def get_program_path_dict(pwd_cfg_file):
+    program_path_dict = {}
+    for each in open(pwd_cfg_file):
+        each_split = each.strip().split('=')
+        program_name = each_split[0]
+        program_path = each_split[1]
+
+        # remove space if there are
+        if program_name[-1] == ' ':
+            program_name = program_name[:-1]
+        if program_path[0] == ' ':
+            program_path = program_path[1:]
+
+        program_path_dict[program_name] = program_path
+
+    return program_path_dict
+
 
 def get_number_of_group(grouping_file):
 
@@ -997,15 +1017,21 @@ identity_percentile = args['ip']
 align_len_cutoff = args['al']
 ending_match_length = args['eb']
 keep_temp = args['tmp']
-pwd_blastn_exe = args['blastn']
-pwd_makeblastdb_exe = args['makeblastdb']
 
+# get path to current script
+pwd_best_match_script = sys.argv[0]
+best_match_script_path, file_name = os.path.split(pwd_best_match_script)
+
+# read in config file
+pwd_cfg_file = '%s/config.txt' % best_match_script_path
+program_path_dict = get_program_path_dict(pwd_cfg_file)
+
+pwd_blastn_exe = program_path_dict['blastn']
+pwd_makeblastdb_exe = program_path_dict['makeblastdb']
 
 warnings.filterwarnings("ignore")
 
-
 MetaCHIP_wd = '%s_MetaCHIP_wd' % output_prefix
-
 
 ffn_folder =             '%s_ffn_files'       % output_prefix
 faa_folder =             '%s_faa_files'       % output_prefix

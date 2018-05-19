@@ -49,7 +49,7 @@ for (i in 1:length(SCG_tree_with_group$tip.label)) {
 jpeg(pwd_tree_plot_file_with_group, width = 1600, height = 1600, units = "px", quality = 100, pointsize = 30)
 plot.phylo(SCG_tree_with_group, 'u', font = 1, cex = 0.7, label.offset = 0.02, lab4ut = 'axial')
 dev.off()
-write.tree(SCG_tree_with_group, file=pwd_tree_txt_file_with_group)
+#write.tree(SCG_tree_with_group, file=pwd_tree_txt_file_with_group)
 
 # plot SCG tree only group
 SCG_tree_only_group = read.tree(tree_file_in)
@@ -64,4 +64,4 @@ for (i in 1:length(SCG_tree_only_group$tip.label)) {
 jpeg(pwd_tree_plot_file_only_group, width = 1600, height = 1600, units = "px", quality = 100, pointsize = 30)
 plot.phylo(SCG_tree_only_group, 'u', font = 1, cex = 0.7, label.offset = 0.02, lab4ut = 'axial')
 dev.off()
-write.tree(SCG_tree_only_group, file=pwd_tree_txt_file_only_group)
+#write.tree(SCG_tree_only_group, file=pwd_tree_txt_file_only_group)

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os
 import re
+import sys
 import glob
 import shutil
 import argparse
@@ -10,6 +11,7 @@ from Bio.Seq import Seq
 from Bio.Alphabet import IUPAC
 from Bio.SeqRecord import SeqRecord
 from datetime import datetime
+
 
 # to-do
 # what if hiden files are more than one (section: get species tree for all input genomes)
@@ -21,6 +23,24 @@ from datetime import datetime
 # no ''' in input file name
 # plot inter node of species tree
 # multiple threads
+
+
+def get_program_path_dict(pwd_cfg_file):
+    program_path_dict = {}
+    for each in open(pwd_cfg_file):
+        each_split = each.strip().split('=')
+        program_name = each_split[0]
+        program_path = each_split[1]
+
+        # remove space if there are
+        if program_name[-1] == ' ':
+            program_name = program_name[:-1]
+        if program_path[0] == ' ':
+            program_path = program_path[1:]
+
+        program_path_dict[program_name] = program_path
+
+    return program_path_dict
 
 
 class BinRecord(object):
@@ -318,7 +338,7 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument('-p', required=True, help='output prefix')
 
-parser.add_argument('-g', required=True, help='grouping file')
+parser.add_argument('-g', required=False, help='grouping file')
 
 parser.add_argument('-cov', required=False, type=int, default=70, help='coverage cutoff')
 
@@ -328,13 +348,11 @@ parser.add_argument('-ip', required=False, type=int, default=90, help='identity 
 
 parser.add_argument('-eb', required=False, type=int, default=1000, help='the minimal length to be considered as end break')
 
-parser.add_argument('-a', required=True, help='Prokka output')
+parser.add_argument('-a', required=False, help='Prokka output')
 
-parser.add_argument('-o', required=True, help='orthologs folder')
+parser.add_argument('-o', required=False, help='orthologs folder')
 
 parser.add_argument('-pt', action="store_true", required=False, help='plot tree')
-
-parser.add_argument('-m', required=False, help='~/PycharmProjects/MetaCHIP/phylo.hmm')
 
 parser.add_argument('-ranger', required=False, default='/Users/songweizhi/Softwares/Ranger-DTL/ranger-dtl-U.mac', help='path to Ranger executable')
 
@@ -347,6 +365,7 @@ parser.add_argument('-fasttree', required=False, default='~/Softwares/FastTree/F
 parser.add_argument('-blastp', required=False, default='blastp', help='path to FastTree executable')
 
 args = vars(parser.parse_args())
+output_prefix = args['p']
 grouping_file = args['g']
 cover_cutoff = args['cov']
 align_len_cutoff = args['al']
@@ -355,12 +374,21 @@ ending_match_length = args['eb']
 prokka_output = args['a']
 ortholog_group_folder_name = args['o']
 plot_tree = args['pt']
-pwd_phylo_hmm = args['m']
-pwd_ranger_exe = args['ranger']
-pwd_hmmsearch_exe = args['hmmsearch']
-pwd_mafft_exe = args['mafft']
-pwd_fasttree_exe = args['fasttree']
-pwd_blastp_exe = args['blastp']
+
+# get path to current script
+pwd_phylogenetic_script = sys.argv[0]
+phylogenetic_script_path, file_name = os.path.split(pwd_phylogenetic_script)
+pwd_phylo_hmm = '%s/phylo.hmm' % phylogenetic_script_path
+
+# read in config file
+pwd_cfg_file = '%s/config.txt' % phylogenetic_script_path
+program_path_dict = get_program_path_dict(pwd_cfg_file)
+
+pwd_ranger_exe = program_path_dict['ranger']
+pwd_hmmsearch_exe = program_path_dict['hmmsearch']
+pwd_mafft_exe = program_path_dict['mafft']
+pwd_fasttree_exe = program_path_dict['fasttree']
+pwd_blastp_exe = program_path_dict['blastp']
 
 
 ############################################### Define folder/file name ################################################
@@ -370,9 +398,32 @@ if plot_tree == 1:
     from ete3 import TreeStyle, NodeStyle, TextFace
     from PIL import Image, ImageDraw, ImageFont
 
+########################################################################################################################
+
+MetaCHIP_wd = '%s_MetaCHIP_wd' % output_prefix
+gbk_folder =             '%s_gbk_files'       % output_prefix
+get_homologues_wd =      '%s_homologues'      % gbk_folder
+pwd_get_homologues_wd = '%s/%s' % (MetaCHIP_wd, get_homologues_wd)
+
+# get grouping file
+if grouping_file == None:
+    grouping_file_re = '%s/%s_grouping_g*.txt' % (MetaCHIP_wd, output_prefix)
+    grouping_file_list = [os.path.basename(file_name) for file_name in glob.glob(grouping_file_re)]
+    #grouping_file_list = re.match(grouping_file_re)
+
+    if len(grouping_file_list) == 1:
+        grouping_file = '%s/%s' % (MetaCHIP_wd, grouping_file_list[0])
+
+    if len(grouping_file_list) != 1:
+        print('No or multiple grouping file found, please specify with "-g" option')
+        exit()
+
+pwd_grouping_file = grouping_file
+
+MetaCHIP_op_folder = '%s_HGTs_ip%s_al%sbp_c%s_e%sbp_g%s' % (output_prefix, str(identity_percentile), str(align_len_cutoff), str(cover_cutoff), str(ending_match_length), get_number_of_group(pwd_grouping_file))
+pwd_MetaCHIP_op_folder = '%s/%s' % (MetaCHIP_wd, MetaCHIP_op_folder)
+
 wd = os.getcwd()
-pwd_grouping_file = '%s/%s' % (wd, grouping_file)
-op_folder = 'output_ip%s_al%sbp_c%s_e%sbp_g%s' % (str(identity_percentile), str(align_len_cutoff), str(cover_cutoff), str(ending_match_length), get_number_of_group(pwd_grouping_file))
 
 tree_folder =                                'tree_folder'
 tree_plots_folder =                          'tree_plots'
@@ -390,38 +441,49 @@ candidates_file_name_ET_validated_fasta_aa = 'HGT_candidates_ET_validated_aa.fas
 ranger_wd_name =                             'Ranger-DTL_wd'
 output_tree_folder_name =                    'Explicit_tree_output'
 tree_image_folder_name =                     'combined_tree_images'
-ffn_file =                                   'combined.ffn'
+
+
+combined_ffn_file = '%s_combined.ffn' % output_prefix
+pwd_combined_ffn_file = '%s/%s' % (MetaCHIP_wd, combined_ffn_file)
+
 
 pwd_prokka =                     '%s/%s'         % (wd, prokka_output)
-pwd_ffn_file =                   '%s/%s'         % (wd, ffn_file)
-pwd_ortholog_group_folder =      '%s/%s'         % (wd, ortholog_group_folder_name)
-pwd_candidates_file =            '%s/%s/%s'      % (wd, op_folder, candidates_file_name)
-pwd_candidates_seq_file =        '%s/%s/%s'      % (wd, op_folder, candidates_seq_file_name)
-pwd_candidates_file_ET =         '%s/%s/%s'      % (wd, op_folder, candidates_file_name_ET)
-pwd_candidates_file_ET_validated ='%s/%s/%s'      % (wd, op_folder, candidates_file_name_ET_validated)
-pwd_candidates_file_ET_validated_fasta_nc = '%s/%s/%s' % (wd, op_folder, candidates_file_name_ET_validated_fasta_nc)
-pwd_candidates_file_ET_validated_fasta_aa = '%s/%s/%s' % (wd, op_folder, candidates_file_name_ET_validated_fasta_aa)
-pwd_ranger_wd =                  '%s/%s/%s/%s/'  % (wd, op_folder, output_tree_folder_name, ranger_wd_name)
+pwd_candidates_file =            '%s/%s'      % (pwd_MetaCHIP_op_folder, candidates_file_name)
+pwd_candidates_seq_file =        '%s/%s'      % (pwd_MetaCHIP_op_folder, candidates_seq_file_name)
+pwd_candidates_file_ET =         '%s/%s'      % (pwd_MetaCHIP_op_folder, candidates_file_name_ET)
+pwd_candidates_file_ET_validated ='%s/%s'      % (pwd_MetaCHIP_op_folder, candidates_file_name_ET_validated)
+pwd_candidates_file_ET_validated_fasta_nc = '%s/%s' % (pwd_MetaCHIP_op_folder, candidates_file_name_ET_validated_fasta_nc)
+pwd_candidates_file_ET_validated_fasta_aa = '%s/%s' % (pwd_MetaCHIP_op_folder, candidates_file_name_ET_validated_fasta_aa)
+pwd_ranger_wd =                  '%s/%s/%s/'  % (pwd_MetaCHIP_op_folder, output_tree_folder_name, ranger_wd_name)
 pwd_ranger_inputs_folder =       '%s/%s'         % (pwd_ranger_wd, ranger_inputs_folder_name)
 pwd_ranger_outputs_folder =      '%s/%s'         % (pwd_ranger_wd, ranger_outputs_folder_name)
-pwd_op_tree_folder =             '%s/%s/%s'      % (wd, op_folder, output_tree_folder_name)
+pwd_op_tree_folder =             '%s/%s'      % (pwd_MetaCHIP_op_folder, output_tree_folder_name)
 pwd_tree_image_folder =          '%s/%s'         % (pwd_op_tree_folder, tree_image_folder_name)
 pwd_tree_folder =                '%s/%s'         % (pwd_op_tree_folder, tree_folder)
 pwd_tree_plots_folder =          '%s/%s'         % (pwd_op_tree_folder, tree_plots_folder)
 pwd_gene_tree_newick_folder =    '%s/%s'         % (pwd_op_tree_folder, gene_tree_newick_folder)
 pwd_species_tree_folder_plot =   '%s/%s'         % (pwd_op_tree_folder, species_tree_folder_plot)
 pwd_species_tree_folder_ranger = '%s/%s'         % (pwd_op_tree_folder, species_tree_folder_ranger)
-pwd_grouping_file_with_id =      '%s/%s/%s'      % (wd, op_folder, 'grouping_with_id.txt')
+pwd_grouping_file_with_id =      '%s/%s'      % (pwd_MetaCHIP_op_folder, 'grouping_with_id.txt')
 
-# check whether file exist
-unfound_inputs = []
-for each_input in [pwd_prokka, pwd_grouping_file, pwd_ortholog_group_folder, pwd_phylo_hmm]:
-    if (not os.path.isfile(each_input)) and (not os.path.isdir(each_input)):
-        unfound_inputs.append(each_input)
-if len(unfound_inputs) > 0:
-    for each_unfound in unfound_inputs:
-        print('%s not found' % each_unfound)
-    exit()
+
+
+
+
+get_homologues_wd_subdirs = [d for d in os.listdir(pwd_get_homologues_wd) if os.path.isdir(os.path.join(pwd_get_homologues_wd, d))]
+get_homologues_wd_subdirs.remove('tmp')
+ortholog_group_folder_name = get_homologues_wd_subdirs[0]
+pwd_ortholog_group_folder = '%s/%s' % (pwd_get_homologues_wd, ortholog_group_folder_name)
+
+# # check whether file exist
+# unfound_inputs = []
+# for each_input in [pwd_prokka, pwd_grouping_file, pwd_ortholog_group_folder, pwd_phylo_hmm]:
+#     if (not os.path.isfile(each_input)) and (not os.path.isdir(each_input)):
+#         unfound_inputs.append(each_input)
+# if len(unfound_inputs) > 0:
+#     for each_unfound in unfound_inputs:
+#         print('%s not found' % each_unfound)
+#     exit()
 
 ########################################################################################################################
 
@@ -433,8 +495,10 @@ for match_group in candidates_file:
         match_group_split = match_group.strip().split('\t')[:2]
         candidates_list.append(match_group_split)
 
-
 # get all ortholog groups
+ortholog_group_file_re = '%s/*.fna' % pwd_ortholog_group_folder
+ortholog_group_file_list = [os.path.basename(file_name) for file_name in glob.glob(ortholog_group_file_re)]
+
 clusters_original = [os.path.basename(file_name) for file_name in glob.glob('%s/*.fna' % pwd_ortholog_group_folder)]
 clusters = []
 for cluster_o in clusters_original:
@@ -512,17 +576,8 @@ else:
 ####################################################### Main Code ######################################################
 
 # get species tree for all input genomes
-print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Building species tree for all input genomes')
-get_species_tree_wd = '%s/%s' % (wd, 'get_species_tree_wd')
-
-if (os.path.isdir(get_species_tree_wd)) and (len(os.listdir(get_species_tree_wd)) > 1):
-    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' get_species_tree_wd folder detected, will skip the alignment step')
-else:
-    os.system('rm -r ' + get_species_tree_wd)
-    os.mkdir(get_species_tree_wd)
-    get_species_tree_alignment(get_species_tree_wd, pwd_prokka, pwd_phylo_hmm, pwd_hmmsearch_exe, pwd_mafft_exe)
-    all_input_genomes = [i for i in os.listdir(pwd_prokka) if os.path.isdir(pwd_prokka + '/' + i)]
-    get_species_tree_newick(get_species_tree_wd, all_input_genomes, pwd_fasttree_exe, wd, 'species_tree_all')
+SCG_tree_wd =                   '%s_get_SCG_tree_wd'        % output_prefix
+pwd_SCG_tree_wd =               '%s/%s'                     % (MetaCHIP_wd, SCG_tree_wd)
 
 candidate_2_predictions_dict = {}
 candidate_2_possible_direction_dict = {}
@@ -565,7 +620,7 @@ for each_candidates in candidates_list:
         seq_file_name = '%s.seq' % seq_file_name_prefix
         pwd_seq_file = '%s/%s' % (pwd_tree_folder, seq_file_name)
         output_handle = open(pwd_seq_file, "w")
-        for seq_record in SeqIO.parse(pwd_ffn_file, 'fasta'):
+        for seq_record in SeqIO.parse(pwd_combined_ffn_file, 'fasta'):
             if seq_record.id in gene_member:
                 aa_object = seq_record.seq.translate()
                 aa_record = SeqRecord(aa_object)
@@ -644,13 +699,9 @@ for each_candidates in candidates_list:
         os.remove(non_self_seq)
         os.remove(blast_output)
         os.remove(blast_output_sorted)
-        os.remove(pwd_seq_file)
-
         # forward back to previous wd
         os.chdir(current_wd)
-
-########################################################################################################################
-
+        os.remove(pwd_seq_file)
 
 ############################################ get gene tree and species tree ############################################
 
@@ -663,7 +714,7 @@ for each_candidates in candidates_list:
 
         # get species tree subset
         species_tree_file_name = '___'.join(each_candidates) + '_species_tree'
-        get_species_tree_newick(get_species_tree_wd, genome_subset, pwd_fasttree_exe, pwd_tree_folder, species_tree_file_name)
+        get_species_tree_newick(pwd_SCG_tree_wd, genome_subset, pwd_fasttree_exe, pwd_tree_folder, species_tree_file_name)
 
         # plot  tree
         if plot_tree == 1:

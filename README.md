@@ -11,8 +11,6 @@ Publication
 Dependencies:
 ---
 
-
-
 1. For Get_clusters.py
     + Python package:
     [BioPython](https://github.com/biopython/biopython.github.io/),
@@ -39,6 +37,14 @@ Dependencies:
     [Pillow](https://pypi.python.org/pypi/Pillow/3.3.1)
     + [Get_Homologues](https://github.com/eead-csic-compbio/get_homologues)
     + [Ranger-DTL 1.0](http://compbio.mit.edu/ranger-dtl/)
+
+
+How to install:
+---
+1. Download MetaCHIP scrsipt and decompress it
+1. Isntall the dependencies
+1. Modify the config file according to the place of installed dependencies.
+
 
 Notes:
 ---

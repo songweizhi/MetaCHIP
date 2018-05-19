@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import os
 import re
+import sys
 import glob
 import shutil
 import warnings
@@ -23,6 +24,24 @@ import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
 from scipy.cluster.hierarchy import linkage, fcluster, dendrogram
+
+
+def get_program_path_dict(pwd_cfg_file):
+    program_path_dict = {}
+    for each in open(pwd_cfg_file):
+        each_split = each.strip().split('=')
+        program_name = each_split[0]
+        program_path = each_split[1]
+
+        # remove space if there are
+        if program_name[-1] == ' ':
+            program_name = program_name[:-1]
+        if program_path[0] == ' ':
+            program_path = program_path[1:]
+
+        program_path_dict[program_name] = program_path
+
+    return program_path_dict
 
 
 def export_dna_record(gene_seq, gene_id, gene_description, output_handle):
@@ -308,23 +327,11 @@ parser.add_argument('-x', required=True, help='file extension of input sequences
 
 parser.add_argument('-p', required=True, help='output prefix')
 
-parser.add_argument('-hmm', required=False, default='~/PycharmProjects/MetaCHIP/phylo.hmm' ,help='the phylo.hmm file')
-
 parser.add_argument('-dc', required=False, type=float, default=None, help='distance cutoff')
 
 parser.add_argument('-fs', required=False, type=int, default=6, help='leaf name font size')
 
 parser.add_argument('-taxon', required=False, default=None, help='taxon classification if available')
-
-parser.add_argument('-prodigal', required=False, default='prodigal', help='path to prodigal executable')
-
-parser.add_argument('-hmmsearch', required=False, default='~/Softwares/hmmer/hmmer-3.1b2-macosx-intel/binaries/hmmsearch', help='path to hmmsearch executable')
-
-parser.add_argument('-mafft', required=False, default='mafft', help='path to mafft executable')
-
-parser.add_argument('-fasttree', required=False, default='~/Softwares/FastTree/FastTree', help='path to fasttree executable')
-
-parser.add_argument('-Rscript', required=False, default='~/R_scripts/newick_tree/add_group_to_tree.R', help='path to add_group_to_tree.R')
 
 parser.add_argument('-tr', required=False, default='c', help='taxon_ranks')
 
@@ -333,16 +340,31 @@ args = vars(parser.parse_args())
 input_genome_folder = args['i']
 file_extension = args['x']
 output_prefix = args['p']
-path_to_hmm = args['hmm']
-pwd_prodigal_exe = args['prodigal']
-pwd_hmmsearch_exe = args['hmmsearch']
-pwd_mafft_exe = args['mafft']
-pwd_fasttree_exe = args['fasttree']
 max_d = args['dc']
 leaf_font_size = args['fs']
 taxon_classification_file = args['taxon']
-add_group_to_tree_R = args['Rscript']
 taxon_rank = args['tr']
+
+# get path to current script
+pwd_Get_clusters_script = sys.argv[0]
+Get_clusters_script_path, file_name = os.path.split(pwd_Get_clusters_script)
+path_to_hmm = '%s/phylo.hmm' % Get_clusters_script_path
+add_group_to_tree_R = '%s/add_group_to_tree.R' % Get_clusters_script_path
+
+# read in config file
+pwd_cfg_file = '%s/config.txt' % Get_clusters_script_path
+program_path_dict = get_program_path_dict(pwd_cfg_file)
+pwd_prodigal_exe = program_path_dict['prodigal']
+pwd_hmmsearch_exe = program_path_dict['hmmsearch']
+pwd_mafft_exe = program_path_dict['mafft']
+pwd_fasttree_exe = program_path_dict['fasttree']
+
+# check whether input genome exist
+input_genome_re = '%s/*.%s' % (input_genome_folder, file_extension)
+input_genome_file_list = [os.path.basename(file_name) for file_name in glob.glob(input_genome_re)]
+if input_genome_file_list == []:
+    print('No input genome detected, program exited!')
+    exit()
 
 ########################################################################################################################
 
