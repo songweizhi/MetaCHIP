@@ -1,8 +1,8 @@
 
 ################################### run Get_clusters.py ##################################
 
-python ~/PycharmProjects/MetaCHIP/Get_clusters.py -i Human_gut_bins -x fasta -p Human_gut
-python ~/PycharmProjects/MetaCHIP/Get_clusters.py -i North_Sea_bins -x fasta -p North_Sea
+python Get_clusters.py -i Human_gut_bins -x fasta -p Human_gut
+python Get_clusters.py -i North_Sea_bins -x fasta -p North_Sea
 
 
 ####################################### run GTDB-Tk ######################################
@@ -19,14 +19,14 @@ get_homologues.pl -f 70 -t 3 -S 70 -E 1e-05 -C 70 -G -d North_Sea_input_genomes_
 
 ################################### Best-match approach ##################################
 
-python ~/PycharmProjects/MetaCHIP/Best-match.py -p Human_gut
-python ~/PycharmProjects/MetaCHIP/Best-match.py -p North_Sea
+python Best-match.py -p Human_gut
+python Best-match.py -p North_Sea
 
 
 ################################## Phylogenetic approach #################################
 
-python ~/PycharmProjects/MetaCHIP/Phylogenetic.py -p Human_gut
-python ~/PycharmProjects/MetaCHIP/Phylogenetic.py -p North_Sea
+python Phylogenetic.py -p Human_gut
+python Phylogenetic.py -p North_Sea
 
 
 ##################################### COG annotation #####################################
@@ -49,6 +49,11 @@ python COG_wrapper.py -in North_Sea_HGT_candidates_Phylogenetic_aa.fasta -t P
 
 ############################ get the number of AR related COGs ###########################
 
-# cd into COG annotation output folder, then run 
+# cd into COG annotation output folder, then run the following command
+# Note: path to type2cog.tab (line 13, from ARDB, https://ardb.cbcb.umd.edu) and whog (line 14, ftp://ftp.ncbi.nih.gov/pub/COG/COG/whog) files may need to be changed in the script. 
 python get_AR_COGs.py
-# path to type2cog.tab (line 13) and whog (line 14) files may need to be changed in the script. 
+
+
+
+
+
