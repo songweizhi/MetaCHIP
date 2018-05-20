@@ -467,9 +467,6 @@ pwd_species_tree_folder_ranger = '%s/%s'         % (pwd_op_tree_folder, species_
 pwd_grouping_file_with_id =      '%s/%s'      % (pwd_MetaCHIP_op_folder, 'grouping_with_id.txt')
 
 
-
-
-
 get_homologues_wd_subdirs = [d for d in os.listdir(pwd_get_homologues_wd) if os.path.isdir(os.path.join(pwd_get_homologues_wd, d))]
 get_homologues_wd_subdirs.remove('tmp')
 ortholog_group_folder_name = get_homologues_wd_subdirs[0]
