@@ -201,75 +201,81 @@ python3 /srv/scratch/z5039045/Softwares/MetaCHIP/assessment_scripts/Step_2_Assem
 cd /srv/scratch/z5039045/MetaCHIP/mNC
 python3 /srv/scratch/z5039045/Softwares/MetaCHIP/assessment_scripts/Step_2_Assemble_idba_ud.py -cfg config_9_million_mNC.txt
 
-# get assembler recovered HGTs
+# get the number of recovered gene transfers by assemblers from dornor, recipient or both
 module load python/3.5.2
 module load blast+/2.6.0
-# m0
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers_iden100.py -a m0_IDBA_UD_3_million_k20-124.fasta -t input_sequence_mutant_nc_m0.fasta -minf 1000 -d distribution_of_transfers.txt -combined_genomes combined_reference_genomes_m0.fna
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers_iden100.py -a m0_IDBA_UD_6_million_k20-124.fasta -t input_sequence_mutant_nc_m0.fasta -minf 1000 -d distribution_of_transfers.txt -combined_genomes combined_reference_genomes_m0.fna
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers_iden100.py -a m0_IDBA_UD_9_million_k20-124.fasta -t input_sequence_mutant_nc_m0.fasta -minf 1000 -d distribution_of_transfers.txt -combined_genomes combined_reference_genomes_m0.fna
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers_iden100.py -a m0_IDBA_UD_12_million_k20-124.fasta -t input_sequence_mutant_nc_m0.fasta -minf 1000 -d distribution_of_transfers.txt -combined_genomes combined_reference_genomes_m0.fna
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers_iden100.py -a m0_metaSPAdes_3_million_scaffolds.fasta -t input_sequence_mutant_nc_m0.fasta -minf 1000 -d distribution_of_transfers.txt -combined_genomes combined_reference_genomes_m0.fna
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers_iden100.py -a m0_metaSPAdes_6_million_scaffolds.fasta -t input_sequence_mutant_nc_m0.fasta -minf 1000 -d distribution_of_transfers.txt -combined_genomes combined_reference_genomes_m0.fna
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers_iden100.py -a m0_metaSPAdes_9_million_scaffolds.fasta -t input_sequence_mutant_nc_m0.fasta -minf 1000 -d distribution_of_transfers.txt -combined_genomes combined_reference_genomes_m0.fna
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers_iden100.py -a m0_metaSPAdes_12_million_scaffolds.fasta -t input_sequence_mutant_nc_m0.fasta -minf 1000 -d distribution_of_transfers.txt -combined_genomes combined_reference_genomes_m0.fna
-# m5
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m5_IDBA_UD_3_million_k20-124.fasta -t input_sequence_mutant_nc_m5.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m5_IDBA_UD_6_million_k20-124.fasta -t input_sequence_mutant_nc_m5.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m5_IDBA_UD_9_million_k20-124.fasta -t input_sequence_mutant_nc_m5.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m5_IDBA_UD_12_million_k20-124.fasta -t input_sequence_mutant_nc_m5.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m5_metaSPAdes_3_million_scaffolds.fasta -t input_sequence_mutant_nc_m5.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m5_metaSPAdes_6_million_scaffolds.fasta -t input_sequence_mutant_nc_m5.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m5_metaSPAdes_9_million_scaffolds.fasta -t input_sequence_mutant_nc_m5.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m5_metaSPAdes_12_million_scaffolds.fasta -t input_sequence_mutant_nc_m5.fasta -minf 1000
-# m10
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m10_IDBA_UD_3_million_k20-124.fasta -t input_sequence_mutant_nc_m10.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m10_IDBA_UD_6_million_k20-124.fasta -t input_sequence_mutant_nc_m10.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m10_IDBA_UD_9_million_k20-124.fasta -t input_sequence_mutant_nc_m10.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m10_IDBA_UD_12_million_k20-124.fasta -t input_sequence_mutant_nc_m10.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m10_metaSPAdes_3_million_scaffolds.fasta -t input_sequence_mutant_nc_m10.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m10_metaSPAdes_6_million_scaffolds.fasta -t input_sequence_mutant_nc_m10.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m10_metaSPAdes_9_million_scaffolds.fasta -t input_sequence_mutant_nc_m10.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m10_metaSPAdes_12_million_scaffolds.fasta -t input_sequence_mutant_nc_m10.fasta -minf 1000
-# m15
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m15_IDBA_UD_3_million_k20-124.fasta -t input_sequence_mutant_nc_m15.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m15_IDBA_UD_6_million_k20-124.fasta -t input_sequence_mutant_nc_m15.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m15_IDBA_UD_9_milliona_k20-124.fasta -t input_sequence_mutant_nc_m15.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m15_IDBA_UD_12_million_k20-124.fasta -t input_sequence_mutant_nc_m15.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m15_metaSPAdes_3_million_scaffolds.fasta -t input_sequence_mutant_nc_m15.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m15_metaSPAdes_6_million_scaffolds.fasta -t input_sequence_mutant_nc_m15.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m15_metaSPAdes_9_million_scaffolds.fasta -t input_sequence_mutant_nc_m15.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m15_metaSPAdes_12_million_scaffolds.fasta -t input_sequence_mutant_nc_m15.fasta -minf 1000
-# m20
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m20_IDBA_UD_3_million_k20-124.fasta -t input_sequence_mutant_nc_m20.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m20_IDBA_UD_6_million_k20-124.fasta -t input_sequence_mutant_nc_m20.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m20_IDBA_UD_9_million_k20-124.fasta -t input_sequence_mutant_nc_m20.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m20_IDBA_UD_12_million_k20-124.fasta -t input_sequence_mutant_nc_m20.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m20_metaSPAdes_3_million_scaffolds.fasta -t input_sequence_mutant_nc_m20.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m20_metaSPAdes_6_million_scaffolds.fasta -t input_sequence_mutant_nc_m20.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m20_metaSPAdes_9_million_scaffolds.fasta -t input_sequence_mutant_nc_m20.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m20_metaSPAdes_12_million_scaffolds.fasta -t input_sequence_mutant_nc_m20.fasta -minf 1000
-# m25
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m25_IDBA_UD_3_million_k20-124.fasta -t input_sequence_mutant_nc_m25.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m25_IDBA_UD_6_million_k20-124.fasta -t input_sequence_mutant_nc_m25.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m25_IDBA_UD_9_million_k20-124.fasta -t input_sequence_mutant_nc_m25.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m25_IDBA_UD_12_million_k20-124.fasta -t input_sequence_mutant_nc_m25.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m25_metaSPAdes_3_million_scaffolds.fasta -t input_sequence_mutant_nc_m25.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m25_metaSPAdes_6_million_scaffolds.fasta -t input_sequence_mutant_nc_m25.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m25_metaSPAdes_9_million_scaffolds.fasta -t input_sequence_mutant_nc_m25.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m25_metaSPAdes_12_million_scaffolds.fasta -t input_sequence_mutant_nc_m25.fasta -minf 1000
-# m30
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m30_IDBA_UD_3_million_k20-124.fasta -t input_sequence_mutant_nc_m30.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m30_IDBA_UD_6_million_k20-124.fasta -t input_sequence_mutant_nc_m30.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m30_IDBA_UD_9_million_k20-124.fasta -t input_sequence_mutant_nc_m30.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m30_IDBA_UD_12_million_k20-124.fasta -t input_sequence_mutant_nc_m30.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m30_metaSPAdes_3_million_scaffolds.fasta -t input_sequence_mutant_nc_m30.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m30_metaSPAdes_6_million_scaffolds.fasta -t input_sequence_mutant_nc_m30.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m30_metaSPAdes_9_million_scaffolds.fasta -t input_sequence_mutant_nc_m30.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a m30_metaSPAdes_12_million_scaffolds.fasta -t input_sequence_mutant_nc_m30.fasta -minf 1000
-# mNC
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a mNC_IDBA_UD_9_million_k20-124.fasta -t input_sequence_mutant_nc_mNC.fasta -minf 1000
-python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers.py -a mNC_metaSPAdes_9_million_scaffolds.fasta -t input_sequence_mutant_nc_mNC.fasta -minf 1000
+
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers_iden100.py -a m0_IDBA_UD_3_million_k20-124.fasta -t input_sequence_mutant_nc_m0.fasta -minf 1000 -d distribution_of_transfers.txt -combined_genomes combined_reference_genomes_m0.fna 
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers_iden100.py -a m0_IDBA_UD_6_million_k20-124.fasta -t input_sequence_mutant_nc_m0.fasta -minf 1000 -d distribution_of_transfers.txt -combined_genomes combined_reference_genomes_m0.fna 
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers_iden100.py -a m0_IDBA_UD_9_million_k20-124.fasta -t input_sequence_mutant_nc_m0.fasta -minf 1000 -d distribution_of_transfers.txt -combined_genomes combined_reference_genomes_m0.fna 
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers_iden100.py -a m0_IDBA_UD_12_million_k20-124.fasta -t input_sequence_mutant_nc_m0.fasta -minf 1000 -d distribution_of_transfers.txt -combined_genomes combined_reference_genomes_m0.fna 
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers_iden100.py -a m0_metaSPAdes_3_million_scaffolds.fasta -t input_sequence_mutant_nc_m0.fasta -minf 1000 -d distribution_of_transfers.txt -combined_genomes combined_reference_genomes_m0.fna 
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers_iden100.py -a m0_metaSPAdes_6_million_scaffolds.fasta -t input_sequence_mutant_nc_m0.fasta -minf 1000 -d distribution_of_transfers.txt -combined_genomes combined_reference_genomes_m0.fna 
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers_iden100.py -a m0_metaSPAdes_9_million_scaffolds.fasta -t input_sequence_mutant_nc_m0.fasta -minf 1000 -d distribution_of_transfers.txt -combined_genomes combined_reference_genomes_m0.fna 
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers_iden100.py -a m0_metaSPAdes_12_million_scaffolds.fasta -t input_sequence_mutant_nc_m0.fasta -minf 1000 -d distribution_of_transfers.txt -combined_genomes combined_reference_genomes_m0.fna 
+
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m5_IDBA_UD_3_million_k20-124.fasta -t input_sequence_mutant_nc_m5.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m5_IDBA_UD_6_million_k20-124.fasta -t input_sequence_mutant_nc_m5.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m5_IDBA_UD_9_million_k20-124.fasta -t input_sequence_mutant_nc_m5.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m5_IDBA_UD_12_million_k20-124.fasta -t input_sequence_mutant_nc_m5.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m5_metaSPAdes_3_million_scaffolds.fasta -t input_sequence_mutant_nc_m5.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m5_metaSPAdes_6_million_scaffolds.fasta -t input_sequence_mutant_nc_m5.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m5_metaSPAdes_9_million_scaffolds.fasta -t input_sequence_mutant_nc_m5.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m5_metaSPAdes_12_million_scaffolds.fasta -t input_sequence_mutant_nc_m5.fasta -minf 1000
+
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m10_IDBA_UD_3_million_k20-124.fasta -t input_sequence_mutant_nc_m10.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m10_IDBA_UD_6_million_k20-124.fasta -t input_sequence_mutant_nc_m10.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m10_IDBA_UD_9_million_k20-124.fasta -t input_sequence_mutant_nc_m10.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m10_IDBA_UD_12_million_k20-124.fasta -t input_sequence_mutant_nc_m10.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m10_metaSPAdes_3_million_scaffolds.fasta -t input_sequence_mutant_nc_m10.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m10_metaSPAdes_6_million_scaffolds.fasta -t input_sequence_mutant_nc_m10.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m10_metaSPAdes_9_million_scaffolds.fasta -t input_sequence_mutant_nc_m10.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m10_metaSPAdes_12_million_scaffolds.fasta -t input_sequence_mutant_nc_m10.fasta -minf 1000
+
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m15_IDBA_UD_3_million_k20-124.fasta -t input_sequence_mutant_nc_m15.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m15_IDBA_UD_6_million_k20-124.fasta -t input_sequence_mutant_nc_m15.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m15_IDBA_UD_9_million_k20-124.fasta -t input_sequence_mutant_nc_m15.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m15_IDBA_UD_12_million_k20-124.fasta -t input_sequence_mutant_nc_m15.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m15_metaSPAdes_3_million_scaffolds.fasta -t input_sequence_mutant_nc_m15.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m15_metaSPAdes_6_million_scaffolds.fasta -t input_sequence_mutant_nc_m15.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m15_metaSPAdes_9_million_scaffolds.fasta -t input_sequence_mutant_nc_m15.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m15_metaSPAdes_12_million_scaffolds.fasta -t input_sequence_mutant_nc_m15.fasta -minf 1000
+
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m20_IDBA_UD_3_million_k20-124.fasta -t input_sequence_mutant_nc_m20.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m20_IDBA_UD_6_million_k20-124.fasta -t input_sequence_mutant_nc_m20.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m20_IDBA_UD_9_million_k20-124.fasta -t input_sequence_mutant_nc_m20.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m20_IDBA_UD_12_million_k20-124.fasta -t input_sequence_mutant_nc_m20.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m20_metaSPAdes_3_million_scaffolds.fasta -t input_sequence_mutant_nc_m20.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m20_metaSPAdes_6_million_scaffolds.fasta -t input_sequence_mutant_nc_m20.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m20_metaSPAdes_9_million_scaffolds.fasta -t input_sequence_mutant_nc_m20.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m20_metaSPAdes_12_million_scaffolds.fasta -t input_sequence_mutant_nc_m20.fasta -minf 1000
+
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m25_IDBA_UD_3_million_k20-124.fasta -t input_sequence_mutant_nc_m25.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m25_IDBA_UD_6_million_k20-124.fasta -t input_sequence_mutant_nc_m25.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m25_IDBA_UD_9_million_k20-124.fasta -t input_sequence_mutant_nc_m25.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m25_IDBA_UD_12_million_k20-124.fasta -t input_sequence_mutant_nc_m25.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m25_metaSPAdes_3_million_scaffolds.fasta -t input_sequence_mutant_nc_m25.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m25_metaSPAdes_6_million_scaffolds.fasta -t input_sequence_mutant_nc_m25.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m25_metaSPAdes_9_million_scaffolds.fasta -t input_sequence_mutant_nc_m25.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m25_metaSPAdes_12_million_scaffolds.fasta -t input_sequence_mutant_nc_m25.fasta -minf 1000
+
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m30_IDBA_UD_3_million_k20-124.fasta -t input_sequence_mutant_nc_m30.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m30_IDBA_UD_6_million_k20-124.fasta -t input_sequence_mutant_nc_m30.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m30_IDBA_UD_9_million_k20-124.fasta -t input_sequence_mutant_nc_m30.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m30_IDBA_UD_12_million_k20-124.fasta -t input_sequence_mutant_nc_m30.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m30_metaSPAdes_3_million_scaffolds.fasta -t input_sequence_mutant_nc_m30.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m30_metaSPAdes_6_million_scaffolds.fasta -t input_sequence_mutant_nc_m30.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m30_metaSPAdes_9_million_scaffolds.fasta -t input_sequence_mutant_nc_m30.fasta -minf 1000
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m30_metaSPAdes_12_million_scaffolds.fasta -t input_sequence_mutant_nc_m30.fasta -minf 1000
+
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/get_successfully_binned_transfers_m0.py -a m0_metaSPAdes_9_million_scaffolds.fasta -t input_sequence_mutant_nc_m0.fasta -minf 1000 -d distribution_of_transfers.txt -combined_genomes combined_reference_genomes_m0.fna 
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/get_successfully_binned_transfers.py -a m5_IDBA_UD_9_million_k20-124.fasta -t input_sequence_mutant_nc_m5.fasta -minf 1000 -mutation_level 5
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/get_successfully_binned_transfers.py -a m10_IDBA_UD_9_million_k20-124.fasta -t input_sequence_mutant_nc_m10.fasta -minf 1000 -mutation_level 10
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/get_successfully_binned_transfers.py -a m15_IDBA_UD_9_million_k20-124.fasta -t input_sequence_mutant_nc_m15.fasta -minf 1000 -mutation_level 15
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/get_successfully_binned_transfers.py -a m20_IDBA_UD_9_million_k20-124.fasta -t input_sequence_mutant_nc_m20.fasta -minf 1000 -mutation_level 20
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/get_successfully_binned_transfers.py -a m25_IDBA_UD_9_million_k20-124.fasta -t input_sequence_mutant_nc_m25.fasta -minf 1000 -mutation_level 25
+python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/get_successfully_binned_transfers.py -a m30_IDBA_UD_9_million_k20-124.fasta -t input_sequence_mutant_nc_m30.fasta -minf 1000 -mutation_level 30
+
 
 # rename metaSPAdes contig ID
 module load python/3.5.2
@@ -752,38 +758,35 @@ mv 5_get_correlations_9_million/Renamed_refined_bins 6_MetaCHIP_9_million/
 
 # Step_6 prepare input files and run MetaCHIP
 
-# m0
-cd /srv/scratch/z5039045/MetaCHIP/m0/6_MetaCHIP_9_million
-python /srv/scratch/z5039045/Softwares/MetaCHIP/MetaCHIP.py -cfg config.txt
-python /srv/scratch/z5039045/Softwares/MetaCHIP/Explicit_Tree.py -cfg config.txt
-# m5
-cd /srv/scratch/z5039045/MetaCHIP/m5/6_MetaCHIP_9_million
-python /srv/scratch/z5039045/Softwares/MetaCHIP/MetaCHIP.py -cfg config.txt
-python /srv/scratch/z5039045/Softwares/MetaCHIP/Explicit_Tree.py -cfg config.txt
-# m10
-cd /srv/scratch/z5039045/MetaCHIP/m10/6_MetaCHIP_9_million
-python /srv/scratch/z5039045/Softwares/MetaCHIP/MetaCHIP.py -cfg config.txt
-python /srv/scratch/z5039045/Softwares/MetaCHIP/Explicit_Tree.py -cfg config.txt
-# m15
-cd /srv/scratch/z5039045/MetaCHIP/m15/6_MetaCHIP_9_million
-python /srv/scratch/z5039045/Softwares/MetaCHIP/MetaCHIP.py -cfg config.txt
-python /srv/scratch/z5039045/Softwares/MetaCHIP/Explicit_Tree.py -cfg config.txt
-# m20
-cd /srv/scratch/z5039045/MetaCHIP/m20/6_MetaCHIP_9_million
-python /srv/scratch/z5039045/Softwares/MetaCHIP/MetaCHIP.py -cfg config.txt
-python /srv/scratch/z5039045/Softwares/MetaCHIP/Explicit_Tree.py -cfg config.txt
-# m25
-cd /srv/scratch/z5039045/MetaCHIP/m25/6_MetaCHIP_9_million
-python /srv/scratch/z5039045/Softwares/MetaCHIP/MetaCHIP.py -cfg config.txt
-python /srv/scratch/z5039045/Softwares/MetaCHIP/Explicit_Tree.py -cfg config.txt
-# m30
-cd /srv/scratch/z5039045/MetaCHIP/m30/6_MetaCHIP_9_million
-python /srv/scratch/z5039045/Softwares/MetaCHIP/MetaCHIP.py -cfg config.txt
-python /srv/scratch/z5039045/Softwares/MetaCHIP/Explicit_Tree.py -cfg config.txt
+# Get_clusters.py
+python Get_clusters.py -i input_genomes_m0 -x fasta -p M0
+python Get_clusters.py -i input_genomes_m5 -x fasta -p M5
+python Get_clusters.py -i input_genomes_m10 -x fasta -p M10
+python Get_clusters.py -i input_genomes_m15 -x fasta -p M15
+python Get_clusters.py -i input_genomes_m20 -x fasta -p M20
+python Get_clusters.py -i input_genomes_m25 -x fasta -p M25
+python Get_clusters.py -i input_genomes_m30 -x fasta -p M30
+
+# Best-match.py
+python Best-match.py -p M0
+python Best-match.py -p M5
+python Best-match.py -p M10
+python Best-match.py -p M15
+python Best-match.py -p M20
+python Best-match.py -p M25
+python Best-match.py -p M30
+
+# Phylogenetic.py
+python Phylogenetic.py -p M0
+python Phylogenetic.py -p M5
+python Phylogenetic.py -p M10
+python Phylogenetic.py -p M15
+python Phylogenetic.py -p M20
+python Phylogenetic.py -p M25
+python Phylogenetic.py -p M30
 
 
 # Step_7_get_gene_correlations
-
 module load python/3.5.2
 module load blast+/2.6.0
 module load R/3.2.2
@@ -806,7 +809,6 @@ python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations_iden100.py
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations_iden100.py -predicted_HGTs m0_e5000_HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m0.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn 
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations_iden100.py -predicted_HGTs m0_e10000_HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m0.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn 
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations_iden100.py -predicted_HGTs m0_e50000_HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m0.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn 
-
 
 cd /srv/scratch/z5039045/MetaCHIP/m5
 mkdir 7_get_gene_correlations_9_million
@@ -929,354 +931,4 @@ python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predic
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m30_e5000_HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m30.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m30_e10000_HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m30.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m30_e50000_HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m30.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
-
-
-cd /srv/scratch/z5039045/MetaCHIP/m0/positive_control_m0
-python /srv/scratch/z5039045/Softwares/MetaCHIP/Explicit_Tree.py -cfg config.txt
-cd /srv/scratch/z5039045/MetaCHIP/m5/positive_control_m5
-python /srv/scratch/z5039045/Softwares/MetaCHIP/Explicit_Tree.py -cfg config.txt
-cd /srv/scratch/z5039045/MetaCHIP/m10/positive_control_m10
-python /srv/scratch/z5039045/Softwares/MetaCHIP/Explicit_Tree.py -cfg config.txt
-cd /srv/scratch/z5039045/MetaCHIP/m15/positive_control_m15
-python /srv/scratch/z5039045/Softwares/MetaCHIP/Explicit_Tree.py -cfg config.txt
-cd /srv/scratch/z5039045/MetaCHIP/m20/positive_control_m20
-python /srv/scratch/z5039045/Softwares/MetaCHIP/Explicit_Tree.py -cfg config.txt
-cd /srv/scratch/z5039045/MetaCHIP/m25/positive_control_m25
-python /srv/scratch/z5039045/Softwares/MetaCHIP/Explicit_Tree.py -cfg config.txt
-cd /srv/scratch/z5039045/MetaCHIP/m30/positive_control_m30
-python /srv/scratch/z5039045/Softwares/MetaCHIP/Explicit_Tree.py -cfg config.txt
-
-
-# summary
-Group	Reads_num		Size			Depth		metaSPAdes	IDBA_UD MetaCHIP(SPAdes)	MetaCHIP(idba)
-m0		3 million		429.41 Mbp		5.67x		51			24		8
-m0		4.2 million		601.3 Mbp		7.93x		57			26		34
-m0		4.5 million		644.28 Mbp		8.50x		66			24		31
-m0		6 million		859.09 Mbp		11.33x		71			11		40
-m0		7.5 million		1073.65 Mbp		14.16x		60			4		37
-m0		9 million		1288.53 Mbp		17.0x		57			3		27
-m0		10.5 million	1503.09	Mbp		19.83x		67			1		42
-m0		12 million		1717.76	Mbp		22.66x		51			2		39
-
-m5		3 million									3			11
-m5		4.2 million									9			10
-m5		4.5 million									12			13
-m5		6 million									5			19
-m5		7.5 million									12			23
-m5		9 million									8			23
-m5		10.5 million								15			25
-m5		12 million									11			30
-m5		18 million									11			38
-m5		24 million									3			34
-m5		30 million									0			36
-
-m10		3 million									6			17
-m10		4.2 million									11			49
-m10		4.5 million									12			60
-m10		6 million									22			91
-m10		7.5 million									36			93
-m10		9 million									34			98
-m10		10.5 million								42			97
-m10		12 million									35			98
-
-m15		3 million									10			32
-m15		6 million									63			96
-m15		9 million									90			98
-m15		12 million									89			99
-m15		18 million									89			98
-
-m20		3 million									19			42
-m20		6 million									88			98
-m20		9 million									98			100
-m20		12 million									99			100
-m20		18 million									98			99
-
-m25		3 million									29			39
-m25		6 million									92			99
-m25		9 million									99			100
-m25		12 million									99			100
-m25		18 million									99			100
-
-m30		3 million									28			41
-m30		6 million									98			99
-m30		9 million									100			100
-m30		12 million									98			100
-m30		18 million									98			99
-
-
-
-# get COG annotation of 20 genomes
-module unload python/2.7.12
-module load python/3.5.2
-module load perl/5.20.1
-module load blast+/2.6.0
-cd /srv/scratch/z5039045/MetaCHIP/mNC/positive_control_mNC/prokka_output/AAM
-python3 /srv/scratch/z5039045/Scripts/COG_wrapper.py -in AAM.faa -t P &
-cd /srv/scratch/z5039045/MetaCHIP/mNC/positive_control_mNC/prokka_output/AKV
-python3 /srv/scratch/z5039045/Scripts/COG_wrapper.py -in AKV.faa -t P &
-cd /srv/scratch/z5039045/MetaCHIP/mNC/positive_control_mNC/prokka_output/AMAC
-python3 /srv/scratch/z5039045/Scripts/COG_wrapper.py -in AMAC.faa -t P &
-cd /srv/scratch/z5039045/MetaCHIP/mNC/positive_control_mNC/prokka_output/AMAU
-python3 /srv/scratch/z5039045/Scripts/COG_wrapper.py -in AMAU.faa -t P &
-cd /srv/scratch/z5039045/MetaCHIP/mNC/positive_control_mNC/prokka_output/AMS
-python3 /srv/scratch/z5039045/Scripts/COG_wrapper.py -in AMS.faa -t P &
-cd /srv/scratch/z5039045/MetaCHIP/mNC/positive_control_mNC/prokka_output/ARL
-python3 /srv/scratch/z5039045/Scripts/COG_wrapper.py -in ARL.faa -t P &
-cd /srv/scratch/z5039045/MetaCHIP/mNC/positive_control_mNC/prokka_output/ARS
-python3 /srv/scratch/z5039045/Scripts/COG_wrapper.py -in ARS.faa -t P &
-cd /srv/scratch/z5039045/MetaCHIP/mNC/positive_control_mNC/prokka_output/ASJ
-python3 /srv/scratch/z5039045/Scripts/COG_wrapper.py -in ASJ.faa -t P &
-cd /srv/scratch/z5039045/MetaCHIP/mNC/positive_control_mNC/prokka_output/ASN
-python3 /srv/scratch/z5039045/Scripts/COG_wrapper.py -in ASN.faa -t P &
-cd /srv/scratch/z5039045/MetaCHIP/mNC/positive_control_mNC/prokka_output/ATM
-python3 /srv/scratch/z5039045/Scripts/COG_wrapper.py -in ATM.faa -t P &
-cd /srv/scratch/z5039045/MetaCHIP/mNC/positive_control_mNC/prokka_output/BAD
-python3 /srv/scratch/z5039045/Scripts/COG_wrapper.py -in BAD.faa -t P &
-cd /srv/scratch/z5039045/MetaCHIP/mNC/positive_control_mNC/prokka_output/BDS
-python3 /srv/scratch/z5039045/Scripts/COG_wrapper.py -in BDS.faa -t P &
-cd /srv/scratch/z5039045/MetaCHIP/mNC/positive_control_mNC/prokka_output/BGC
-python3 /srv/scratch/z5039045/Scripts/COG_wrapper.py -in BGC.faa -t P &
-cd /srv/scratch/z5039045/MetaCHIP/mNC/positive_control_mNC/prokka_output/BHS
-python3 /srv/scratch/z5039045/Scripts/COG_wrapper.py -in BHS.faa -t P &
-cd /srv/scratch/z5039045/MetaCHIP/mNC/positive_control_mNC/prokka_output/BNM
-python3 /srv/scratch/z5039045/Scripts/COG_wrapper.py -in BNM.faa -t P &
-cd /srv/scratch/z5039045/MetaCHIP/mNC/positive_control_mNC/prokka_output/BRT
-python3 /srv/scratch/z5039045/Scripts/COG_wrapper.py -in BRT.faa -t P &
-cd /srv/scratch/z5039045/MetaCHIP/mNC/positive_control_mNC/prokka_output/BSA
-python3 /srv/scratch/z5039045/Scripts/COG_wrapper.py -in BSA.faa -t P &
-cd /srv/scratch/z5039045/MetaCHIP/mNC/positive_control_mNC/prokka_output/BSD
-python3 /srv/scratch/z5039045/Scripts/COG_wrapper.py -in BSD.faa -t P &
-cd /srv/scratch/z5039045/MetaCHIP/mNC/positive_control_mNC/prokka_output/BSL
-python3 /srv/scratch/z5039045/Scripts/COG_wrapper.py -in BSL.faa -t P &
-cd /srv/scratch/z5039045/MetaCHIP/mNC/positive_control_mNC/prokka_output/BTK
-python3 /srv/scratch/z5039045/Scripts/COG_wrapper.py -in BTK.faa -t P &
-
-
-cd /srv/scratch/z5039045/MetaCHIP/mNC/positive_control_mNC
-mkdir COG_annotation
-cp prokka_output/AAM/AAM_COG_results/func_stats.txt ./COG_annotation/AAM_func_stats.txt
-cp prokka_output/AKV/AKV_COG_results/func_stats.txt ./COG_annotation/AKV_func_stats.txt
-cp prokka_output/AMAC/AMAC_COG_results/func_stats.txt ./COG_annotation/AMAC_func_stats.txt
-cp prokka_output/AMAU/AMAU_COG_results/func_stats.txt ./COG_annotation/AMAU_func_stats.txt
-cp prokka_output/AMS/AMS_COG_results/func_stats.txt ./COG_annotation/AMS_func_stats.txt
-cp prokka_output/ARL/ARL_COG_results/func_stats.txt ./COG_annotation/ARL_func_stats.txt
-cp prokka_output/ARS/ARS_COG_results/func_stats.txt ./COG_annotation/ARS_func_stats.txt
-cp prokka_output/ASJ/ASJ_COG_results/func_stats.txt ./COG_annotation/ASJ_func_stats.txt
-cp prokka_output/ASN/ASN_COG_results/func_stats.txt ./COG_annotation/ASN_func_stats.txt
-cp prokka_output/ATM/ATM_COG_results/func_stats.txt ./COG_annotation/ATM_func_stats.txt
-cp prokka_output/BAD/BAD_COG_results/func_stats.txt ./COG_annotation/BAD_func_stats.txt
-cp prokka_output/BDS/BDS_COG_results/func_stats.txt ./COG_annotation/BDS_func_stats.txt
-cp prokka_output/BGC/BGC_COG_results/func_stats.txt ./COG_annotation/BGC_func_stats.txt
-cp prokka_output/BHS/BHS_COG_results/func_stats.txt ./COG_annotation/BHS_func_stats.txt
-cp prokka_output/BNM/BNM_COG_results/func_stats.txt ./COG_annotation/BNM_func_stats.txt
-cp prokka_output/BRT/BRT_COG_results/func_stats.txt ./COG_annotation/BRT_func_stats.txt
-cp prokka_output/BSA/BSA_COG_results/func_stats.txt ./COG_annotation/BSA_func_stats.txt
-cp prokka_output/BSD/BSD_COG_results/func_stats.txt ./COG_annotation/BSD_func_stats.txt
-cp prokka_output/BSL/BSL_COG_results/func_stats.txt ./COG_annotation/BSL_func_stats.txt
-cp prokka_output/BTK/BTK_COG_results/func_stats.txt ./COG_annotation/BTK_func_stats.txt
-
-
-module load python/3.5.2
-module load perl/5.20.1
-module load blast+/2.6.0
-python3 /srv/scratch/z5039045/Scripts/COG_wrapper.py -in HGT_candidates.fasta -t N
-python3 /srv/scratch/z5039045/Scripts/COG_wrapper.py -in HGT_candidates_ET_validated.fasta -t N
-
-
-# get the number of recovered gene transfers by assemblers from dornor, recipient or both
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers_iden100.py -a m0_IDBA_UD_3_million_k20-124.fasta -t input_sequence_mutant_nc_m0.fasta -minf 1000 -d distribution_of_transfers.txt -combined_genomes combined_reference_genomes_m0.fna 
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers_iden100.py -a m0_IDBA_UD_6_million_k20-124.fasta -t input_sequence_mutant_nc_m0.fasta -minf 1000 -d distribution_of_transfers.txt -combined_genomes combined_reference_genomes_m0.fna 
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers_iden100.py -a m0_IDBA_UD_9_million_k20-124.fasta -t input_sequence_mutant_nc_m0.fasta -minf 1000 -d distribution_of_transfers.txt -combined_genomes combined_reference_genomes_m0.fna 
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers_iden100.py -a m0_IDBA_UD_12_million_k20-124.fasta -t input_sequence_mutant_nc_m0.fasta -minf 1000 -d distribution_of_transfers.txt -combined_genomes combined_reference_genomes_m0.fna 
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers_iden100.py -a m0_metaSPAdes_3_million_scaffolds.fasta -t input_sequence_mutant_nc_m0.fasta -minf 1000 -d distribution_of_transfers.txt -combined_genomes combined_reference_genomes_m0.fna 
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers_iden100.py -a m0_metaSPAdes_6_million_scaffolds.fasta -t input_sequence_mutant_nc_m0.fasta -minf 1000 -d distribution_of_transfers.txt -combined_genomes combined_reference_genomes_m0.fna 
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers_iden100.py -a m0_metaSPAdes_9_million_scaffolds.fasta -t input_sequence_mutant_nc_m0.fasta -minf 1000 -d distribution_of_transfers.txt -combined_genomes combined_reference_genomes_m0.fna 
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers_iden100.py -a m0_metaSPAdes_12_million_scaffolds.fasta -t input_sequence_mutant_nc_m0.fasta -minf 1000 -d distribution_of_transfers.txt -combined_genomes combined_reference_genomes_m0.fna 
-
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m5_IDBA_UD_3_million_k20-124.fasta -t input_sequence_mutant_nc_m5.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m5_IDBA_UD_6_million_k20-124.fasta -t input_sequence_mutant_nc_m5.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m5_IDBA_UD_9_million_k20-124.fasta -t input_sequence_mutant_nc_m5.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m5_IDBA_UD_12_million_k20-124.fasta -t input_sequence_mutant_nc_m5.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m5_metaSPAdes_3_million_scaffolds.fasta -t input_sequence_mutant_nc_m5.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m5_metaSPAdes_6_million_scaffolds.fasta -t input_sequence_mutant_nc_m5.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m5_metaSPAdes_9_million_scaffolds.fasta -t input_sequence_mutant_nc_m5.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m5_metaSPAdes_12_million_scaffolds.fasta -t input_sequence_mutant_nc_m5.fasta -minf 1000
-
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m10_IDBA_UD_3_million_k20-124.fasta -t input_sequence_mutant_nc_m10.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m10_IDBA_UD_6_million_k20-124.fasta -t input_sequence_mutant_nc_m10.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m10_IDBA_UD_9_million_k20-124.fasta -t input_sequence_mutant_nc_m10.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m10_IDBA_UD_12_million_k20-124.fasta -t input_sequence_mutant_nc_m10.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m10_metaSPAdes_3_million_scaffolds.fasta -t input_sequence_mutant_nc_m10.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m10_metaSPAdes_6_million_scaffolds.fasta -t input_sequence_mutant_nc_m10.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m10_metaSPAdes_9_million_scaffolds.fasta -t input_sequence_mutant_nc_m10.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m10_metaSPAdes_12_million_scaffolds.fasta -t input_sequence_mutant_nc_m10.fasta -minf 1000
-
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m15_IDBA_UD_3_million_k20-124.fasta -t input_sequence_mutant_nc_m15.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m15_IDBA_UD_6_million_k20-124.fasta -t input_sequence_mutant_nc_m15.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m15_IDBA_UD_9_million_k20-124.fasta -t input_sequence_mutant_nc_m15.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m15_IDBA_UD_12_million_k20-124.fasta -t input_sequence_mutant_nc_m15.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m15_metaSPAdes_3_million_scaffolds.fasta -t input_sequence_mutant_nc_m15.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m15_metaSPAdes_6_million_scaffolds.fasta -t input_sequence_mutant_nc_m15.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m15_metaSPAdes_9_million_scaffolds.fasta -t input_sequence_mutant_nc_m15.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m15_metaSPAdes_12_million_scaffolds.fasta -t input_sequence_mutant_nc_m15.fasta -minf 1000
-
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m20_IDBA_UD_3_million_k20-124.fasta -t input_sequence_mutant_nc_m20.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m20_IDBA_UD_6_million_k20-124.fasta -t input_sequence_mutant_nc_m20.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m20_IDBA_UD_9_million_k20-124.fasta -t input_sequence_mutant_nc_m20.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m20_IDBA_UD_12_million_k20-124.fasta -t input_sequence_mutant_nc_m20.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m20_metaSPAdes_3_million_scaffolds.fasta -t input_sequence_mutant_nc_m20.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m20_metaSPAdes_6_million_scaffolds.fasta -t input_sequence_mutant_nc_m20.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m20_metaSPAdes_9_million_scaffolds.fasta -t input_sequence_mutant_nc_m20.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m20_metaSPAdes_12_million_scaffolds.fasta -t input_sequence_mutant_nc_m20.fasta -minf 1000
-
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m25_IDBA_UD_3_million_k20-124.fasta -t input_sequence_mutant_nc_m25.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m25_IDBA_UD_6_million_k20-124.fasta -t input_sequence_mutant_nc_m25.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m25_IDBA_UD_9_million_k20-124.fasta -t input_sequence_mutant_nc_m25.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m25_IDBA_UD_12_million_k20-124.fasta -t input_sequence_mutant_nc_m25.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m25_metaSPAdes_3_million_scaffolds.fasta -t input_sequence_mutant_nc_m25.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m25_metaSPAdes_6_million_scaffolds.fasta -t input_sequence_mutant_nc_m25.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m25_metaSPAdes_9_million_scaffolds.fasta -t input_sequence_mutant_nc_m25.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m25_metaSPAdes_12_million_scaffolds.fasta -t input_sequence_mutant_nc_m25.fasta -minf 1000
-
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m30_IDBA_UD_3_million_k20-124.fasta -t input_sequence_mutant_nc_m30.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m30_IDBA_UD_6_million_k20-124.fasta -t input_sequence_mutant_nc_m30.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m30_IDBA_UD_9_million_k20-124.fasta -t input_sequence_mutant_nc_m30.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m30_IDBA_UD_12_million_k20-124.fasta -t input_sequence_mutant_nc_m30.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m30_metaSPAdes_3_million_scaffolds.fasta -t input_sequence_mutant_nc_m30.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m30_metaSPAdes_6_million_scaffolds.fasta -t input_sequence_mutant_nc_m30.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m30_metaSPAdes_9_million_scaffolds.fasta -t input_sequence_mutant_nc_m30.fasta -minf 1000
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/scripts/Assembler_recovered_transfers.py -a m30_metaSPAdes_12_million_scaffolds.fasta -t input_sequence_mutant_nc_m30.fasta -minf 1000
-
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/get_successfully_binned_transfers_m0.py -a m0_metaSPAdes_9_million_scaffolds.fasta -t input_sequence_mutant_nc_m0.fasta -minf 1000 -d distribution_of_transfers.txt -combined_genomes combined_reference_genomes_m0.fna 
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/get_successfully_binned_transfers.py -a m5_IDBA_UD_9_million_k20-124.fasta -t input_sequence_mutant_nc_m5.fasta -minf 1000 -mutation_level 5
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/get_successfully_binned_transfers.py -a m10_IDBA_UD_9_million_k20-124.fasta -t input_sequence_mutant_nc_m10.fasta -minf 1000 -mutation_level 10
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/get_successfully_binned_transfers.py -a m15_IDBA_UD_9_million_k20-124.fasta -t input_sequence_mutant_nc_m15.fasta -minf 1000 -mutation_level 15
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/get_successfully_binned_transfers.py -a m20_IDBA_UD_9_million_k20-124.fasta -t input_sequence_mutant_nc_m20.fasta -minf 1000 -mutation_level 20
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/get_successfully_binned_transfers.py -a m25_IDBA_UD_9_million_k20-124.fasta -t input_sequence_mutant_nc_m25.fasta -minf 1000 -mutation_level 25
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/get_successfully_binned_transfers.py -a m30_IDBA_UD_9_million_k20-124.fasta -t input_sequence_mutant_nc_m30.fasta -minf 1000 -mutation_level 30
-
-
-python /Users/songweizhi/PycharmProjects/MetaCHIP/assessment_scripts/Assembler_recovered_transfers_iden100.py -a m0_metaSPAdes_9_million_scaffolds.fasta -t input_sequence_mutant_nc_m0.fasta -minf 1000 -d distribution_of_transfers.txt -combined_genomes combined_reference_genomes_m0.fna 
-
-python3 /srv/scratch/z5039045/Binning_refiner/CheckM_runner.py -1 Renamed_refined_bins_m20 -2 Renamed_refined_bins_m25 -r Renamed_refined_bins_m30 -pbs -qsub
-
-
-########## assess SCG tree ##########
-
-# run Prokka
-module unload python/2.7.12
-module load python/3.5.2
-python3 /srv/scratch/z5039045/Softwares/MetaCHIP/InPrep1_Prokka.py -genome_folder genomes -genome_extension fna
-
-# get species tree and grouping input genomes
-module unload python/3.5.2 
-module load python/2.7.12
-module load blast+/2.6.0
-module load mafft/7.310
-module load hmmer/3.1b2
-module load fasttree/2.1.7
-python /srv/scratch/z5039045/Softwares/MetaCHIP/Get_species_tree.py -prokka_output prokka_output -hmm /srv/scratch/z5039045/Softwares/MetaCHIP/phylo.hmm 
-python /srv/scratch/z5039045/Softwares/MetaCHIP/Get_species_tree.py -prokka_output prokka_output -hmm /srv/scratch/z5039045/Softwares/MetaCHIP/PCG74.hmm 
-python /srv/scratch/z5039045/Softwares/MetaCHIP/Get_species_tree.py -prokka_output prokka_output -hmm /srv/scratch/z5039045/Softwares/MetaCHIP/PCG82.hmm 
-
-
-########## determine end break length ##########
-
-# copy files into working directory
-cp m0/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e1000bp/HGT_candidates.fasta determine_end_break_length/m0_e1000_HGT_candidates.fasta &
-cp m0/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e2000bp/HGT_candidates.fasta determine_end_break_length/m0_e2000_HGT_candidates.fasta &
-cp m0/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e5000bp/HGT_candidates.fasta determine_end_break_length/m0_e5000_HGT_candidates.fasta &
-cp m0/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e10000bp/HGT_candidates.fasta determine_end_break_length/m0_e10000_HGT_candidates.fasta &
-cp m0/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e50000bp/HGT_candidates.fasta determine_end_break_length/m0_e50000_HGT_candidates.fasta &
-cp m5/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e1000bp/HGT_candidates.fasta determine_end_break_length/m5_e1000_HGT_candidates.fasta &
-cp m5/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e2000bp/HGT_candidates.fasta determine_end_break_length/m5_e2000_HGT_candidates.fasta &
-cp m5/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e5000bp/HGT_candidates.fasta determine_end_break_length/m5_e5000_HGT_candidates.fasta &
-cp m5/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e10000bp/HGT_candidates.fasta determine_end_break_length/m5_e10000_HGT_candidates.fasta &
-cp m5/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e50000bp/HGT_candidates.fasta determine_end_break_length/m5_e50000_HGT_candidates.fasta &
-cp m10/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e1000bp/HGT_candidates.fasta determine_end_break_length/m10_e1000_HGT_candidates.fasta &
-cp m10/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e2000bp/HGT_candidates.fasta determine_end_break_length/m10_e2000_HGT_candidates.fasta &
-cp m10/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e5000bp/HGT_candidates.fasta determine_end_break_length/m10_e5000_HGT_candidates.fasta &
-cp m10/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e10000bp/HGT_candidates.fasta determine_end_break_length/m10_e10000_HGT_candidates.fasta &
-cp m10/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e50000bp/HGT_candidates.fasta determine_end_break_length/m10_e50000_HGT_candidates.fasta &
-cp m15/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e1000bp/HGT_candidates.fasta determine_end_break_length/m15_e1000_HGT_candidates.fasta &
-cp m15/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e2000bp/HGT_candidates.fasta determine_end_break_length/m15_e2000_HGT_candidates.fasta &
-cp m15/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e5000bp/HGT_candidates.fasta determine_end_break_length/m15_e5000_HGT_candidates.fasta &
-cp m15/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e10000bp/HGT_candidates.fasta determine_end_break_length/m15_e10000_HGT_candidates.fasta &
-cp m15/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e50000bp/HGT_candidates.fasta determine_end_break_length/m15_e50000_HGT_candidates.fasta &
-cp m20/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e1000bp/HGT_candidates.fasta determine_end_break_length/m20_e1000_HGT_candidates.fasta &
-cp m20/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e2000bp/HGT_candidates.fasta determine_end_break_length/m20_e2000_HGT_candidates.fasta &
-cp m20/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e5000bp/HGT_candidates.fasta determine_end_break_length/m20_e5000_HGT_candidates.fasta &
-cp m20/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e10000bp/HGT_candidates.fasta determine_end_break_length/m20_e10000_HGT_candidates.fasta &
-cp m20/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e50000bp/HGT_candidates.fasta determine_end_break_length/m20_e50000_HGT_candidates.fasta &
-cp m25/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e1000bp/HGT_candidates.fasta determine_end_break_length/m25_e1000_HGT_candidates.fasta &
-cp m25/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e2000bp/HGT_candidates.fasta determine_end_break_length/m25_e2000_HGT_candidates.fasta &
-cp m25/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e5000bp/HGT_candidates.fasta determine_end_break_length/m25_e5000_HGT_candidates.fasta &
-cp m25/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e10000bp/HGT_candidates.fasta determine_end_break_length/m25_e10000_HGT_candidates.fasta &
-cp m25/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e50000bp/HGT_candidates.fasta determine_end_break_length/m25_e50000_HGT_candidates.fasta &
-cp m30/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e1000bp/HGT_candidates.fasta determine_end_break_length/m30_e1000_HGT_candidates.fasta &
-cp m30/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e2000bp/HGT_candidates.fasta determine_end_break_length/m30_e2000_HGT_candidates.fasta &
-cp m30/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e5000bp/HGT_candidates.fasta determine_end_break_length/m30_e5000_HGT_candidates.fasta &
-cp m30/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e10000bp/HGT_candidates.fasta determine_end_break_length/m30_e10000_HGT_candidates.fasta &
-cp m30/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e50000bp/HGT_candidates.fasta determine_end_break_length/m30_e50000_HGT_candidates.fasta &
-cp m0/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e1000bp/HGT_candidates_ET_validated.fasta determine_end_break_length/m0_e1000_HGT_candidates_ET_validated.fasta &
-cp m0/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e2000bp/HGT_candidates_ET_validated.fasta determine_end_break_length/m0_e2000_HGT_candidates_ET_validated.fasta &
-cp m0/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e5000bp/HGT_candidates_ET_validated.fasta determine_end_break_length/m0_e5000_HGT_candidates_ET_validated.fasta &
-cp m0/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e10000bp/HGT_candidates_ET_validated.fasta determine_end_break_length/m0_e10000_HGT_candidates_ET_validated.fasta &
-cp m0/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e50000bp/HGT_candidates_ET_validated.fasta determine_end_break_length/m0_e50000_HGT_candidates_ET_validated.fasta &
-cp m5/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e1000bp/HGT_candidates_ET_validated.fasta determine_end_break_length/m5_e1000_HGT_candidates_ET_validated.fasta &
-cp m5/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e2000bp/HGT_candidates_ET_validated.fasta determine_end_break_length/m5_e2000_HGT_candidates_ET_validated.fasta &
-cp m5/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e5000bp/HGT_candidates_ET_validated.fasta determine_end_break_length/m5_e5000_HGT_candidates_ET_validated.fasta &
-cp m5/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e10000bp/HGT_candidates_ET_validated.fasta determine_end_break_length/m5_e10000_HGT_candidates_ET_validated.fasta &
-cp m5/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e50000bp/HGT_candidates_ET_validated.fasta determine_end_break_length/m5_e50000_HGT_candidates_ET_validated.fasta &
-cp m10/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e1000bp/HGT_candidates_ET_validated.fasta determine_end_break_length/m10_e1000_HGT_candidates_ET_validated.fasta &
-cp m10/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e2000bp/HGT_candidates_ET_validated.fasta determine_end_break_length/m10_e2000_HGT_candidates_ET_validated.fasta &
-cp m10/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e5000bp/HGT_candidates_ET_validated.fasta determine_end_break_length/m10_e5000_HGT_candidates_ET_validated.fasta &
-cp m10/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e10000bp/HGT_candidates_ET_validated.fasta determine_end_break_length/m10_e10000_HGT_candidates_ET_validated.fasta &
-cp m10/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e50000bp/HGT_candidates_ET_validated.fasta determine_end_break_length/m10_e50000_HGT_candidates_ET_validated.fasta &
-cp m15/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e1000bp/HGT_candidates_ET_validated.fasta determine_end_break_length/m15_e1000_HGT_candidates_ET_validated.fasta &
-cp m15/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e2000bp/HGT_candidates_ET_validated.fasta determine_end_break_length/m15_e2000_HGT_candidates_ET_validated.fasta &
-cp m15/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e5000bp/HGT_candidates_ET_validated.fasta determine_end_break_length/m15_e5000_HGT_candidates_ET_validated.fasta &
-cp m15/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e10000bp/HGT_candidates_ET_validated.fasta determine_end_break_length/m15_e10000_HGT_candidates_ET_validated.fasta &
-cp m15/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e50000bp/HGT_candidates_ET_validated.fasta determine_end_break_length/m15_e50000_HGT_candidates_ET_validated.fasta &
-cp m20/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e1000bp/HGT_candidates_ET_validated.fasta determine_end_break_length/m20_e1000_HGT_candidates_ET_validated.fasta &
-cp m20/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e2000bp/HGT_candidates_ET_validated.fasta determine_end_break_length/m20_e2000_HGT_candidates_ET_validated.fasta &
-cp m20/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e5000bp/HGT_candidates_ET_validated.fasta determine_end_break_length/m20_e5000_HGT_candidates_ET_validated.fasta &
-cp m20/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e10000bp/HGT_candidates_ET_validated.fasta determine_end_break_length/m20_e10000_HGT_candidates_ET_validated.fasta &
-cp m20/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e50000bp/HGT_candidates_ET_validated.fasta determine_end_break_length/m20_e50000_HGT_candidates_ET_validated.fasta &
-cp m25/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e1000bp/HGT_candidates_ET_validated.fasta determine_end_break_length/m25_e1000_HGT_candidates_ET_validated.fasta &
-cp m25/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e2000bp/HGT_candidates_ET_validated.fasta determine_end_break_length/m25_e2000_HGT_candidates_ET_validated.fasta &
-cp m25/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e5000bp/HGT_candidates_ET_validated.fasta determine_end_break_length/m25_e5000_HGT_candidates_ET_validated.fasta &
-cp m25/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e10000bp/HGT_candidates_ET_validated.fasta determine_end_break_length/m25_e10000_HGT_candidates_ET_validated.fasta &
-cp m25/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e50000bp/HGT_candidates_ET_validated.fasta determine_end_break_length/m25_e50000_HGT_candidates_ET_validated.fasta &
-cp m30/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e1000bp/HGT_candidates_ET_validated.fasta determine_end_break_length/m30_e1000_HGT_candidates_ET_validated.fasta &
-cp m30/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e2000bp/HGT_candidates_ET_validated.fasta determine_end_break_length/m30_e2000_HGT_candidates_ET_validated.fasta &
-cp m30/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e5000bp/HGT_candidates_ET_validated.fasta determine_end_break_length/m30_e5000_HGT_candidates_ET_validated.fasta &
-cp m30/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e10000bp/HGT_candidates_ET_validated.fasta determine_end_break_length/m30_e10000_HGT_candidates_ET_validated.fasta &
-cp m30/6_MetaCHIP_9_million/output_ip90_al200bp_c70_e50000bp/HGT_candidates_ET_validated.fasta determine_end_break_length/m30_e50000_HGT_candidates_ET_validated.fasta &
-
-# get results
-python3 Step_6_2_get_gene_correlations_iden100.py -predicted_HGTs m0_e1000_HGT_candidates.fasta -t input_sequence_mutant_nc_m0.fasta -d distribution_of_transfers.txt
-python3 Step_6_2_get_gene_correlations_iden100.py -predicted_HGTs m0_e1000_HGT_candidates_ET_validated.fasta -t input_sequence_mutant_nc_m0.fasta -d distribution_of_transfers.txt
-python3 Step_6_2_get_gene_correlations_iden100.py -predicted_HGTs m0_e2000_HGT_candidates.fasta -t input_sequence_mutant_nc_m0.fasta -d distribution_of_transfers.txt
-python3 Step_6_2_get_gene_correlations_iden100.py -predicted_HGTs m0_e2000_HGT_candidates_ET_validated.fasta -t input_sequence_mutant_nc_m0.fasta -d distribution_of_transfers.txt
-python3 Step_6_2_get_gene_correlations_iden100.py -predicted_HGTs m0_e5000_HGT_candidates.fasta -t input_sequence_mutant_nc_m0.fasta -d distribution_of_transfers.txt
-python3 Step_6_2_get_gene_correlations_iden100.py -predicted_HGTs m0_e5000_HGT_candidates_ET_validated.fasta -t input_sequence_mutant_nc_m0.fasta -d distribution_of_transfers.txt
-python3 Step_6_2_get_gene_correlations_iden100.py -predicted_HGTs m0_e10000_HGT_candidates.fasta -t input_sequence_mutant_nc_m0.fasta -d distribution_of_transfers.txt
-python3 Step_6_2_get_gene_correlations_iden100.py -predicted_HGTs m0_e10000_HGT_candidates_ET_validated.fasta -t input_sequence_mutant_nc_m0.fasta -d distribution_of_transfers.txt
-python3 Step_6_2_get_gene_correlations_iden100.py -predicted_HGTs m0_e50000_HGT_candidates.fasta -t input_sequence_mutant_nc_m0.fasta -d distribution_of_transfers.txt
-python3 Step_6_2_get_gene_correlations_iden100.py -predicted_HGTs m0_e50000_HGT_candidates_ET_validated.fasta -t input_sequence_mutant_nc_m0.fasta -d distribution_of_transfers.txt
-
-
-python3 Step_6_2_get_gene_correlations.py -predicted_HGTs m10_e1000_HGT_candidates.fasta -t input_sequence_mutant_nc_m10.fasta -d distribution_of_transfers.txt
-python3 Step_6_2_get_gene_correlations.py -predicted_HGTs m10_e1000_HGT_candidates_ET_validated.fasta -t input_sequence_mutant_nc_m10.fasta -d distribution_of_transfers.txt
-
-
-python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m10_e1000_HGT_candidates.fasta -t input_sequence_mutant_nc_m20.fasta -d distribution_of_transfers.txt
-python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m20.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
-python3 Step_6_2_get_gene_correlations.py -predicted_HGTs m10_e10000_HGT_candidates.fasta -t input_sequence_mutant_nc_m10.fasta -d distribution_of_transfers.txt
-python3 Step_6_2_get_gene_correlations.py -predicted_HGTs m10_e10000_HGT_candidates_ET_validated.fasta -t input_sequence_mutant_nc_m10.fasta -d distribution_of_transfers.txt
-
-
-
-
 
