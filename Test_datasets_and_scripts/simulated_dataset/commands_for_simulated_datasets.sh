@@ -1,7 +1,6 @@
 
-########################### Performance on simulated datasets ############################
+########################## simulate gene transfers with HgtSIM ###########################
 
-# simulate gene transfer with HgtSIM
 python3 HgtSIM.py -t sequences_of_gene_transfers.fasta -i 0 -d distribution_of_transfers.txt -f selected_10_Betaproteobacteria -r 1-0-1-1 -x fna -lf TAGATGAGTGATTAGTTAGTTA -rf TAGATGAGTGATTAGTTAGTTA
 python3 HgtSIM.py -t sequences_of_gene_transfers.fasta -i 5 -d distribution_of_transfers.txt -f selected_10_Betaproteobacteria -r 1-0-1-1 -x fna -lf TAGATGAGTGATTAGTTAGTTA -rf TAGATGAGTGATTAGTTAGTTA
 python3 HgtSIM.py -t sequences_of_gene_transfers.fasta -i 10 -d distribution_of_transfers.txt -f selected_10_Betaproteobacteria -r 1-0-1-1 -x fna -lf TAGATGAGTGATTAGTTAGTTA -rf TAGATGAGTGATTAGTTAGTTA
@@ -10,28 +9,38 @@ python3 HgtSIM.py -t sequences_of_gene_transfers.fasta -i 20 -d distribution_of_
 python3 HgtSIM.py -t sequences_of_gene_transfers.fasta -i 25 -d distribution_of_transfers.txt -f selected_10_Betaproteobacteria -r 1-0-1-1 -x fna -lf TAGATGAGTGATTAGTTAGTTA -rf TAGATGAGTGATTAGTTAGTTA
 python3 HgtSIM.py -t sequences_of_gene_transfers.fasta -i 30 -d distribution_of_transfers.txt -f selected_10_Betaproteobacteria -r 1-0-1-1 -x fna -lf TAGATGAGTGATTAGTTAGTTA -rf TAGATGAGTGATTAGTTAGTTA
 
-###### positive control ######
-# Run Prokka 
-module load perl/5.20.1
-module load infernal/1.1.1
-module load blast+/2.2.31
-module load hmmer/3.1b2
-module load prodigal/2.6.3
-module load tbl2asn/25.3
-module load parallel/20160222
-module load prokka/1.12
-prokka --force --prefix BAD --locustag BAD --strain BAD --outdir BAD BAD.fna
-# run all_vs_all blast
-module load blast+/2.6.0
-makeblastdb -in combined.ffn -dbtype nucl -parse_seqids
-blastn -query combined.ffn -db combined.ffn -out all_vs_all_ffn.tab -evalue 1e-5 -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen" -task blastn
-# run MetaCHIP 
-module load python/3.5.2
-module load blast+/2.6.0
-python3 /srv/scratch/z5039045/Softwares/MetaCHIP/MetaCHIP.py -cfg config.txt
+
+#################### Performance assessment without reads simulation #####################
+
+# run Get_clusters.py
+python Get_clusters.py -i input_genomes_m0 -x fasta -p M0
+python Get_clusters.py -i input_genomes_m5 -x fasta -p M5
+python Get_clusters.py -i input_genomes_m10 -x fasta -p M10
+python Get_clusters.py -i input_genomes_m15 -x fasta -p M15
+python Get_clusters.py -i input_genomes_m20 -x fasta -p M20
+python Get_clusters.py -i input_genomes_m25 -x fasta -p M25
+python Get_clusters.py -i input_genomes_m30 -x fasta -p M30
+
+# run Best-match.py
+python Best-match.py -p M0
+python Best-match.py -p M5
+python Best-match.py -p M10
+python Best-match.py -p M15
+python Best-match.py -p M20
+python Best-match.py -p M25
+python Best-match.py -p M30
+
+# run Phylogenetic.py
+python Phylogenetic.py -p M0
+python Phylogenetic.py -p M5
+python Phylogenetic.py -p M10
+python Phylogenetic.py -p M15
+python Phylogenetic.py -p M20
+python Phylogenetic.py -p M25
+python Phylogenetic.py -p M30
 
 
-################################ optimize sequencing depth ###############################
+##################### Performance assessment with reads simulation #######################
 
 # Step_1_1_GemSIM
 module load python/3.5.2
@@ -195,7 +204,6 @@ python3 /srv/scratch/z5039045/Softwares/MetaCHIP/assessment_scripts/Step_2_Assem
 # get assembler recovered HGTs
 module load python/3.5.2
 module load blast+/2.6.0
-
 # m0
 python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers_iden100.py -a m0_IDBA_UD_3_million_k20-124.fasta -t input_sequence_mutant_nc_m0.fasta -minf 1000 -d distribution_of_transfers.txt -combined_genomes combined_reference_genomes_m0.fna
 python3 /srv/scratch/z5039045/HgtSIM/Assembler_recovered_transfers_iden100.py -a m0_IDBA_UD_6_million_k20-124.fasta -t input_sequence_mutant_nc_m0.fasta -minf 1000 -d distribution_of_transfers.txt -combined_genomes combined_reference_genomes_m0.fna
@@ -363,8 +371,6 @@ cd /srv/scratch/z5039045/MetaCHIP/mNC/4_Binning_9_million
 mv *_*_*mer_*_cov MyCC
 mv *_MetaBAT MetaBAT
 python3 /srv/scratch/z5039045/Binning_refiner/Binning_refiner.py -1 MetaBAT -2 MyCC 
-
-
 
 
 # Step_5_get_correlation
@@ -715,9 +721,6 @@ Sensitivity: 0.774597, 0.963484
 
 
 # Step_6_run_MetaCHIP
-cd /srv/scratch/z5039045/MetaCHIP/m0
-cd /srv/scratch/z5039045/MetaCHIP/m5
-cd /srv/scratch/z5039045/MetaCHIP/m10
 
 mkdir 6_MetaCHIP_9_million
 mv 5_get_correlations_9_million/Renamed_refined_bins 6_MetaCHIP_9_million/
@@ -748,15 +751,6 @@ mv 5_get_correlations_9_million/Renamed_refined_bins 6_MetaCHIP_9_million/
 
 
 # Step_6 prepare input files and run MetaCHIP
-# module load blast+/2.6.0
-# module load mafft/7.310
-# module load hmmer/3.1b2
-# module load fasttree/2.1.7
-module load python/2.7.12
-module load ete3/3.0.0b36
-virtualenv --system-site-packages mypythonenv
-. mypythonenv/bin/activate
-export PATH=~/anaconda_ete/bin:$PATH;
 
 # m0
 cd /srv/scratch/z5039045/MetaCHIP/m0/6_MetaCHIP_9_million
@@ -794,7 +788,6 @@ module load python/3.5.2
 module load blast+/2.6.0
 module load R/3.2.2
 
-
 cd /srv/scratch/z5039045/MetaCHIP/m0
 mkdir 7_get_gene_correlations_9_million
 cp 6_MetaCHIP_9_million/output_ip90_al200bp_c70_e1000bp/HGT_candidates_with_direction.txt 7_get_gene_correlations_9_million
@@ -803,13 +796,11 @@ cp 6_MetaCHIP_9_million/combined.ffn 7_get_gene_correlations_9_million
 cd /srv/scratch/z5039045/MetaCHIP/m0/7_get_gene_correlations_9_million
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations_iden100.py -predicted_HGTs HGT_candidates_with_direction.txt -t input_sequence_mutant_nc_m0.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn 
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations_iden100.py -predicted_HGTs HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m0.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn 
-
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations_iden100.py -predicted_HGTs m0_e1000_HGT_candidates.txt -t input_sequence_mutant_nc_m0.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn 
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations_iden100.py -predicted_HGTs m0_e2000_HGT_candidates.txt -t input_sequence_mutant_nc_m0.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn 
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations_iden100.py -predicted_HGTs m0_e5000_HGT_candidates.txt -t input_sequence_mutant_nc_m0.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn 
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations_iden100.py -predicted_HGTs m0_e10000_HGT_candidates.txt -t input_sequence_mutant_nc_m0.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn 
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations_iden100.py -predicted_HGTs m0_e50000_HGT_candidates.txt -t input_sequence_mutant_nc_m0.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn 
-
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations_iden100.py -predicted_HGTs m0_e1000_HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m0.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn 
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations_iden100.py -predicted_HGTs m0_e2000_HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m0.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn 
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations_iden100.py -predicted_HGTs m0_e5000_HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m0.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn 
@@ -825,21 +816,16 @@ cp 6_MetaCHIP_9_million/combined.ffn 7_get_gene_correlations_9_million
 cp ../assemblies/input_sequence_mutant_nc_m5.fasta 7_get_gene_correlations_9_million/
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs HGT_candidates_with_direction.txt -t input_sequence_mutant_nc_m5.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m5.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
-
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m5_e1000_HGT_candidates.txt -t input_sequence_mutant_nc_m5.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m5_e2000_HGT_candidates.txt -t input_sequence_mutant_nc_m5.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m5_e5000_HGT_candidates.txt -t input_sequence_mutant_nc_m5.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m5_e10000_HGT_candidates.txt -t input_sequence_mutant_nc_m5.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m5_e50000_HGT_candidates.txt -t input_sequence_mutant_nc_m5.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
-
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m5_e1000_HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m5.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m5_e2000_HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m5.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m5_e5000_HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m5.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m5_e10000_HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m5.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m5_e50000_HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m5.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
-
-
-
 
 cd /srv/scratch/z5039045/MetaCHIP/m10
 mkdir 7_get_gene_correlations_9_million
@@ -850,19 +836,16 @@ cp ../assemblies/input_sequence_mutant_nc_m10.fasta 7_get_gene_correlations_9_mi
 cd 7_get_gene_correlations_9_million
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs HGT_candidates_with_direction.txt -t input_sequence_mutant_nc_m10.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m10.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
-
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m10_e1000_HGT_candidates.txt -t input_sequence_mutant_nc_m10.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m10_e2000_HGT_candidates.txt -t input_sequence_mutant_nc_m10.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m10_e5000_HGT_candidates.txt -t input_sequence_mutant_nc_m10.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m10_e10000_HGT_candidates.txt -t input_sequence_mutant_nc_m10.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m10_e50000_HGT_candidates.txt -t input_sequence_mutant_nc_m10.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
-
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m10_e1000_HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m10.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m10_e2000_HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m10.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m10_e5000_HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m10.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m10_e10000_HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m10.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m10_e50000_HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m10.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
-
 
 cd /srv/scratch/z5039045/MetaCHIP/m15
 mkdir 7_get_gene_correlations_9_million
@@ -873,13 +856,11 @@ cp ../assemblies/input_sequence_mutant_nc_m15.fasta 7_get_gene_correlations_9_mi
 cd 7_get_gene_correlations_9_million
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs HGT_candidates_with_direction.txt -t input_sequence_mutant_nc_m15.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m15.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
-
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m15_e1000_HGT_candidates.txt -t input_sequence_mutant_nc_m15.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m15_e2000_HGT_candidates.txt -t input_sequence_mutant_nc_m15.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m15_e5000_HGT_candidates.txt -t input_sequence_mutant_nc_m15.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m15_e10000_HGT_candidates.txt -t input_sequence_mutant_nc_m15.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m15_e50000_HGT_candidates.txt -t input_sequence_mutant_nc_m15.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
-
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m15_e1000_HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m15.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m15_e2000_HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m15.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m15_e5000_HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m15.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
@@ -896,13 +877,11 @@ cp ../assemblies/input_sequence_mutant_nc_m20.fasta 7_get_gene_correlations_9_mi
 cd 7_get_gene_correlations_9_million
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs HGT_candidates_with_direction.txt -t input_sequence_mutant_nc_m20.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m20.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
-
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m20_e1000_HGT_candidates.txt -t input_sequence_mutant_nc_m20.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m20_e2000_HGT_candidates.txt -t input_sequence_mutant_nc_m20.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m20_e5000_HGT_candidates.txt -t input_sequence_mutant_nc_m20.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m20_e10000_HGT_candidates.txt -t input_sequence_mutant_nc_m20.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m20_e50000_HGT_candidates.txt -t input_sequence_mutant_nc_m20.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
-
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m20_e1000_HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m20.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m20_e2000_HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m20.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m20_e5000_HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m20.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
@@ -910,7 +889,6 @@ python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predic
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m20_e50000_HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m20.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 
 
-	
 cd /srv/scratch/z5039045/MetaCHIP/m25
 mkdir 7_get_gene_correlations_9_million
 cp 6_MetaCHIP_9_million/output_ip90%_al200bp_c70%_e500bp/HGT_candidates_with_direction.txt 7_get_gene_correlations_9_million
@@ -920,13 +898,11 @@ cp ../assemblies/input_sequence_mutant_nc_m25.fasta 7_get_gene_correlations_9_mi
 cd 7_get_gene_correlations_9_million
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs HGT_candidates_with_direction.txt -t input_sequence_mutant_nc_m25.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m25.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
-
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m25_e1000_HGT_candidates.txt -t input_sequence_mutant_nc_m25.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m25_e2000_HGT_candidates.txt -t input_sequence_mutant_nc_m25.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m25_e5000_HGT_candidates.txt -t input_sequence_mutant_nc_m25.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m25_e10000_HGT_candidates.txt -t input_sequence_mutant_nc_m25.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m25_e50000_HGT_candidates.txt -t input_sequence_mutant_nc_m25.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
-
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m25_e1000_HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m25.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m25_e2000_HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m25.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m25_e5000_HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m25.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
@@ -943,18 +919,17 @@ cp ../assemblies/input_sequence_mutant_nc_m30.fasta 7_get_gene_correlations_9_mi
 cd 7_get_gene_correlations_9_million
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs HGT_candidates_with_direction.txt -t input_sequence_mutant_nc_m30.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m30.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
-
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m30_e1000_HGT_candidates.txt -t input_sequence_mutant_nc_m30.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m30_e2000_HGT_candidates.txt -t input_sequence_mutant_nc_m30.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m30_e5000_HGT_candidates.txt -t input_sequence_mutant_nc_m30.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m30_e10000_HGT_candidates.txt -t input_sequence_mutant_nc_m30.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m30_e50000_HGT_candidates.txt -t input_sequence_mutant_nc_m30.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
-
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m30_e1000_HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m30.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m30_e2000_HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m30.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m30_e5000_HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m30.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m30_e10000_HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m30.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
 python3 /srv/scratch/z5039045/MetaCHIP/Step_6_2_get_gene_correlations.py -predicted_HGTs m30_e50000_HGT_candidates_ET_validated.txt -t input_sequence_mutant_nc_m30.fasta -d distribution_of_transfers.txt -combined_ffn combined.ffn
+
 
 cd /srv/scratch/z5039045/MetaCHIP/m0/positive_control_m0
 python /srv/scratch/z5039045/Softwares/MetaCHIP/Explicit_Tree.py -cfg config.txt
