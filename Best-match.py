@@ -1006,6 +1006,8 @@ parser.add_argument('-blastn', required=False, default='blastn', help='path to b
 
 parser.add_argument('-makeblastdb', required=False, default='makeblastdb', help='path to makeblastdb executable')
 
+parser.add_argument('-num_threads', required=False, type=int, default=1, help='number of threads for running blastn')
+
 args = vars(parser.parse_args())
 
 output_prefix = args['p']
@@ -1017,6 +1019,7 @@ identity_percentile = args['ip']
 align_len_cutoff = args['al']
 ending_match_length = args['eb']
 keep_temp = args['tmp']
+num_threads = args['num_threads']
 
 # get path to current script
 pwd_best_match_script = sys.argv[0]
@@ -1149,7 +1152,7 @@ if blast_results == None:
     os.system('cp %s %s' % (pwd_combined_ffn_file, pwd_blast_db_folder))
     makeblastdb_cmd = '%s -in %s/%s -dbtype nucl -parse_seqids' % (pwd_makeblastdb_exe, pwd_blast_db_folder, combined_ffn_file)
     os.system(makeblastdb_cmd)
-    blast_parameters = '-evalue 1e-5 -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen" -task blastn'
+    blast_parameters = '-evalue 1e-5 num_threads %s -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen" -task blastn' % num_threads
     print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Running blastn, be patient...')
     os.system('%s -query %s -db %s/%s -out %s %s' % (pwd_blastn_exe, pwd_combined_ffn_file, pwd_blast_db_folder, combined_ffn_file, pwd_blast_results, blast_parameters))
 

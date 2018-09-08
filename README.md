@@ -26,7 +26,7 @@ Dependencies:
     + [MAFFT](https://mafft.cbrc.jp/alignment/software/)
     + [FastTree 2.1.9](http://www.microbesonline.org/fasttree/)
 
-1. For Best-match.py.py
+1. For Best-match.py
     + Python package:
     [ReportLab](http://www.reportlab.com)
     + [BLAST+](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download)
