@@ -49,9 +49,9 @@ How to install:
 Notes:
 ---
 1. To get a reliable clusrering results of the input genome bins, their completeness need to be higher than 40% (Figure 3 in doc/MetaCHIP_manuscript.pdf).
-1. You can use GTDB-Tk to get the taxonomy of your input genome bin to further refine the cluster results.
+1. You can use [GTDB-Tk](https://github.com/Ecogenomics/GTDBTk) to get the taxonomy of your input genome bin to further refine the cluster results.
 1. The only input for MetaCHIP is a folder which holds the sequence file of a set of genome bins.
-1. Get_Homologues is needed to get the Ortholog groups within your input genomes.
+1. [Get_Homologues](https://github.com/eead-csic-compbio/get_homologues) is needed to get the Ortholog groups within your input genomes.
 
 How to run:
 ---
@@ -64,11 +64,11 @@ How to run:
 
 1.  You may want to manually modify the grouping profile based on the taxonomy classification of your input genome bins
 
-1.  Run best-match approach
+1.  Best-match approach
 
         python Best-match.py -p human_gut -num_threads 9
 
-1.  Run phylogenetic approach
+1.  Phylogenetic approach
 
         python Phylogenetic.py -p human_gut
 
