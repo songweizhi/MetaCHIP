@@ -53,19 +53,25 @@ Notes:
 1. The only input for MetaCHIP is a folder which holds the sequence file of a set of genome bins.
 1. Get_Homologues is needed to get the Ortholog groups within your input genomes.
 
-How to run it:
+How to run:
 ---
 
-        # First, get clusters
-        $ python Get_clusters.py -i human_gut_bins -x fasta -p human_gut
+1. Customize file config.txt, specify the path to needed executables in your system.
 
-        # You may want to manully modify the grouping profile based on the taxonomy classification of input bins
+1. Cluster your input genome bins
+        
+        python Get_clusters.py -i human_gut_bins -x fasta -p human_gut
 
-        # Second, predict HGT with best-match approach
-        $ python Best-match.py -p human_gut
+1.  You may want to manually modify the grouping profile based on the taxonomy classification of your input genome bins
 
-        # Third, predict HGT with phylogenetic approach
-        $ python Phylogenetic.py -p human_gut
+1.  Run best-match approach
+
+        python Best-match.py -p human_gut -num_threads 9
+
+1.  Run phylogenetic approach
+
+        python Phylogenetic.py -p human_gut
+
 
 Output files:
 ---
