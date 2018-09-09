@@ -105,3 +105,8 @@ Output files:
 1. Combined species tree and gene tree, as well as Ranger-DTL predicted HGTs.
 
     ![Combined_tree](doc/images/Combined_trees.png)
+
+1. Gene flow within a community
+
+    ![Gene_flow](doc/images/Gene_flow.jpg)
+    
