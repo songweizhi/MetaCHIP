@@ -77,7 +77,6 @@ How to run:
 
         python Phylogenetic.py -p human_gut
 
-
 Output files:
 ---
 
