@@ -68,6 +68,11 @@ How to run:
 
         python Best-match.py -p human_gut -num_threads 9
 
+1. All protein orthologs within the input genomes need to be obtained for the Phylogenetic approach, you can get it with [GET_HOMOLOGUES](https://github.com/eead-csic-compbio/get_homologues). Example command:
+
+        cd [prefix]_MetaCHIP_wd
+        get_homologues.pl -f 70 -t 3 -S 70 -E 1e-05 -C 70 -G -n 16 -d [prefix]_gbk_files
+
 1.  Phylogenetic approach
 
         python Phylogenetic.py -p human_gut
