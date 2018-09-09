@@ -2,7 +2,8 @@
 
 Publication
 ---
-+ Song WZ, Wemheuer B, Zhang S, Steensen K, Thomas T* (2018) MetaCHIP: community-level horizontal gene transfer identification through the combination of best-match and explicit phylogenetic tree approaches. Microbiome **(Under review)**.
++ Song W, Wemheuer B, Zhang S, Steensen K, Thomas T. (2018) MetaCHIP: community-level horizontal gene transfer identification through the combination of best-match and explicit phylogenetic tree approaches (submitted)
+
 + Contact: Weizhi Song (songwz03@gmail.com), Torsten Thomas(t.thomas@unsw.edu.au)
 
 + Affiliation: The Centre for Marine Bio-Innovation (CMB), The University of New South Wales, Sydney, Australia
@@ -23,7 +24,7 @@ Dependencies:
     + [Prodigal](https://github.com/hyattpd/Prodigal)
     + [HMMER](http://hmmer.org)
     + [MAFFT](https://mafft.cbrc.jp/alignment/software/)
-    + [FastTree](http://www.microbesonline.org/fasttree/)
+    + [FastTree 2.1.9](http://www.microbesonline.org/fasttree/)
 
 1. For Best-match.py
     + Python package:
@@ -33,6 +34,7 @@ Dependencies:
 1. For Phylogenetic.py
     + Python package:
     [ETE3](http://etetoolkit.org),
+    [Pillow](https://pypi.python.org/pypi/Pillow/3.3.1)
     + [Get_Homologues](https://github.com/eead-csic-compbio/get_homologues)
     + [Ranger-DTL 1.0](http://compbio.mit.edu/ranger-dtl/)
 
@@ -99,6 +101,10 @@ Output files:
 1. ACT image for checking flanking regions of identified HGTs.
 
     ![flanking_regions](doc/images/flanking_regions.jpg)
+
+1. Combined species tree and gene tree, as well as Ranger-DTL predicted HGTs.
+
+    ![Combined_tree](doc/images/Combined_trees.png)
 
 1. Gene flow between groups.
 
