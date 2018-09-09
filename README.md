@@ -70,8 +70,8 @@ How to run:
 
 1. All protein orthologs within the input genomes need to be obtained for the Phylogenetic approach, you can get it with [GET_HOMOLOGUES](https://github.com/eead-csic-compbio/get_homologues). Example command:
 
-        cd [prefix]_MetaCHIP_wd
-        get_homologues.pl -f 70 -t 3 -S 70 -E 1e-05 -C 70 -G -n 16 -d [prefix]_gbk_files
+        cd human_gut_MetaCHIP_wd
+        get_homologues.pl -f 70 -t 3 -S 70 -E 1e-05 -C 70 -G -n 16 -d human_gut_gbk_files
 
 1.  Phylogenetic approach
 
