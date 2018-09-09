@@ -372,16 +372,6 @@ parser.add_argument('-o', required=False, help='orthologs folder')
 
 parser.add_argument('-pt', action="store_true", required=False, help='plot tree')
 
-parser.add_argument('-ranger', required=False, default='ranger-dtl-U.mac', help='path to Ranger executable')
-
-parser.add_argument('-hmmsearch', required=False, default='hmmsearch', help='path to hmmsearch executable')
-
-parser.add_argument('-mafft', required=False, default='mafft', help='path to Mafft executable')
-
-parser.add_argument('-fasttree', required=False, default='FastTree', help='path to FastTree executable')
-
-parser.add_argument('-blastp', required=False, default='blastp', help='path to FastTree executable')
-
 args = vars(parser.parse_args())
 output_prefix = args['p']
 grouping_file = args['g']

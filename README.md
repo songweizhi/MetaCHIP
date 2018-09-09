@@ -106,7 +106,6 @@ Output files:
 
     ![Combined_tree](doc/images/Combined_trees.png)
 
-1. Gene flow between groups
+1. Gene flow between groups.
 
     ![Gene_flow](doc/images/Gene_flow.jpg)
-

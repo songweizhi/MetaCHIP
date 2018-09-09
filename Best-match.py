@@ -43,9 +43,6 @@ from string import ascii_uppercase
 from datetime import datetime
 
 
-# add -f force option
-
-
 def get_program_path_dict(pwd_cfg_file):
     program_path_dict = {}
     for each in open(pwd_cfg_file):
@@ -1019,10 +1016,6 @@ parser.add_argument('-ip', required=False, type=int, default=90, help='identity 
 parser.add_argument('-eb', required=False, type=int, default=1000, help='the minimal length to be considered as end break')
 
 parser.add_argument('-tmp', required=False, action="store_true", help='keep temporary files')
-
-parser.add_argument('-blastn', required=False, default='blastn', help='path to blastn executable')
-
-parser.add_argument('-makeblastdb', required=False, default='makeblastdb', help='path to makeblastdb executable')
 
 parser.add_argument('-num_threads', required=False, type=int, default=1, help='number of threads for running blastn')
 
