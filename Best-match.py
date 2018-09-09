@@ -1138,7 +1138,7 @@ pwd_grouping_file_with_id =                         '%s/%s/%s'    % (MetaCHIP_wd
 blast_db_folder = '%s_blastdb' % output_prefix
 pwd_blast_db_folder = '%s/%s' % (MetaCHIP_wd, blast_db_folder)
 
-
+pwd_blast_results = ''
 if blast_results != None:
     pwd_blast_results = blast_results
 if blast_results == None:
@@ -1170,7 +1170,7 @@ if blast_results == None:
     os.system('cp %s %s' % (pwd_combined_ffn_file, pwd_blast_db_folder))
     makeblastdb_cmd = '%s -in %s/%s -dbtype nucl -parse_seqids' % (pwd_makeblastdb_exe, pwd_blast_db_folder, combined_ffn_file)
     os.system(makeblastdb_cmd)
-    blast_parameters = '-evalue 1e-5 num_threads %s -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen" -task blastn' % num_threads
+    blast_parameters = '-evalue 1e-5 -num_threads %s -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen" -task blastn' % num_threads
     print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Running blastn, be patient...')
     os.system('%s -query %s -db %s/%s -out %s %s' % (pwd_blastn_exe, pwd_combined_ffn_file, pwd_blast_db_folder, combined_ffn_file, pwd_blast_results, blast_parameters))
 

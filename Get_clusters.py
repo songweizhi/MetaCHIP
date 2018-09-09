@@ -25,6 +25,7 @@ import shutil
 import warnings
 import argparse
 import itertools
+import subprocess
 import numpy as np
 from ete3 import Tree
 from time import sleep
@@ -347,7 +348,7 @@ parser.add_argument('-p', required=True, help='output prefix')
 
 parser.add_argument('-dc', required=False, type=float, default=None, help='distance cutoff')
 
-parser.add_argument('-fs', required=False, type=int, default=6, help='leaf name font size')
+parser.add_argument('-fs', required=False, type=int, default=9, help='leaf name font size')
 
 parser.add_argument('-taxon', required=False, default=None, help='taxon classification if available')
 
@@ -426,11 +427,13 @@ else:
 input_genome_re = '%s/*.%s' % (input_genome_folder, file_extension)
 input_genome_file_list = [os.path.basename(file_name) for file_name in glob.glob(input_genome_re)]
 
-n = 1
-for input_genome in input_genome_file_list:
+# report current processing
+print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Running Prodigal.')
 
-    # report current processing
-    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Running Prodigal for %s/%s: %s' % (n, len(input_genome_file_list), input_genome))
+
+MaxProcesses = 10
+Processes = []
+for input_genome in input_genome_file_list:
 
     # prepare command (according to Prokka)
     input_genome_basename, input_genome_ext = os.path.splitext(input_genome)
@@ -438,8 +441,32 @@ for input_genome in input_genome_file_list:
     pwd_output_sco = '%s/%s.sco' % (pwd_prodigal_output_folder, input_genome_basename)
     prodigal_cmd = '%s -f sco -q -c -m -g 11 -p meta -i %s -o %s' % (pwd_prodigal_exe, pwd_input_genome, pwd_output_sco)
 
-    # run prodigal
-    os.system(prodigal_cmd)
+
+    # run with subprocess
+    prodigal_cmd_list = [pwd_prodigal_exe, '-f', 'sco',  '-q', '-c', '-m', '-g', '11', '-p', 'meta', '-i', pwd_input_genome, '-o', pwd_output_sco]
+
+    # keep wait if there is no spare slots
+    while len(Processes) >= MaxProcesses:
+        sleep(0.1)
+        for process in Processes:
+            if process.poll() is not None:
+                Processes.remove(process)
+
+    # submit new subprocess
+    p = subprocess.Popen(prodigal_cmd_list)
+    Processes.append(p)
+
+# wait for completion
+for p in Processes:
+    p.wait()
+
+
+for input_genome_2 in input_genome_file_list:
+
+    # prepare filename
+    input_genome_basename, input_genome_ext = os.path.splitext(input_genome_2)
+    pwd_input_genome = '%s/%s' % (input_genome_folder, input_genome_2)
+    pwd_output_sco = '%s/%s.sco' % (pwd_prodigal_output_folder, input_genome_basename)
 
     # prepare ffn, faa and gbk files from prodigal output
     prodigal_parser(pwd_input_genome, pwd_output_sco, input_genome_basename, pwd_prodigal_output_folder)
@@ -449,7 +476,6 @@ for input_genome in input_genome_file_list:
     os.system('mv %s/%s.faa %s' % (pwd_prodigal_output_folder, input_genome_basename, pwd_faa_folder))
     os.system('mv %s/%s.gbk %s' % (pwd_prodigal_output_folder, input_genome_basename, pwd_gbk_folder))
 
-    n += 1
 
 ################################################### get species tree ###################################################
 
@@ -683,3 +709,7 @@ os.chdir(current_wd)
 # report done
 sleep(0.5)
 print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Grouping step done!')
+
+sleep(0.5)
+print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' You may want to modify the grouping results based on the taxonomy\nof your input genomes/bins, you can do this by changing their group assignment specified\nin the first column of %s' % grouping_file)
+

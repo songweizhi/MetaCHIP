@@ -1,8 +1,11 @@
 prodigal=prodigal
-hmmsearch=/Users/songweizhi/Softwares/hmmer/hmmer-3.1b2-macosx-intel/binaries/hmmsearch
+hmmsearch=hmmsearch
+#hmmsearch=/Users/songweizhi/Softwares/hmmer/hmmer-3.1b2-macosx-intel/binaries/hmmsearch
 mafft=mafft
-fasttree=/Users/songweizhi/Softwares/FastTree/FastTree
+fasttree=FastTree
+#fasttree=/Users/songweizhi/Softwares/FastTree/FastTree
 ranger=/Users/songweizhi/Softwares/Ranger-DTL/ranger-dtl-U.mac
+#ranger=/srv/scratch/z5039045/Softwares/Ranger-DTL/ranger-dtl-U.linux
 blastp=blastp
 blastn=blastn
 makeblastdb=makeblastdb

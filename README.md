@@ -62,7 +62,7 @@ How to run:
         
         python Get_clusters.py -i human_gut_bins -x fasta -p human_gut
 
-1.  You may want to manually modify the grouping profile based on the taxonomy classification of your input genome bins
+1.  You may want to manually modify the grouping results ([prefix]_grouping_g[num].txt) based on the taxonomy classification of your input genome bins
 
 1.  Best-match approach
 

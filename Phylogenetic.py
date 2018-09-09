@@ -316,22 +316,22 @@ def plot_species_tree(tree_newick, tree_type, gene_name, tree_file_name, name_li
             if each_node.name in name_list:
                 ns['fgcolor'] = 'red'  # the dot setting
                 each_node.add_face(TextFace(each_node.name,
-                                            fsize = 8,
-                                            fgcolor = 'red',
-                                            tight_text = False,
-                                            bold = False),
-                                   column = 0,
-                                   position = 'branch-right')  # the node name text setting
+                                            fsize=8,
+                                            fgcolor='red',
+                                            tight_text=False,
+                                            bold=False),
+                                   column=0,
+                                   position='branch-right')  # the node name text setting
                 each_node.set_style(ns)
             else:
                 ns['fgcolor'] = 'blue'  # the dot setting
                 each_node.add_face(TextFace(each_node.name,
-                                            fsize = 8,
-                                            fgcolor = 'black',
-                                            tight_text = False,
-                                            bold = False),
-                                   column = 0,
-                                   position = 'branch-right')  # the node name text setting
+                                            fsize=8,
+                                            fgcolor='black',
+                                            tight_text=False,
+                                            bold=False),
+                                   column=0,
+                                   position='branch-right')  # the node name text setting
                 each_node.set_style(ns)
 
         # non-leaf node parameters
@@ -339,12 +339,12 @@ def plot_species_tree(tree_newick, tree_type, gene_name, tree_file_name, name_li
             nlns = NodeStyle()
             nlns['size'] = 0  # dot size
             each_node.add_face(TextFace(each_node.name,
-                                        fsize = 4,
-                                        fgcolor = 'black',
-                                        tight_text = False,
-                                        bold = False),
-                               column = 5,
-                               position = 'branch-top')  # non-leaf node name text setting)
+                                        fsize=4,
+                                        fgcolor='black',
+                                        tight_text=False,
+                                        bold=False),
+                               column=5,
+                               position='branch-top')  # non-leaf node name text setting)
             each_node.set_style(nlns)
     # set figures size
     tree.render('%s/%s.png' % (tree_image_folder, tree_file_name), w = 900, units = 'px', tree_style = ts)
@@ -372,13 +372,13 @@ parser.add_argument('-o', required=False, help='orthologs folder')
 
 parser.add_argument('-pt', action="store_true", required=False, help='plot tree')
 
-parser.add_argument('-ranger', required=False, default='/Users/songweizhi/Softwares/Ranger-DTL/ranger-dtl-U.mac', help='path to Ranger executable')
+parser.add_argument('-ranger', required=False, default='ranger-dtl-U.mac', help='path to Ranger executable')
 
-parser.add_argument('-hmmsearch', required=False, default='~/Softwares/hmmer/hmmer-3.1b2-macosx-intel/binaries/hmmsearch', help='path to hmmsearch executable')
+parser.add_argument('-hmmsearch', required=False, default='hmmsearch', help='path to hmmsearch executable')
 
 parser.add_argument('-mafft', required=False, default='mafft', help='path to Mafft executable')
 
-parser.add_argument('-fasttree', required=False, default='~/Softwares/FastTree/FastTree', help='path to FastTree executable')
+parser.add_argument('-fasttree', required=False, default='FastTree', help='path to FastTree executable')
 
 parser.add_argument('-blastp', required=False, default='blastp', help='path to FastTree executable')
 
