@@ -499,6 +499,9 @@ for faa_file in faa_file_list:
     faa_file_basename_list.append(faa_file_basename)
 
 
+# report current processing
+print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Running hmmsearch.')
+
 for faa_file_basename in faa_file_basename_list:
 
     # run hmmsearch
