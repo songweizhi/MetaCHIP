@@ -54,26 +54,8 @@ Notes:
 How to run:
 ---
 
-1. Customize file config.txt, specify the path to needed executables in your system.
++ A detailed manual can be found at manual/MetaCHIP_User_Manual.pdf
 
-1. Cluster your input genome bins
-        
-        python Get_clusters.py -i human_gut_bins -x fasta -p human_gut
-
-1.  You may want to manually modify the grouping results ([prefix]_grouping_g[num].txt) based on the taxonomy classification of your input genome bins
-
-1.  Best-match approach
-
-        python Best-match.py -p human_gut -num_threads 9
-
-1. All protein orthologs within the input genomes need to be obtained for the Phylogenetic approach, you can get it with [GET_HOMOLOGUES](https://github.com/eead-csic-compbio/get_homologues). Example command:
-
-        cd human_gut_MetaCHIP_wd
-        get_homologues.pl -f 70 -t 3 -S 70 -E 1e-05 -C 70 -G -n 16 -d human_gut_gbk_files
-
-1.  Phylogenetic approach
-
-        python Phylogenetic.py -p human_gut
 
 Output files:
 ---
