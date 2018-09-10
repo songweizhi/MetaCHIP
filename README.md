@@ -10,31 +10,26 @@ Publication
 Dependencies:
 ---
 
-1. For Get_clusters.py
-    + Python package:
-    [BioPython](https://github.com/biopython/biopython.github.io/),
-    [ETE3](http://etetoolkit.org),
-    [Numpy](http://www.numpy.org),
-    [SciPy](https://www.scipy.org),
-    [Matplotlib](http://matplotlib.org)
-    + [R](https://www.r-project.org) and its module:
-    [optparse](https://cran.r-project.org/web/packages/optparse/index.html),
-    [ape](https://cran.r-project.org/web/packages/ape/index.html)
-    + [Prodigal](https://github.com/hyattpd/Prodigal)
-    + [HMMER](http://hmmer.org)
-    + [MAFFT](https://mafft.cbrc.jp/alignment/software/)
-    + [FastTree](http://www.microbesonline.org/fasttree/)
++ Python packages:
+[BioPython](https://github.com/biopython/biopython.github.io/),
+[ETE3](http://etetoolkit.org),
+[Numpy](http://www.numpy.org),
+[SciPy](https://www.scipy.org),
+[Matplotlib](http://matplotlib.org)
+[ReportLab](http://www.reportlab.com)
 
-1. For Best-match.py
-    + Python package:
-    [ReportLab](http://www.reportlab.com)
-    + [BLAST+](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download)
++ R packages:
+[optparse](https://cran.r-project.org/web/packages/optparse/index.html),
+[ape](https://cran.r-project.org/web/packages/ape/index.html)
+[circlize](https://cran.r-project.org/web/packages/circlize/index.html)
 
-1. For Phylogenetic.py
-    + Python package:
-    [ETE3](http://etetoolkit.org),
-    + [Get_Homologues](https://github.com/eead-csic-compbio/get_homologues)
-    + [Ranger-DTL 1.0](http://compbio.mit.edu/ranger-dtl/)
++ [Prodigal](https://github.com/hyattpd/Prodigal)
++ [HMMER](http://hmmer.org)
++ [MAFFT](https://mafft.cbrc.jp/alignment/software/)
++ [FastTree](http://www.microbesonline.org/fasttree/)
++ [BLAST+](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download)
++ [Get_Homologues](https://github.com/eead-csic-compbio/get_homologues)
++ [Ranger-DTL 1.0](http://compbio.mit.edu/ranger-dtl/)
 
 
 How to install:
