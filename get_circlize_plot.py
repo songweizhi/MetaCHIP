@@ -116,3 +116,5 @@ os.remove('tmp1_sorted_count.txt')
 os.remove(matrix_filename)
 
 print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Plot exported to %s' % circos_plot_name)
+
+

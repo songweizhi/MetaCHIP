@@ -570,18 +570,18 @@ else:
 ####################################################### Main Code ######################################################
 
 # get species tree for all input genomes
-SCG_tree_wd =                   '%s_get_SCG_tree_wd'        % output_prefix
-pwd_SCG_tree_wd =               '%s/%s'                     % (MetaCHIP_wd, SCG_tree_wd)
+SCG_tree_wd =     '%s_get_SCG_tree_wd' % output_prefix
+pwd_SCG_tree_wd = '%s/%s'              % (MetaCHIP_wd, SCG_tree_wd)
 
 candidate_2_predictions_dict = {}
 candidate_2_possible_direction_dict = {}
 
 # get gene tree for each orthologous and run Ranger-DTL
-print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Get gene tree for each orthologous and run Ranger-DTL')
+print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Get gene tree for each orthologous and run Ranger-DTL-U')
 n = 1
 for each_candidates in candidates_list:
     process_name = '___'.join(each_candidates)
-    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + " Processing %sth of %s candidates: %s" % (str(n), str(len(candidates_list)), process_name))
+    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + " Processing %s/%s: %s" % (str(n), str(len(candidates_list)), process_name))
 
     # get ortholog_list for each match pairs
     ortholog_list = [] # ortholog_list == gene_member, need to modify!!!!!
@@ -864,7 +864,7 @@ for each_candidates in candidates_list:
     n += 1
 
 # add results to output file of best blast match approach
-print('Add Ranger-DTL predicted direction to HGT_candidates.txt')
+print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Add Ranger-DTL predicted direction to HGT_candidates.txt')
 combined_output_handle = open(pwd_candidates_file_ET, 'w')
 combined_output_validated_handle = open(pwd_candidates_file_ET_validated, 'w')
 combined_output_validated_handle.write('Gene_1\tGene_2\tGenome_1_ID\tGenome_2_ID\tIdentity\tEnd_break\tDirection\n' % ())
@@ -911,5 +911,105 @@ for each_candidate in SeqIO.parse(pwd_candidates_seq_file, 'fasta'):
 combined_output_validated_fasta_nc_handle.close()
 combined_output_validated_fasta_aa_handle.close()
 
-print('\nDone for Tree approach!')
+print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Done for Tree approach!')
+
+
+################################################### Get_circlize_plot ##################################################
+
+print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Plotting gene flow between groups')
+
+# get path to circos_HGT.R
+circos_HGT_R = '%s/circos_HGT.R' % phylogenetic_script_path
+
+name2id_dict = {}
+transfers = []
+for each in open(pwd_candidates_file_ET_validated):
+    if not each.startswith('Gene_1'):
+        each_split = each.strip().split('\t')
+        Gene_1 = each_split[0]
+        Gene_2 = each_split[1]
+        Genome_1_ID = each_split[2]
+        Genome_1 = '_'.join(Gene_1.split('_')[:-1])
+        Genome_2_ID = each_split[3]
+        Genome_2 = '_'.join(Gene_2.split('_')[:-1])
+        Identity = each_split[4]
+        End_break = each_split[5]
+        Direction = each_split[6]
+        if Genome_1 not in name2id_dict:
+            name2id_dict[Genome_1] = Genome_1_ID
+        if Genome_2 not in name2id_dict:
+            name2id_dict[Genome_2] = Genome_2_ID
+        transfers.append(Direction)
+
+tmp1 = open('tmp1.txt', 'w')
+all_group_id = []
+for each_t in transfers:
+    each_t_split = each_t.split('-->')
+    donor = each_t_split[0]
+    recipient = each_t_split[1]
+    donor_id = name2id_dict[donor].split('_')[0]
+    recipient_id = name2id_dict[recipient].split('_')[0]
+    if donor_id not in all_group_id:
+        all_group_id.append(donor_id)
+    if recipient_id not in all_group_id:
+        all_group_id.append(recipient_id)
+    tmp1.write('%s,%s\n' % (donor_id, recipient_id))
+tmp1.close()
+
+os.system('cat tmp1.txt | sort > tmp1_sorted.txt')
+
+current_t = ''
+count = 0
+tmp2 = open('tmp1_sorted_count.txt', 'w')
+for each_t2 in open('tmp1_sorted.txt'):
+    each_t2 = each_t2.strip()
+    if current_t == '':
+        current_t = each_t2
+        count += 1
+    elif current_t == each_t2:
+        count += 1
+    elif current_t != each_t2:
+        tmp2.write('%s,%s\n' % (current_t, count))
+        current_t = each_t2
+        count = 1
+tmp2.write('%s,%s\n' % (current_t, count))
+tmp2.close()
+
+# read in count as dict
+transfer_count = {}
+for each_3 in open('tmp1_sorted_count.txt'):
+    each_3_split = each_3.strip().split(',')
+    key = '%s,%s' % (each_3_split[0], each_3_split[1])
+    value = each_3_split[2]
+    transfer_count[key] = value
+
+all_group_id = sorted(all_group_id)
+
+input_file_name, input_file_ext = os.path.splitext(pwd_candidates_file_ET_validated)
+matrix_filename = '%s_matrix.csv' % input_file_name
+circos_plot_name = '%s_circos.png' % input_file_name
+matrix_file = open(matrix_filename, 'w')
+matrix_file.write('\t' + '\t'.join(all_group_id) + '\n')
+for each_1 in all_group_id:
+    row = [each_1]
+    for each_2 in all_group_id:
+        current_key = '%s,%s' % (each_2, each_1)
+        if current_key not in transfer_count:
+            row.append('0')
+        else:
+            row.append(transfer_count[current_key])
+    matrix_file.write('\t'.join(row) + '\n')
+matrix_file.close()
+
+# get plot with R
+#print('Running: Rscript %s -m %s -p %s' % (circos_HGT_R, matrix_filename, circos_plot_name))
+os.system('Rscript %s -m %s -p %s' % (circos_HGT_R, matrix_filename, circos_plot_name))
+
+# remove tmp files
+os.remove('tmp1.txt')
+os.remove('tmp1_sorted.txt')
+os.remove('tmp1_sorted_count.txt')
+os.remove(matrix_filename)
+
+print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Gene flow plot exported to %s' % circos_plot_name.split('/')[-1])
 

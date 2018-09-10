@@ -1,4 +1,4 @@
-![logo](doc/images/MetaCHIP_logo.jpg)
+![logo](images/MetaCHIP_logo.jpg)
 
 Publication
 ---
@@ -94,12 +94,12 @@ Output files:
 
 1. Identity distribution plot for each group pair.
 
-    ![identity_distribution](doc/images/identity_distribution.png)
+    ![identity_distribution](images/identity_distribution.png)
 
 1. ACT image for checking flanking regions of identified HGTs.
 
-    ![flanking_regions](doc/images/flanking_regions.jpg)
+    ![flanking_regions](images/flanking_regions.jpg)
 
 1. Gene flow between groups.
 
-    ![Gene_flow](doc/images/Gene_flow.jpg)
+    ![Gene_flow](images/Gene_flow.jpg)
