@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 # Copyright (C) 2017, Weizhi Song, Torsten Thomas.
 # songwz03@gmail.com or t.thomas@unsw.edu.au
