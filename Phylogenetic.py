@@ -31,18 +31,6 @@ from Bio.SeqRecord import SeqRecord
 from datetime import datetime
 
 
-# to-do
-# what if hiden files are more than one (section: get species tree for all input genomes)
-# ortholog_list == gene_member, need to modify
-# add gene name instead of concatenated candidates id to the species tree and gene tree
-# what if not plot, how to prepare outputs
-# what does checkm tree do
-# for orthology groups, file name should be the protein name
-# no ''' in input file name
-# plot inter node of species tree
-# multiple threads
-
-
 def get_program_path_dict(pwd_cfg_file):
     program_path_dict = {}
     for each in open(pwd_cfg_file):
@@ -370,7 +358,7 @@ parser.add_argument('-a', required=False, help='Prokka output')
 
 parser.add_argument('-o', required=False, help='orthologs folder')
 
-parser.add_argument('-pt', action="store_true", required=False, help='plot tree')
+#parser.add_argument('-pt', action="store_true", required=False, help='plot tree')
 
 args = vars(parser.parse_args())
 output_prefix = args['p']
@@ -381,7 +369,8 @@ identity_percentile = args['ip']
 ending_match_length = args['eb']
 prokka_output = args['a']
 ortholog_group_folder_name = args['o']
-plot_tree = args['pt']
+#plot_tree = args['pt']
+plot_tree = 0
 
 # get path to current script
 pwd_phylogenetic_script = sys.argv[0]
@@ -440,12 +429,12 @@ species_tree_folder_plot =                   'species_tree_plot'
 species_tree_folder_ranger =                 'species_tree'
 ranger_inputs_folder_name =                  'Ranger_input'
 ranger_outputs_folder_name =                 'Ranger_output'
-candidates_file_name =                       'HGT_candidates.txt'
-candidates_seq_file_name =                   'HGT_candidates_nc.fasta'
-candidates_file_name_ET =                    'HGT_candidates_ET.txt'
-candidates_file_name_ET_validated =          'HGT_candidates_ET_validated.txt'
-candidates_file_name_ET_validated_fasta_nc = 'HGT_candidates_ET_validated_nc.fasta'
-candidates_file_name_ET_validated_fasta_aa = 'HGT_candidates_ET_validated_aa.fasta'
+candidates_file_name =                       'HGT_candidates_BM.txt'
+candidates_seq_file_name =                   'HGT_candidates_BM_nc.fasta'
+candidates_file_name_ET =                    'HGT_candidates_PG.txt'
+candidates_file_name_ET_validated =          'HGT_candidates_PG_validated.txt'
+candidates_file_name_ET_validated_fasta_nc = 'HGT_candidates_PG_nc.fasta'
+candidates_file_name_ET_validated_fasta_aa = 'HGT_candidates_PG_aa.fasta'
 ranger_wd_name =                             'Ranger-DTL_wd'
 output_tree_folder_name =                    'Explicit_tree_output'
 tree_image_folder_name =                     'combined_tree_images'
@@ -922,4 +911,5 @@ for each_candidate in SeqIO.parse(pwd_candidates_seq_file, 'fasta'):
 combined_output_validated_fasta_nc_handle.close()
 combined_output_validated_fasta_aa_handle.close()
 
-print('\nAll done for Tree approach!')
+print('\nDone for Tree approach!')
+

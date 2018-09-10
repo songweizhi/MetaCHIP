@@ -340,9 +340,9 @@ def plot_clustering_dendrogram(cluster, leaf_font_size, leaf_label_func, color_t
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('-i', required=True, help='input sequence folder')
+parser.add_argument('-i', required=True, help='input genome folder')
 
-parser.add_argument('-x', required=True, help='file extension of input sequences')
+parser.add_argument('-x', required=True, help='file extension')
 
 parser.add_argument('-p', required=True, help='output prefix')
 
@@ -350,9 +350,9 @@ parser.add_argument('-dc', required=False, type=float, default=None, help='dista
 
 parser.add_argument('-fs', required=False, type=int, default=9, help='leaf name font size')
 
-parser.add_argument('-taxon', required=False, default=None, help='taxon classification if available')
+parser.add_argument('-taxon', required=False, default=None, help='taxonomy (if available)')
 
-parser.add_argument('-tr', required=False, default='c', help='taxon_ranks')
+parser.add_argument('-tr', required=False, default='c', help='taxon ranks, with “-taxon” specified')
 
 args = vars(parser.parse_args())
 

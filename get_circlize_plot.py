@@ -1,10 +1,11 @@
 import os
+import sys
 import argparse
 from datetime import datetime
 
 usage = """
 
-python /srv/scratch/z5039045/Softwares/MetaCHIP/get_circlize_plot.py -in HGT_candidates_ET_validated.txt 
+python /srv/scratch/z5039045/Softwares/MetaCHIP/Get_circlize_plot.py -in HGT_candidates_ET_validated.txt 
 
 """
 
@@ -14,15 +15,14 @@ parser.add_argument('-in',
                     required=True,
                     help='input file')
 
-parser.add_argument('-Rscript',
-                    required=False,
-                    default='/srv/scratch/z5039045/Softwares/MetaCHIP/circos_HGT.R',
-                    #default='~/PycharmProjects/MetaCHIP/circos_HGT.R',
-                    help='Rscript')
-
 args = vars(parser.parse_args())
 input_file = args['in']
-circos_HGT_R = args['Rscript']
+
+
+# get path to current script
+pwd_get_circlize_plot_script = sys.argv[0]
+get_circlize_plot_script_path, file_name = os.path.split(pwd_get_circlize_plot_script)
+circos_HGT_R = '%s/circos_HGT.R' % get_circlize_plot_script_path
 
 
 name2id_dict = {}

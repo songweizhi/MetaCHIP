@@ -909,18 +909,18 @@ def get_gbk_blast_act(candidates_file, gbk_file, flanking_length, end_seq_length
                 if query == gene1_contig.name :
                     link = CrossLink((contig_1_gene_content_track, query_start, query_end),
                                      (contig_2_gene_content_track, target_start, target_end),
-                                     color = color,
-                                     border = color,
-                                     flip = False)
+                                     color=color,
+                                     border=color,
+                                     flip=False)
                     diagram.cross_track_links.append(link)
 
                 # if query is contig_2
                 elif query == gene2_contig.name:
                     link = CrossLink((contig_2_gene_content_track, query_start, query_end),
                                      (contig_1_gene_content_track, target_start, target_end),
-                                     color = color,
-                                     border = color,
-                                     flip = False)
+                                     color=color,
+                                     border=color,
+                                     flip=False)
                     diagram.cross_track_links.append(link)
 
             ############################################### Draw and Export ################################################
@@ -1011,7 +1011,7 @@ parser.add_argument('-al', required=False, type=int, default=200, help='alignmen
 
 parser.add_argument('-flk', required=False, type=int, default=3000, help='the length of flanking sequences to plot')
 
-parser.add_argument('-ip', required=False, type=int, default=90, help='identity percentile')
+parser.add_argument('-ip', required=False, type=int, default=90, help='identity percentile cutoff')
 
 parser.add_argument('-eb', required=False, type=int, default=1000, help='the minimal length to be considered as end break')
 
@@ -1102,9 +1102,9 @@ group_pair_iden_cutoff_file_name =                  'identity_cutoff.txt'
 op_candidates_with_group_file_name =                'HGT_candidates_with_group.txt'
 op_candidates_only_gene_file_name =                 'HGT_candidates_only_id.txt'
 op_candidates_only_gene_file_name_uniq =            'HGT_candidates_uniq.txt'
-op_candidates_only_gene_uniq_end_break =            'HGT_candidates.txt'
-op_candidates_seq_nc =                              'HGT_candidates_nc.fasta'
-op_candidates_seq_aa =                              'HGT_candidates_aa.fasta'
+op_candidates_only_gene_uniq_end_break =            'HGT_candidates_BM.txt'
+op_candidates_seq_nc =                              'HGT_candidates_BM_nc.fasta'
+op_candidates_seq_aa =                              'HGT_candidates_BM_aa.fasta'
 op_act_folder_name =                                'Flanking_regions'
 gbk_subset_file =                                   'combined_subset.gbk'
 
