@@ -1,11 +1,13 @@
 ![logo](images/MetaCHIP_logo.jpg)
 
+
 Publication
 ---
 + Song WZ, Wemheuer B, Zhang S, Steensen K, Thomas T* (2018) MetaCHIP: community-level horizontal gene transfer identification through the combination of best-match and explicit phylogenetic tree approaches. Microbiome **(Under review)**.
 + Contact: Weizhi Song (songwz03@gmail.com), Torsten Thomas(t.thomas@unsw.edu.au)
 
 + Affiliation: The Centre for Marine Bio-Innovation (CMB), The University of New South Wales, Sydney, Australia
+
 
 Dependencies:
 ---
@@ -39,6 +41,7 @@ How to install:
 1. Modify the config file according to the location of required softwares.
 1. MetaCHIP is ready to run now.
 
+
 Notes:
 ---
 1. To get a reliable clusrering results of the input genome bins, their completeness need to be higher than 40% (Figure 3 in doc/MetaCHIP_manuscript.pdf).
@@ -46,15 +49,14 @@ Notes:
 1. The only input for MetaCHIP is a folder which holds the sequence file of a set of genome bins.
 1. [Get_Homologues](https://github.com/eead-csic-compbio/get_homologues) is needed to get the Ortholog groups within your input genomes.
 
+
 How to run:
 ---
-
-+ A detailed manual can be found at manual/MetaCHIP_User_Manual.pdf
++ A detailed manual can be found at [manual/MetaCHIP_User_Manual.pdf](https://github.com/songweizhi/MetaCHIP/blob/master/manual/MetaCHIP_User_Manual.pdf).
 
 
 Output files:
 ---
-
 1. All identified candidates (this file will be used as input for the second step).
 
     |Gene_1|Gene_2|Genome_1_ID|Genome_2_ID|Identity|End_break|Direction|
