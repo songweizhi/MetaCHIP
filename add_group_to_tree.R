@@ -29,13 +29,19 @@ option_list = list(
   make_option(c("-g", "--grouping"), 
               type="character", 
               help="grouping file", 
-              metavar="character"));
+              metavar="character"),
+
+  make_option(c("-l", "--label_shift"),
+              type="double",
+              help="label shift on the tree plot",
+              metavar="double"));
 
 opt_parser = OptionParser(option_list=option_list);
 opt = parse_args(opt_parser);
 wd = getwd()
 grouping_file = opt$grouping
 tree_file_in = opt$tree
+label_shift = opt$label_shift
 
 tree_file_in_name_no_extension = file_path_sans_ext(basename(grouping_file))
 tree_txt_file_with_group = paste(tree_file_in_name_no_extension, 'tree.txt', sep = '_')
@@ -61,7 +67,7 @@ for (i in 1:length(SCG_tree_with_group$tip.label)) {
   i = i + 1}
 # plot tree with group
 jpeg(pwd_tree_plot_file_with_group, width = 1600, height = 1600, units = "px", quality = 100, pointsize = 30)
-plot.phylo(SCG_tree_with_group, 'u', font = 1, cex = 0.7, label.offset = 0.02, lab4ut = 'axial')
+plot.phylo(SCG_tree_with_group, 'u', font = 1, cex = 0.7, label.offset = label_shift, lab4ut = 'axial')
 dev.off()
 #write.tree(SCG_tree_with_group, file=pwd_tree_txt_file_with_group)
 
@@ -76,6 +82,6 @@ for (i in 1:length(SCG_tree_only_group$tip.label)) {
   i = i + 1}
 # plot tree only group
 jpeg(pwd_tree_plot_file_only_group, width = 1600, height = 1600, units = "px", quality = 100, pointsize = 30)
-plot.phylo(SCG_tree_only_group, 'u', font = 1, cex = 0.7, label.offset = 0.01, lab4ut = 'axial')
+plot.phylo(SCG_tree_only_group, 'u', font = 1, cex = 0.7, label.offset = label_shift, lab4ut = 'axial')
 dev.off()
 #write.tree(SCG_tree_only_group, file=pwd_tree_txt_file_only_group)

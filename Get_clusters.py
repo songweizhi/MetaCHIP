@@ -350,9 +350,11 @@ parser.add_argument('-dc', required=False, type=float, default=None, help='dista
 
 parser.add_argument('-fs', required=False, type=int, default=9, help='leaf name font size')
 
-parser.add_argument('-taxon', required=False, default=None, help='taxonomy (if available)')
+parser.add_argument('-ls', required=False, type=float, default=0.01, help='label shift on the tree plot')
 
-parser.add_argument('-tr', required=False, default='c', help='taxon ranks, with “-taxon” specified')
+parser.add_argument('-taxon', required=False, default=None, help='taxonomy classification of input genomes, if available')
+
+parser.add_argument('-tr', required=False, default='c', help='taxon ranks')
 
 args = vars(parser.parse_args())
 
@@ -363,6 +365,7 @@ max_d = args['dc']
 leaf_font_size = args['fs']
 taxon_classification_file = args['taxon']
 taxon_rank = args['tr']
+label_shift = args['ls']
 
 # get path to current script
 pwd_Get_clusters_script = sys.argv[0]
@@ -705,7 +708,8 @@ else:
 # call R
 current_wd = os.getcwd()
 os.chdir(MetaCHIP_wd)
-add_group_to_tree_R_cmd = 'Rscript %s -t %s -g %s > /dev/null' % (add_group_to_tree_R, newick_tree_file, grouping_file)
+add_group_to_tree_R_cmd = 'Rscript %s -t %s -g %s -l %s > /dev/null' % (add_group_to_tree_R, newick_tree_file, grouping_file, label_shift)
+print(add_group_to_tree_R_cmd)
 os.system(add_group_to_tree_R_cmd)
 os.chdir(current_wd)
 
