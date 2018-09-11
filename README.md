@@ -57,7 +57,7 @@ How to run:
 
 Output files:
 ---
-1. All identified candidates (this file will be used as input for the second step).
+1. Identified HGT candidates.
 
     |Gene_1|Gene_2|Genome_1_ID|Genome_2_ID|Identity|End_break|Direction|
     |---|---|---|---|---|---|---|
@@ -71,11 +71,11 @@ Output files:
     |BNM_02445|AMS_01681|B_5|A_5|77.961|no|BNM<-AMS|
     |BNM_02717|AAM_02737|B_5|A_1|74.47|no|BNM<-AAM|
 
-1. Identity distribution plot for each group pair.
+1. Identity distribution for each group pair.
 
     ![identity_distribution](images/identity_distribution.png)
 
-1. ACT image for checking flanking regions of identified HGTs.
+1. Flanking regions of identified HGTs.
 
     ![flanking_regions](images/flanking_regions.jpg)
 
