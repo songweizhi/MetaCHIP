@@ -82,3 +82,4 @@ Output files:
 1. Gene flow between groups.
 
     ![Gene_flow](images/Gene_flow.jpg)
+
