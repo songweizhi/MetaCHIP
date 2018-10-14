@@ -111,7 +111,7 @@ def prodigal_parser(seq_file, sco_file, prefix, output_folder):
                 seq_to_transl_table_dict[current_seq_id] = current_transl_table
 
             # reset value
-            current_seq_id = each_cds.strip().split('=')[-1][1:-1]
+            current_seq_id = each_cds.strip().split('=')[-1][1:-1].split(' ')[0]
             current_transl_table = ''
             current_seq_csd_list = []
 
@@ -135,6 +135,7 @@ def prodigal_parser(seq_file, sco_file, prefix, output_folder):
         current_sequence = Seq(id_to_sequence_dict[seq_id])
         current_SeqRecord = SeqRecord(current_sequence, id=seq_id)
         current_SeqRecord.seq.alphabet = generic_dna
+        print(seq_to_transl_table_dict)
         transl_table = seq_to_transl_table_dict[seq_id]
 
         # add SeqFeature to SeqRecord
