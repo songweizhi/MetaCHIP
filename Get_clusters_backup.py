@@ -356,9 +356,6 @@ parser.add_argument('-taxon', required=False, default=None, help='taxonomy class
 
 parser.add_argument('-tr', required=False, default='c', help='taxon ranks')
 
-parser.add_argument('-tuning', action="store_true", required=False, help='specify to run clustering with provided distance cutoff, while skipping previous steps')
-
-
 args = vars(parser.parse_args())
 
 input_genome_folder = args['i']
@@ -369,7 +366,6 @@ leaf_font_size = args['fs']
 taxon_classification_file = args['taxon']
 taxon_rank = args['tr']
 label_shift = args['ls']
-tuning_mode = int(args['tuning'])
 
 # get path to current script
 pwd_Get_clusters_script = sys.argv[0]
@@ -410,25 +406,23 @@ pwd_ffn_folder =             '%s/%s' % (MetaCHIP_wd, ffn_folder)
 pwd_faa_folder =             '%s/%s' % (MetaCHIP_wd, faa_folder)
 pwd_gbk_folder =             '%s/%s' % (MetaCHIP_wd, gbk_folder)
 
-if tuning_mode == 0:
+if os.path.isdir(MetaCHIP_wd):
+    shutil.rmtree(MetaCHIP_wd, ignore_errors=True)
     if os.path.isdir(MetaCHIP_wd):
         shutil.rmtree(MetaCHIP_wd, ignore_errors=True)
         if os.path.isdir(MetaCHIP_wd):
             shutil.rmtree(MetaCHIP_wd, ignore_errors=True)
-            if os.path.isdir(MetaCHIP_wd):
-                shutil.rmtree(MetaCHIP_wd, ignore_errors=True)
-        os.mkdir(MetaCHIP_wd)
-        os.mkdir(pwd_prodigal_output_folder)
-        os.mkdir(pwd_ffn_folder)
-        os.mkdir(pwd_faa_folder)
-        os.mkdir(pwd_gbk_folder)
-    else:
-        os.mkdir(MetaCHIP_wd)
-        os.mkdir(pwd_prodigal_output_folder)
-        os.mkdir(pwd_ffn_folder)
-        os.mkdir(pwd_faa_folder)
-        os.mkdir(pwd_gbk_folder)
-
+    os.mkdir(MetaCHIP_wd)
+    os.mkdir(pwd_prodigal_output_folder)
+    os.mkdir(pwd_ffn_folder)
+    os.mkdir(pwd_faa_folder)
+    os.mkdir(pwd_gbk_folder)
+else:
+    os.mkdir(MetaCHIP_wd)
+    os.mkdir(pwd_prodigal_output_folder)
+    os.mkdir(pwd_ffn_folder)
+    os.mkdir(pwd_faa_folder)
+    os.mkdir(pwd_gbk_folder)
 
 ##################################################### run prodigal #####################################################
 
@@ -437,54 +431,53 @@ input_genome_re = '%s/*.%s' % (input_genome_folder, file_extension)
 input_genome_file_list = [os.path.basename(file_name) for file_name in glob.glob(input_genome_re)]
 
 # report current processing
-if tuning_mode == 0:
-    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Running Prodigal.')
+print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Running Prodigal.')
 
 
-    MaxProcesses = 20
-    Processes = []
-    for input_genome in input_genome_file_list:
+MaxProcesses = 20
+Processes = []
+for input_genome in input_genome_file_list:
 
-        # prepare command (according to Prokka)
-        input_genome_basename, input_genome_ext = os.path.splitext(input_genome)
-        pwd_input_genome = '%s/%s' % (input_genome_folder, input_genome)
-        pwd_output_sco = '%s/%s.sco' % (pwd_prodigal_output_folder, input_genome_basename)
-        prodigal_cmd = '%s -f sco -q -c -m -g 11 -p meta -i %s -o %s' % (pwd_prodigal_exe, pwd_input_genome, pwd_output_sco)
-
-
-        # run with subprocess
-        prodigal_cmd_list = [pwd_prodigal_exe, '-f', 'sco',  '-q', '-c', '-m', '-g', '11', '-p', 'meta', '-i', pwd_input_genome, '-o', pwd_output_sco]
-
-        # keep wait if there is no spare slots
-        while len(Processes) >= MaxProcesses:
-            sleep(0.1)
-            for process in Processes:
-                if process.poll() is not None:
-                    Processes.remove(process)
-
-        # submit new subprocess
-        p = subprocess.Popen(prodigal_cmd_list)
-        Processes.append(p)
-
-    # wait for completion
-    for p in Processes:
-        p.wait()
+    # prepare command (according to Prokka)
+    input_genome_basename, input_genome_ext = os.path.splitext(input_genome)
+    pwd_input_genome = '%s/%s' % (input_genome_folder, input_genome)
+    pwd_output_sco = '%s/%s.sco' % (pwd_prodigal_output_folder, input_genome_basename)
+    prodigal_cmd = '%s -f sco -q -c -m -g 11 -p meta -i %s -o %s' % (pwd_prodigal_exe, pwd_input_genome, pwd_output_sco)
 
 
-    for input_genome_2 in input_genome_file_list:
+    # run with subprocess
+    prodigal_cmd_list = [pwd_prodigal_exe, '-f', 'sco',  '-q', '-c', '-m', '-g', '11', '-p', 'meta', '-i', pwd_input_genome, '-o', pwd_output_sco]
 
-        # prepare filename
-        input_genome_basename, input_genome_ext = os.path.splitext(input_genome_2)
-        pwd_input_genome = '%s/%s' % (input_genome_folder, input_genome_2)
-        pwd_output_sco = '%s/%s.sco' % (pwd_prodigal_output_folder, input_genome_basename)
+    # keep wait if there is no spare slots
+    while len(Processes) >= MaxProcesses:
+        sleep(0.1)
+        for process in Processes:
+            if process.poll() is not None:
+                Processes.remove(process)
 
-        # prepare ffn, faa and gbk files from prodigal output
-        prodigal_parser(pwd_input_genome, pwd_output_sco, input_genome_basename, pwd_prodigal_output_folder)
+    # submit new subprocess
+    p = subprocess.Popen(prodigal_cmd_list)
+    Processes.append(p)
 
-        # move file to separate folders
-        os.system('mv %s/%s.ffn %s' % (pwd_prodigal_output_folder, input_genome_basename, pwd_ffn_folder))
-        os.system('mv %s/%s.faa %s' % (pwd_prodigal_output_folder, input_genome_basename, pwd_faa_folder))
-        os.system('mv %s/%s.gbk %s' % (pwd_prodigal_output_folder, input_genome_basename, pwd_gbk_folder))
+# wait for completion
+for p in Processes:
+    p.wait()
+
+
+for input_genome_2 in input_genome_file_list:
+
+    # prepare filename
+    input_genome_basename, input_genome_ext = os.path.splitext(input_genome_2)
+    pwd_input_genome = '%s/%s' % (input_genome_folder, input_genome_2)
+    pwd_output_sco = '%s/%s.sco' % (pwd_prodigal_output_folder, input_genome_basename)
+
+    # prepare ffn, faa and gbk files from prodigal output
+    prodigal_parser(pwd_input_genome, pwd_output_sco, input_genome_basename, pwd_prodigal_output_folder)
+
+    # move file to separate folders
+    os.system('mv %s/%s.ffn %s' % (pwd_prodigal_output_folder, input_genome_basename, pwd_ffn_folder))
+    os.system('mv %s/%s.faa %s' % (pwd_prodigal_output_folder, input_genome_basename, pwd_faa_folder))
+    os.system('mv %s/%s.gbk %s' % (pwd_prodigal_output_folder, input_genome_basename, pwd_gbk_folder))
 
 
 ################################################### get species tree ###################################################
@@ -496,9 +489,7 @@ newick_tree_file =              '%s_species_tree.newick'    % output_prefix
 pwd_SCG_tree_wd =               '%s/%s'                     % (MetaCHIP_wd, SCG_tree_wd)
 pwd_combined_alignment_file =   '%s/%s'                     % (MetaCHIP_wd, combined_alignment_file)
 pwd_newick_tree_file =          '%s/%s'                     % (MetaCHIP_wd, newick_tree_file)
-
-if tuning_mode == 0:
-    os.mkdir(pwd_SCG_tree_wd)
+os.mkdir(pwd_SCG_tree_wd)
 
 
 faa_file_re = '%s/*.faa' % pwd_faa_folder
@@ -511,59 +502,45 @@ for faa_file in faa_file_list:
     faa_file_basename_list.append(faa_file_basename)
 
 
-if tuning_mode == 0:
-    # report current processing
-    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Running hmmsearch.')
+# report current processing
+print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Running hmmsearch.')
 
-    for faa_file_basename in faa_file_basename_list:
+for faa_file_basename in faa_file_basename_list:
 
-        # run hmmsearch
-        pwd_faa_file = '%s/%s_faa_files/%s.faa' % (MetaCHIP_wd, output_prefix, faa_file_basename)
-        os.system('%s -o /dev/null --domtblout %s/%s_hmmout.tbl %s %s' % (pwd_hmmsearch_exe, pwd_SCG_tree_wd, faa_file_basename, path_to_hmm, pwd_faa_file))
+    # run hmmsearch
+    pwd_faa_file = '%s/%s_faa_files/%s.faa' % (MetaCHIP_wd, output_prefix, faa_file_basename)
+    os.system('%s -o /dev/null --domtblout %s/%s_hmmout.tbl %s %s' % (pwd_hmmsearch_exe, pwd_SCG_tree_wd, faa_file_basename, path_to_hmm, pwd_faa_file))
 
-        # Reading the protein file in a dictionary
-        proteinSequence = {}
-        for seq_record in SeqIO.parse(pwd_faa_file, 'fasta'):
-            proteinSequence[seq_record.id] = str(seq_record.seq)
+    # Reading the protein file in a dictionary
+    proteinSequence = {}
+    for seq_record in SeqIO.parse(pwd_faa_file, 'fasta'):
+        proteinSequence[seq_record.id] = str(seq_record.seq)
 
-        # Reading the hmmersearch table/extracting the protein part found beu hmmsearch out of the protein/Writing each protein sequence that was extracted to a fasta file (one for each hmm in phylo.hmm
-        hmm_id = ''
-        hmm_name = ''
-        hmm_pos1 = 0
-        hmm_pos2 = 0
-        hmm_score = 0
+    # Reading the hmmersearch table/extracting the protein part found beu hmmsearch out of the protein/Writing each protein sequence that was extracted to a fasta file (one for each hmm in phylo.hmm
+    hmm_id = ''
+    hmm_name = ''
+    hmm_pos1 = 0
+    hmm_pos2 = 0
+    hmm_score = 0
 
-        with open(pwd_SCG_tree_wd + '/' + faa_file_basename + '_hmmout.tbl', 'r') as tbl:
-            for line in tbl:
-                if line[0] == "#": continue
-                line = re.sub('\s+', ' ', line)
-                splitLine = line.split(' ')
+    with open(pwd_SCG_tree_wd + '/' + faa_file_basename + '_hmmout.tbl', 'r') as tbl:
+        for line in tbl:
+            if line[0] == "#": continue
+            line = re.sub('\s+', ' ', line)
+            splitLine = line.split(' ')
 
-                if (hmm_id == ''):
-                    hmm_id = splitLine[4]
+            if (hmm_id == ''):
+                hmm_id = splitLine[4]
+                hmm_name = splitLine[0]
+                hmm_pos1 = int(splitLine[17]) - 1
+                hmm_pos2 = int(splitLine[18])
+                hmm_score = float(splitLine[13])
+            elif (hmm_id == splitLine[4]):
+                if (float(splitLine[13]) > hmm_score):
                     hmm_name = splitLine[0]
                     hmm_pos1 = int(splitLine[17]) - 1
                     hmm_pos2 = int(splitLine[18])
                     hmm_score = float(splitLine[13])
-                elif (hmm_id == splitLine[4]):
-                    if (float(splitLine[13]) > hmm_score):
-                        hmm_name = splitLine[0]
-                        hmm_pos1 = int(splitLine[17]) - 1
-                        hmm_pos2 = int(splitLine[18])
-                        hmm_score = float(splitLine[13])
-                else:
-                    file_out = open(pwd_SCG_tree_wd + '/' + hmm_id + '.fasta', 'a+')
-                    file_out.write('>' + faa_file_basename + '\n')
-                    if hmm_name != '':
-                        seq = str(proteinSequence[hmm_name][hmm_pos1:hmm_pos2])
-                    file_out.write(str(seq) + '\n')
-                    file_out.close()
-                    hmm_id = splitLine[4]
-                    hmm_name = splitLine[0]
-                    hmm_pos1 = int(splitLine[17]) - 1
-                    hmm_pos2 = int(splitLine[18])
-                    hmm_score = float(splitLine[13])
-
             else:
                 file_out = open(pwd_SCG_tree_wd + '/' + hmm_id + '.fasta', 'a+')
                 file_out.write('>' + faa_file_basename + '\n')
@@ -571,57 +548,69 @@ if tuning_mode == 0:
                     seq = str(proteinSequence[hmm_name][hmm_pos1:hmm_pos2])
                 file_out.write(str(seq) + '\n')
                 file_out.close()
+                hmm_id = splitLine[4]
+                hmm_name = splitLine[0]
+                hmm_pos1 = int(splitLine[17]) - 1
+                hmm_pos2 = int(splitLine[18])
+                hmm_score = float(splitLine[13])
+
+        else:
+            file_out = open(pwd_SCG_tree_wd + '/' + hmm_id + '.fasta', 'a+')
+            file_out.write('>' + faa_file_basename + '\n')
+            if hmm_name != '':
+                seq = str(proteinSequence[hmm_name][hmm_pos1:hmm_pos2])
+            file_out.write(str(seq) + '\n')
+            file_out.close()
+
+# Call mafft to align all single fasta files with hmms
+files = os.listdir(pwd_SCG_tree_wd)
+fastaFiles = [i for i in files if i.endswith('.fasta')]
+print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Running mafft...')
+for faa_file_basename in fastaFiles:
+    fastaFile1 = '%s/%s' % (pwd_SCG_tree_wd, faa_file_basename)
+    fastaFile2 = fastaFile1.replace('.fasta', '_aligned.fasta')
+    os.system(pwd_mafft_exe + ' --quiet --maxiterate 1000 --globalpair ' + fastaFile1 + ' > ' + fastaFile2 + ' ; rm ' + fastaFile1)
 
 
-    # Call mafft to align all single fasta files with hmms
-    files = os.listdir(pwd_SCG_tree_wd)
-    fastaFiles = [i for i in files if i.endswith('.fasta')]
-    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Running mafft...')
-    for faa_file_basename in fastaFiles:
-        fastaFile1 = '%s/%s' % (pwd_SCG_tree_wd, faa_file_basename)
-        fastaFile2 = fastaFile1.replace('.fasta', '_aligned.fasta')
-        os.system(pwd_mafft_exe + ' --quiet --maxiterate 1000 --globalpair ' + fastaFile1 + ' > ' + fastaFile2 + ' ; rm ' + fastaFile1)
+# concatenating the single alignments
+print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Concatenating alignments...')
+concatAlignment = {}
+for element in faa_file_basename_list:
+    concatAlignment[element] = ''
 
 
-    # concatenating the single alignments
-    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Concatenating alignments...')
-    concatAlignment = {}
+# Reading all single alignment files and append them to the concatenated alignment
+files = os.listdir(pwd_SCG_tree_wd)
+fastaFiles = [i for i in files if i.endswith('.fasta')]
+for faa_file_basename in fastaFiles:
+    fastaFile = pwd_SCG_tree_wd + '/' + faa_file_basename
+    proteinSequence = {}
+    alignmentLength = 0
+    for seq_record_2 in SeqIO.parse(fastaFile, 'fasta'):
+        proteinName = seq_record_2.id
+        proteinSequence[proteinName] = str(seq_record_2.seq)
+        alignmentLength = len(proteinSequence[proteinName])
+
     for element in faa_file_basename_list:
-        concatAlignment[element] = ''
+        if element in proteinSequence.keys():
+            concatAlignment[element] += proteinSequence[element]
+        else:
+            concatAlignment[element] += '-' * alignmentLength
 
+# writing alignment to file
+file_out = open(pwd_combined_alignment_file, 'w')
+for element in faa_file_basename_list:
+    file_out.write('>' + element + '\n' + concatAlignment[element] + '\n')
+file_out.close()
 
-    # Reading all single alignment files and append them to the concatenated alignment
-    files = os.listdir(pwd_SCG_tree_wd)
-    fastaFiles = [i for i in files if i.endswith('.fasta')]
-    for faa_file_basename in fastaFiles:
-        fastaFile = pwd_SCG_tree_wd + '/' + faa_file_basename
-        proteinSequence = {}
-        alignmentLength = 0
-        for seq_record_2 in SeqIO.parse(fastaFile, 'fasta'):
-            proteinName = seq_record_2.id
-            proteinSequence[proteinName] = str(seq_record_2.seq)
-            alignmentLength = len(proteinSequence[proteinName])
+# calling fasttree for tree calculation
+print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Running fasttree...')
+os.system('%s -quiet %s > %s' % (pwd_fasttree_exe, pwd_combined_alignment_file, pwd_newick_tree_file))
 
-        for element in faa_file_basename_list:
-            if element in proteinSequence.keys():
-                concatAlignment[element] += proteinSequence[element]
-            else:
-                concatAlignment[element] += '-' * alignmentLength
-
-    # writing alignment to file
-    file_out = open(pwd_combined_alignment_file, 'w')
-    for element in faa_file_basename_list:
-        file_out.write('>' + element + '\n' + concatAlignment[element] + '\n')
-    file_out.close()
-
-    # calling fasttree for tree calculation
-    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Running fasttree...')
-    os.system('%s -quiet %s > %s' % (pwd_fasttree_exe, pwd_combined_alignment_file, pwd_newick_tree_file))
-
-    # Decomment the two following lines if tree is rooted but should be unrooted
-    # phyloTree = dendropy.Tree.get(path='phylogenticTree.phy', schema='newick', rooting='force-unrooted')
-    # dendropy.Tree.write_to_path(phyloTree, 'phylogenticTree_unrooted.phy', 'newick')
-    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' The built species tree was exported to %s' % newick_tree_file)
+# Decomment the two following lines if tree is rooted but should be unrooted
+# phyloTree = dendropy.Tree.get(path='phylogenticTree.phy', schema='newick', rooting='force-unrooted')
+# dendropy.Tree.write_to_path(phyloTree, 'phylogenticTree_unrooted.phy', 'newick')
+print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' The built species tree was exported to %s' % newick_tree_file)
 
 ###################################################### get cluster #####################################################
 
@@ -729,5 +718,5 @@ sleep(0.5)
 print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Grouping step done!')
 
 sleep(0.5)
-print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' You may want to modify the grouping results based on the taxonomy\nof your input genomes/bins, you can do this by manually changing their group assignment specified\nin the first column of %s' % grouping_file)
+print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' You may want to modify the grouping results based on the taxonomy\nof your input genomes/bins, you can do this by changing their group assignment specified\nin the first column of %s' % grouping_file)
 
