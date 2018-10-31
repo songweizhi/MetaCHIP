@@ -302,7 +302,7 @@ def get_taxon(n):
 def get_distance_matrix(tree_file):
 
     # read in tree
-    tree_in = Tree(tree_file, format=3)
+    tree_in = Tree(tree_file, format=0)
 
     # get leaf node list
     leaf_node_list = []
@@ -620,7 +620,7 @@ if taxon_classification_file != None:
     bin_to_taxon_dict = get_rank_assignment_dict(taxon_rank, taxon_classification_file)
 
 # read in tree
-tree_in = Tree(pwd_newick_tree_file, format=3)
+tree_in = Tree(pwd_newick_tree_file, format=0)
 
 # get sorted leaf node list
 leaf_node_list = []
