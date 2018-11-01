@@ -288,14 +288,14 @@ def get_node_distance(tree, node_1, node_2):
 def get_group(n):
     leaf_name = leaf_node_list[n]
     grouping_id = bin_to_grouping_dict[leaf_name]
-    return '(%s)_(%s)' % (grouping_id, leaf_name)
+    return '(%s) %s' % (grouping_id, leaf_name)
 
 
 def get_taxon(n):
     leaf_name = leaf_node_list[n]
     taxon_assign = bin_to_taxon_dict[leaf_name]
     grouping_id = bin_to_grouping_dict[leaf_name]
-    return '(%s)_(%s)_(%s)' % (grouping_id, leaf_name, taxon_assign)
+    return '(%s) %s (%s)' % (grouping_id, leaf_name, taxon_assign)
     #return taxon_assign
 
 
@@ -325,9 +325,9 @@ def get_distance_matrix(tree_file):
     return all_distances_lol
 
 
-def plot_clustering_dendrogram(cluster, leaf_font_size, leaf_label_func, color_threshold, pwd_png_file):
+def plot_clustering_dendrogram(cluster, leaf_font_size, leaf_label_func, color_threshold, dendrogram_width, dendrogram_height, pwd_png_file):
 
-    plt.figure(figsize=(9, 15))
+    plt.figure(figsize=(dendrogram_width, dendrogram_height))
     plt.xlabel('Distance')
     dendrogram(cluster, orientation='left', leaf_rotation=0, leaf_font_size=leaf_font_size, leaf_label_func=leaf_label_func, color_threshold=color_threshold)
     plt.axvline(x=max_d, c='k', linewidth=0.5)
@@ -348,34 +348,29 @@ parser.add_argument('-p', required=True, help='output prefix')
 
 parser.add_argument('-dc', required=False, type=float, default=None, help='distance cutoff')
 
-parser.add_argument('-fs', required=False, type=int, default=9, help='leaf name font size')
+parser.add_argument('-taxon', required=False, default=None, help='taxon classification of input genomes, if available')
 
-parser.add_argument('-ls', required=False, type=float, default=0.01, help='label shift on the tree plot')
-
-parser.add_argument('-taxon', required=False, default=None, help='taxonomy classification of input genomes, if available')
-
-parser.add_argument('-tr', required=False, default='c', help='taxon ranks')
+parser.add_argument('-tr', required=False, default='c', help='taxon ranks, e.g. d (domain), p (phylum), c (class), o (order), f (family)')
 
 parser.add_argument('-tuning', action="store_true", required=False, help='specify to run clustering with provided distance cutoff, while skipping previous steps')
 
 
 args = vars(parser.parse_args())
-
 input_genome_folder = args['i']
 file_extension = args['x']
 output_prefix = args['p']
 max_d = args['dc']
-leaf_font_size = args['fs']
 taxon_classification_file = args['taxon']
 taxon_rank = args['tr']
-label_shift = args['ls']
 tuning_mode = int(args['tuning'])
+
 
 # get path to current script
 pwd_Get_clusters_script = sys.argv[0]
 Get_clusters_script_path, file_name = os.path.split(pwd_Get_clusters_script)
 path_to_hmm = '%s/phylo.hmm' % Get_clusters_script_path
 add_group_to_tree_R = '%s/add_group_to_tree.R' % Get_clusters_script_path
+
 
 # read in config file
 pwd_cfg_file = '%s/config.txt' % Get_clusters_script_path
@@ -385,12 +380,16 @@ pwd_hmmsearch_exe = program_path_dict['hmmsearch']
 pwd_mafft_exe = program_path_dict['mafft']
 pwd_fasttree_exe = program_path_dict['fasttree']
 
+
 # check whether input genome exist
 input_genome_re = '%s/*.%s' % (input_genome_folder, file_extension)
 input_genome_file_list = [os.path.basename(file_name) for file_name in glob.glob(input_genome_re)]
 if input_genome_file_list == []:
     print('No input genome detected, program exited!')
     exit()
+
+input_genome_num = len(input_genome_file_list)
+
 
 ########################################################################################################################
 
@@ -577,6 +576,34 @@ if tuning_mode == 0:
     files = os.listdir(pwd_SCG_tree_wd)
     fastaFiles = [i for i in files if i.endswith('.fasta')]
     print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Running mafft...')
+
+
+    # MaxProcesses = 20
+    # Processes_mafft = []
+    # for faa_file_basename in fastaFiles:
+    #     fastaFile1 = '%s/%s' % (pwd_SCG_tree_wd, faa_file_basename)
+    #     fastaFile2 = fastaFile1.replace('.fasta', '_aligned.fasta')
+    #     mafft_cmd = pwd_mafft_exe + ' --quiet --maxiterate 1000 --globalpair ' + fastaFile1 + ' > ' + fastaFile2 + ' ; rm ' + fastaFile1
+    #
+    #     # run with subprocess
+    #     mafft_cmd_list = [pwd_mafft_exe, '--quiet', '--maxiterate', '1000', '--globalpair', fastaFile1, '>', fastaFile2, ';', 'rm', fastaFile1]
+    #
+    #     # keep wait if there is no spare slots
+    #     while len(Processes_mafft) >= MaxProcesses:
+    #         sleep(0.1)
+    #         for process in Processes_mafft:
+    #             if process.poll() is not None:
+    #                 Processes_mafft.remove(process)
+    #
+    #     # submit new subprocess
+    #     p_mafft = subprocess.Popen(mafft_cmd_list)
+    #     Processes_mafft.append(p_mafft)
+    #
+    # # wait for completion
+    # for p_mafft in Processes_mafft:
+    #     p_mafft.wait()
+
+
     for faa_file_basename in fastaFiles:
         fastaFile1 = '%s/%s' % (pwd_SCG_tree_wd, faa_file_basename)
         fastaFile2 = fastaFile1.replace('.fasta', '_aligned.fasta')
@@ -708,18 +735,73 @@ os.system('cat %s | sort > %s; rm %s' % (pwd_grouping_file_temp, pwd_grouping_fi
 sleep(0.5)
 print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Grouping results exported to: %s' % grouping_file)
 
+# define dendrogram leaf_font_size and plot size
+dendrogram_width = 10
+
+# define leaf_font_size
+leaf_font_size = 0
+if input_genome_num <= 50:
+    leaf_font_size = 8
+elif 50 < input_genome_num <= 100:
+    leaf_font_size = 7
+elif 100 < input_genome_num <= 150:
+    leaf_font_size = 6
+elif input_genome_num > 150:
+    leaf_font_size = 4
+
+# define dendrogram_height
+dendrogram_height = 0
+if input_genome_num <= 20:
+    dendrogram_height = 6
+elif 20 < input_genome_num <= 50:
+    dendrogram_height = 10
+elif 50 < input_genome_num <= 100:
+    dendrogram_height = 15
+elif 100 < input_genome_num <= 150:
+    dendrogram_height = 20
+elif 150 < input_genome_num <= 300:
+    dendrogram_height = 25
+elif 300 < input_genome_num <= 500:
+    dendrogram_height = 30
+elif input_genome_num > 500:
+    dendrogram_height = input_genome_num * 0.06
+
+
 # calculate full dendrogram
 sleep(0.5)
 print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Get plot for visualization')
 if taxon_classification_file != None:
-    plot_clustering_dendrogram(cluster, leaf_font_size, get_taxon, max_d, pwd_png_file_group)
+    plot_clustering_dendrogram(cluster, leaf_font_size, get_taxon, max_d, dendrogram_width, dendrogram_height, pwd_png_file_group)
 else:
-    plot_clustering_dendrogram(cluster, leaf_font_size, get_group, max_d, pwd_png_file_group)
+    plot_clustering_dendrogram(cluster, leaf_font_size, get_group, max_d, dendrogram_width, dendrogram_height, pwd_png_file_group)
 
 # call R
 current_wd = os.getcwd()
 os.chdir(MetaCHIP_wd)
-add_group_to_tree_R_cmd = 'Rscript %s -t %s -g %s -l %s > /dev/null' % (add_group_to_tree_R, newick_tree_file, grouping_file, label_shift)
+
+# define fontsize of labels on tree plot according to the number of input genome bins
+label_font_on_tree_plot = 0
+if input_genome_num <= 20:
+    label_font_on_tree_plot = 1
+elif 20 < input_genome_num <= 50:
+    label_font_on_tree_plot = 0.8
+elif 50 < input_genome_num <= 100:
+    label_font_on_tree_plot = 0.6
+elif 100 < input_genome_num <= 150:
+    label_font_on_tree_plot = 0.35
+elif input_genome_num > 150:
+    label_font_on_tree_plot = 0.3
+
+# define the height of tree plot
+tree_plot_height = input_genome_num * 10
+if tree_plot_height < 2000:
+    tree_plot_height = 2000
+
+# define label shift
+label_shift = 0.05
+
+add_group_to_tree_R_cmd = 'Rscript %s -t %s -g %s -s %s -f %s -v %s > /dev/null' % (add_group_to_tree_R, newick_tree_file, grouping_file, label_shift, label_font_on_tree_plot, tree_plot_height)
+
 print(add_group_to_tree_R_cmd)
 os.system(add_group_to_tree_R_cmd)
 os.chdir(current_wd)
