@@ -20,6 +20,7 @@
 import os
 import sys
 import glob
+import time
 import shutil
 import warnings
 import argparse
@@ -38,9 +39,32 @@ import numpy as np
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
-from scipy.stats import gaussian_kde
-from string import ascii_uppercase
+import multiprocessing as mp
 from datetime import datetime
+from string import ascii_uppercase
+from scipy.stats import gaussian_kde
+
+
+def force_create_folder(folder_to_create):
+    if os.path.isdir(folder_to_create):
+        shutil.rmtree(folder_to_create)
+        if os.path.isdir(folder_to_create):
+            shutil.rmtree(folder_to_create)
+            if os.path.isdir(folder_to_create):
+                shutil.rmtree(folder_to_create)
+                if os.path.isdir(folder_to_create):
+                    shutil.rmtree(folder_to_create)
+    os.mkdir(folder_to_create)
+
+
+def unique_list_elements(list_input):
+
+    list_output = []
+    for each_element in list_input:
+        if each_element not in list_output:
+            list_output.append(each_element)
+
+    return list_output
 
 
 def get_program_path_dict(pwd_cfg_file):
@@ -163,53 +187,61 @@ def uniq_list(input_list):
     return output_list
 
 
-def get_all_identity_list(blast_results, genome_list, alignment_length_cutoff, coverage_cutoff, all_qualified_identities_file):
-    # get total match number
-    total_match_number = 0
-    matches = open(blast_results)
-    for match in matches:
-        total_match_number += 1
-
-    # get all qualified identities
-    matches = open(blast_results)
-    out_temp = open(all_qualified_identities_file, 'w')
-    all_identities = []
-    counted_match = []
-    n = 1
-    float("{0:.2f}".format(total_match_number/1000))
-    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Filtering blast matches with the following criteria: Query name != Subject name, Alignment length >= %sbp and coverage >= %s%s' % (alignment_length_cutoff, coverage_cutoff, '%'))
-    for match in matches:
-        #print('\r%s x 1000 blast matches detected in total, filtering the %s x 1000th' % (float("{0:.2f}".format(total_match_number/1000)), float("{0:.2f}".format(n/1000))))
-        match_split = match.strip().split('\t')
-        query = match_split[0]
-        subject = match_split[1]
-        identity = float(match_split[2])
-        align_len = int(match_split[3])
-        query_len = int(match_split[12])
-        subject_len = int(match_split[13])
-        query_split = query.split('_')
-        subject_split = subject.split('_')
-        query_bin_name = '_'.join(query_split[:-1])
-        subject_bin_name = '_'.join(subject_split[:-1])
-
-        coverage_q = float("{0:.2f}".format(float(align_len)*100/float(query_len)))
-        coverage_s = float("{0:.2f}".format(float(align_len)*100/float(subject_len)))
-        query_name_subject_name = '%s_%s' % (query, subject)
-        subject_name_query_name = '%s_%s' % (subject, query)
-
-        # only work on genomes included in grouping file
-        if (query_bin_name in genome_list) and (subject_bin_name in genome_list):
-            # filter
-            if (query_bin_name != subject_bin_name) and (align_len >= int(alignment_length_cutoff)) and (coverage_q >= int(coverage_cutoff)) and (coverage_s >= int(coverage_cutoff)):
-                out_temp.write(match)
-                # remove the same match but with swapped query-subject position
-                if (query_name_subject_name not in counted_match) and (subject_name_query_name not in counted_match):
-                    all_identities.append(identity)
-                    counted_match.append(query_name_subject_name)
-        n += 1
-
-    out_temp.close()
-    return all_identities
+def plot_identity_list(identity_list, identity_cut_off, title, output_foler):
+    identity_list = sorted(identity_list)
+    # get statistics
+    match_number = len(identity_list)
+    average_iden = float(np.average(identity_list))
+    average_iden = float("{0:.2f}".format(average_iden))
+    max_match = float(np.max(identity_list))
+    min_match = float(np.min(identity_list))
+    # get hist plot
+    num_bins = 50
+    plt.hist(identity_list,
+             num_bins,
+             alpha=0.1,
+             normed=1,
+             facecolor='blue')  # normed = 1 normalized to 1, that is probablity
+    plt.title('Group: %s' % title)
+    plt.xlabel('Identity')
+    plt.ylabel('Probability')
+    plt.subplots_adjust(left=0.15)
+    # get fit line
+    density = gaussian_kde(identity_list)
+    x_axis = np.linspace(min_match - 5, max_match + 5, 200)
+    density.covariance_factor = lambda: 0.3
+    density._compute_covariance()
+    plt.plot(x_axis, density(x_axis))
+    # add text
+    x_min = plt.xlim()[0]  # get the x-axes minimum value
+    x_max = plt.xlim()[1]  # get the x-axes maximum value
+    y_min = plt.ylim()[0]  # get the y-axes minimum value
+    y_max = plt.ylim()[1]  # get the y-axes maximum value
+    # set text position
+    text_x = x_min + (x_max - x_min)/5 * 3.8
+    text_y_total = y_min + (y_max - y_min) / 5 * 4.4
+    text_y_min = y_min + (y_max - y_min) / 5 * 4.1
+    text_y_max = y_min + (y_max - y_min) / 5 * 3.8
+    text_y_average = y_min + (y_max - y_min) / 5 * 3.5
+    text_y_cutoff = y_min + (y_max - y_min) / 5 * 3.2
+    # plot text
+    plt.text(text_x, text_y_total, 'Total: %s' % match_number)
+    plt.text(text_x, text_y_min, 'Min: %s' % min_match)
+    plt.text(text_x, text_y_max, 'Max: %s' % max_match)
+    plt.text(text_x, text_y_average, 'Mean: %s' % average_iden)
+    plt.text(text_x, text_y_cutoff, 'Cutoff: %s' % identity_cut_off)
+    if identity_cut_off != 'None':
+        plt.annotate(' ',
+                xy=(identity_cut_off, 0),
+                xytext=(identity_cut_off, density(identity_cut_off)),
+                arrowprops=dict(width=0.5,
+                                  headwidth=0.5,
+                                  facecolor='red',
+                                  edgecolor='red',
+                                  shrink=0.02))
+    # Get plot
+    plt.savefig('%s/%s.png' % (output_foler, title), dpi = 300)
+    plt.close()
 
 
 def do():
@@ -231,10 +263,19 @@ def do():
             plot_identity_list(current_group_pair_identities, 'None', current_group_pair_name, pwd_iden_distrib_plot_folder)
         else:
             plot_identity_list(current_group_pair_identities, current_group_pair_identity_cut_off, current_group_pair_name, pwd_iden_distrib_plot_folder)
-        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + " Plotting identity distribution (%dth): %s" % (ploted_group, current_group_pair_name,))
+
+        with open(pwd_log_file_name, 'a') as log_handle:
+            log_handle.write(datetime.now().strftime(time_format) + "Plotting identity distribution (%dth): %s\n" % (ploted_group, current_group_pair_name))
+        if keep_quiet == 0:
+            print(datetime.now().strftime(time_format) + "Plotting identity distribution (%dth): %s" % (ploted_group, current_group_pair_name))
     else:
-        unploted_groups.write('%s\t%s\n' % (current_group_pair_name, len(current_group_pair_identities)))
-        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + " Plotting identity distribution (%dth): %s, blast hits < %d, skipped" % (ploted_group, current_group_pair_name, minimum_plot_number))
+        with open(pwd_unploted_groups_file, 'a') as unploted_groups_handle:
+            unploted_groups_handle.write('%s\t%s\n' % (current_group_pair_name, len(current_group_pair_identities)))
+
+        with open(pwd_log_file_name, 'a') as log_handle:
+            log_handle.write(datetime.now().strftime(time_format) + "Plotting identity distribution (%dth): %s, blast hits < %d, skipped\n" % (ploted_group, current_group_pair_name, minimum_plot_number))
+        if keep_quiet == 0:
+            print(datetime.now().strftime(time_format) + "Plotting identity distribution (%dth): %s, blast hits < %d, skipped" % (ploted_group, current_group_pair_name, minimum_plot_number))
 
 
 def get_hits_group(input_file_name, output_file_name):
@@ -262,65 +303,6 @@ def get_hits_group(input_file_name, output_file_name):
                 group_member.append(target_2)
     output_2_file.write('%s\t%s' % (current_gene, '\t'.join(group_member)) + '\n')
     output_2_file.close()
-
-
-def plot_identity_list(identity_list, identity_cut_off, title, output_foler) :
-    identity_list = sorted(identity_list)
-    # get statistics
-    match_number = len(identity_list)
-    average_iden = float(np.average(identity_list))
-    average_iden = float("{0:.2f}".format(average_iden))
-    max_match = float(np.max(identity_list))
-    min_match = float(np.min(identity_list))
-    # get hist plot
-    num_bins = 50
-    plt.hist(identity_list,
-             num_bins,
-             alpha = 0.1,
-             normed = 1,
-             facecolor = 'blue')  # normed = 1 normalized to 1, that is probablity
-    plt.title('Group: %s' % title)
-    plt.xlabel('Identity')
-    plt.ylabel('Probability')
-    plt.subplots_adjust(left = 0.15)
-    # get fit line
-    density = gaussian_kde(identity_list)
-    x_axis = np.linspace(min_match - 5, max_match + 5, 200)
-    density.covariance_factor = lambda: 0.3
-    density._compute_covariance()
-    plt.plot(x_axis, density(x_axis))
-    # add text
-    x_min = plt.xlim()[0]  # get the x-axes minimum value
-    x_max = plt.xlim()[1]  # get the x-axes maximum value
-    y_min = plt.ylim()[0]  # get the y-axes minimum value
-    y_max = plt.ylim()[1]  # get the y-axes maximum value
-    # set text position
-    text_x = x_min + (x_max - x_min)/5 * 3.8
-    text_y_total = y_min + (y_max - y_min) / 5 * 4.4
-    text_y_min = y_min + (y_max - y_min) / 5 * 4.1
-    text_y_max = y_min + (y_max - y_min) / 5 * 3.8
-    text_y_average = y_min + (y_max - y_min) / 5 * 3.5
-    text_y_cutoff = y_min + (y_max - y_min) / 5 * 3.2
-    # plot text
-    plt.text(text_x, text_y_total, 'Total: %s' % match_number)
-    plt.text(text_x, text_y_min, 'Min: %s' % min_match)
-    plt.text(text_x, text_y_max, 'Max: %s' % max_match)
-    plt.text(text_x, text_y_average, 'Mean: %s' % average_iden)
-    plt.text(text_x, text_y_cutoff, 'Cutoff: %s' % identity_cut_off)
-    if identity_cut_off != 'None':
-        plt.annotate(' ',
-                xy = (identity_cut_off, 0),
-                xytext = (identity_cut_off, density(identity_cut_off)),
-                arrowprops = dict(width = 0.5,
-                                  headwidth = 0.5,
-                                  facecolor = 'red',
-                                  edgecolor = 'red',
-                                  shrink = 0.02))
-    else:
-        pass
-    # Get plot
-    plt.savefig('%s/%s.png' % (output_foler, title), dpi = 300)
-    plt.close()
 
 
 def get_candidates(targets_group_file, gene_with_g_file_name, gene_only_name_file_name, group_pair_iden_cutoff_dict):
@@ -485,15 +467,73 @@ def get_candidates(targets_group_file, gene_with_g_file_name, gene_only_name_fil
     output_2.close()
 
 
-def set_contig_track_features(gene_contig, name_group_dict, candidate_list, feature_set):
+def check_full_lenght_and_end_match(blast_hit, aln_len_cutoff, identity_cutoff):
+    blast_hit_split = blast_hit.strip().split('\t')
+    identity = float(blast_hit_split[2])
+    align_len = int(blast_hit_split[3])
+    query_start = int(blast_hit_split[6])
+    query_end = int(blast_hit_split[7])
+    subject_start = int(blast_hit_split[8])
+    subject_end = int(blast_hit_split[9])
+    query_len = int(blast_hit_split[12])
+    subject_len = int(blast_hit_split[13])
+
+    # print('query %s:%s-%s\nsubject %s:%s-%s' % (query_len, query_start, query_end, subject_len, subject_start, subject_end))
+
+    # get the coverage for query and subject
+    query_cov = align_len / query_len
+    subject_cov = align_len / subject_len
+
+    # check match direction
+    query_direction = query_end - query_start
+    subject_direction = subject_end - subject_start
+    same_match_direction = True
+    if ((query_direction > 0) and (subject_direction < 0)) or ((query_direction < 0) and (subject_direction > 0)):
+        same_match_direction = False
+
+    # get match category
+    match_category = 'normal'
+
+    # full length match: coverage cutoff 95%, identity cutoff 99%, minimal algnment length 200 bp
+    if (query_cov >= 0.95) or (subject_cov >= 0.95):
+        match_category = 'full_length_match'
+
+    # end match, allow 20 bp differences in the ends
+    elif (align_len > aln_len_cutoff) and (identity > identity_cutoff):
+
+        # situation 1
+        if (same_match_direction is True) and (query_len - query_end <= 20) and (subject_start <= 20):
+            match_category = 'end_match'
+
+        # situation 2
+        elif (same_match_direction is True) and (query_start <= 20) and (subject_len - subject_end <= 20):
+            match_category = 'end_match'
+
+        # situation 3
+        elif (same_match_direction is False) and (query_len - query_end <= 20) and (subject_len - subject_start <= 20):
+            match_category = 'end_match'
+
+        # situation 4
+        elif (same_match_direction is False) and (query_start <= 20) and (subject_end <= 20):
+            match_category = 'end_match'
+
+    return match_category
+
+
+def set_contig_track_features(gene_contig, name_group_dict, candidate_list, HGT_iden, feature_set):
     # add features to feature set
     for feature in gene_contig.features:
         if feature.type == "CDS":
+
             # define label color
             if feature.qualifiers['locus_tag'][0] in candidate_list:
                 label_color = colors.blue
+                label_size = 16
+                # add identity to gene is
+                feature.qualifiers['locus_tag'][0] = '%s (%s)' % (feature.qualifiers['locus_tag'][0], HGT_iden)
             else:
                 label_color = colors.black
+                label_size = 10
 
             # change gene name
             bin_name_gbk_split = feature.qualifiers['locus_tag'][0].split('_')
@@ -514,10 +554,10 @@ def set_contig_track_features(gene_contig, name_group_dict, candidate_list, feat
                                     color=color,
                                     label=True,
                                     sigil='ARROW',
-                                    arrowshaft_height=0.7,
+                                    arrowshaft_height=0.5,
                                     arrowhead_length=0.4,
                                     label_color=label_color,
-                                    label_size=10,
+                                    label_size=label_size,
                                     label_angle=label_angle,
                                     label_position="middle")
 
@@ -528,7 +568,6 @@ def get_flanking_region(input_gbk_file, HGT_candidate, flanking_length):
     new_gbk_file = '%s/%s_%sbp_temp.gbk' % (wd, HGT_candidate, flanking_length)
     new_gbk_final_file = '%s/%s_%sbp.gbk' % (wd, HGT_candidate, flanking_length)
     new_fasta_final_file = '%s/%s_%sbp.fasta' % (wd, HGT_candidate, flanking_length)
-    #output_plot = '%s/%s_%sbp.eps' % (wd, HGT_candidate, flanking_length)
 
     # get flanking range of candidate
     input_gbk = SeqIO.parse(input_gbk_file, "genbank")
@@ -578,7 +617,6 @@ def get_flanking_region(input_gbk_file, HGT_candidate, flanking_length):
                 new_record_features.append(gene)
             elif 'locus_tag' in gene.qualifiers:
                 if gene.qualifiers['locus_tag'][0] in keep_gene_list:
-                    #print(record.seq[gene.location.start:gene.location.end])
                     new_record_features.append(gene)
         record.features = new_record_features
         SeqIO.write(record, new_gbk, 'genbank')
@@ -610,7 +648,6 @@ def get_flanking_region(input_gbk_file, HGT_candidate, flanking_length):
                 gene.location = gene_location_new
                 new_record_features_2.append(gene)
             elif 'locus_tag' in gene.qualifiers:
-                #print(record.seq[gene.location.start:gene.location.end])
                 gene_location_new = ''
                 if gene.location.strand == 1:
                     if gene.location.start - new_start < 0:
@@ -651,311 +688,224 @@ def export_dna_record(gene_seq, gene_id, gene_description, pwd_output_file):
     output_handle.close()
 
 
-def get_end_break_value(dict_value_list_in, ending_match_length):
-    gene_1_start = dict_value_list_in[0][1]
-    gene_1_end = dict_value_list_in[0][2]
-    gene_1_ctg_length = dict_value_list_in[0][4]
+def get_gbk_blast_act2(arguments_list):
 
-    gene_2_start = dict_value_list_in[1][1]
-    gene_2_end = dict_value_list_in[1][2]
-    gene_2_ctg_length = dict_value_list_in[1][4]
+    match = arguments_list[0]
+    pwd_gbk_folder = arguments_list[1]
+    flanking_length = arguments_list[2]
+    end_seq_length = arguments_list[3]
+    name_to_group_number_dict = arguments_list[4]
+    path_to_output_act_folder = arguments_list[5]
+    pwd_normal_plot_folder = arguments_list[6]
+    pwd_at_ends_plot_folder = arguments_list[7]
+    pwd_full_contig_match_plot_folder = arguments_list[8]
+    pwd_blastn_exe = arguments_list[9]
+    keep_temp = arguments_list[10]
+    candidates_2_contig_match_category_dict = arguments_list[11]
+    end_match_iden_cutoff = arguments_list[12]
+    end_match_iden_cutoff = 95
 
-    # for gene1
-    gene1_end_location = 0
-    if (gene_1_start <= ending_match_length) or ((gene_1_ctg_length - gene_1_end) <= ending_match_length):
-        gene1_end_location = 1
 
-    # for gene2
-    gene2_end_location = 0
-    if (gene_2_start <= ending_match_length) or ((gene_2_ctg_length - gene_2_end) <= ending_match_length):
-        gene2_end_location = 1
+    genes = match.strip().split('\t')[:-1]
+    current_HGT_iden = float("{0:.1f}".format(float(match.strip().split('\t')[-1])))
+    folder_name = '___'.join(genes)
+    os.mkdir('%s/%s' % (path_to_output_act_folder, folder_name))
 
-    if (gene1_end_location == 1) and (gene2_end_location == 1):
-        end_break = 1
+    gene_1 = genes[0]
+    gene_2 = genes[1]
+    genome_1 = '_'.join(gene_1.split('_')[:-1])
+    genome_2 = '_'.join(gene_2.split('_')[:-1])
+    pwd_genome_1_gbk = '%s/%s.gbk' % (pwd_gbk_folder, genome_1)
+    pwd_genome_2_gbk = '%s/%s.gbk' % (pwd_gbk_folder, genome_2)
+
+    dict_value_list = []
+    # Extract gbk and fasta files for gene 1
+    for genome_1_record in SeqIO.parse(pwd_genome_1_gbk, 'genbank'):
+        for gene_1_f in genome_1_record.features:
+            if 'locus_tag' in gene_1_f.qualifiers:
+                if gene_1 in gene_1_f.qualifiers["locus_tag"]:
+                    dict_value_list.append([gene_1, int(gene_1_f.location.start), int(gene_1_f.location.end), gene_1_f.location.strand, len(genome_1_record.seq)])
+                    pwd_gene_1_gbk_file = '%s/%s/%s.gbk' % (path_to_output_act_folder, folder_name, gene_1)
+                    pwd_gene_1_fasta_file = '%s/%s/%s.fasta' % (path_to_output_act_folder, folder_name, gene_1)
+                    SeqIO.write(genome_1_record, pwd_gene_1_gbk_file, 'genbank')
+                    SeqIO.write(genome_1_record, pwd_gene_1_fasta_file, 'fasta')
+                    # get flanking regions
+                    get_flanking_region(pwd_gene_1_gbk_file, gene_1, flanking_length)
+
+    # Extract gbk and fasta files for gene 2
+    for genome_2_record in SeqIO.parse(pwd_genome_2_gbk, 'genbank'):
+        for gene_2_f in genome_2_record.features:
+            if 'locus_tag' in gene_2_f.qualifiers:
+                if gene_2 in gene_2_f.qualifiers["locus_tag"]:
+                    dict_value_list.append([gene_2, int(gene_2_f.location.start), int(gene_2_f.location.end), gene_2_f.location.strand, len(genome_2_record.seq)])
+                    pwd_gene_2_gbk_file = '%s/%s/%s.gbk' % (path_to_output_act_folder, folder_name, gene_2)
+                    pwd_gene_2_fasta_file = '%s/%s/%s.fasta' % (path_to_output_act_folder, folder_name, gene_2)
+                    SeqIO.write(genome_2_record, pwd_gene_2_gbk_file, 'genbank')
+                    SeqIO.write(genome_2_record, pwd_gene_2_fasta_file, 'fasta')
+                    # get flanking regions
+                    get_flanking_region(pwd_gene_2_gbk_file, gene_2, flanking_length)
+
+    # Run Blast
+    prefix_c =              '%s/%s'                 % (path_to_output_act_folder, folder_name)
+    query_c =               '%s/%s_%sbp.fasta'      % (prefix_c, gene_1, flanking_length)
+    query_c_full_len =      '%s/%s.fasta'           % (prefix_c, gene_1)
+    subject_c =             '%s/%s_%sbp.fasta'      % (prefix_c, gene_2, flanking_length)
+    subject_c_full_len =    '%s/%s.fasta'           % (prefix_c, gene_2)
+    output_c =              '%s/%s.txt'             % (prefix_c, folder_name)
+    output_c_full_len =     '%s/%s_full_length.txt' % (prefix_c, folder_name)
+
+    parameters_c_n =          '-evalue 1e-5 -outfmt 6 -task blastn'
+    parameters_c_n_full_len = '-evalue 1e-5 -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen" -task blastn'
+    command_blast =           '%s -query %s -subject %s -out %s %s' % (pwd_blastn_exe, query_c, subject_c, output_c, parameters_c_n)
+    command_blast_full_len =  '%s -query %s -subject %s -out %s %s' % (pwd_blastn_exe, query_c_full_len, subject_c_full_len, output_c_full_len, parameters_c_n_full_len)
+
+    os.system(command_blast)
+    os.system(command_blast_full_len)
+
+    ############################## check whether full length or end match ##############################
+
+    max_bit_score = 0
+    best_hit_line = ''
+    for each in open(output_c_full_len):
+        each_split = each.strip().split('\t')
+        bit_score = float(each_split[11])
+        if bit_score > max_bit_score:
+            max_bit_score = bit_score
+            best_hit_line = each
+
+    # get match category
+    match_category = check_full_lenght_and_end_match(best_hit_line, end_seq_length, end_match_iden_cutoff)
+    candidates_2_contig_match_category_dict[folder_name] = match_category
+
+    ############################## prepare for flanking plot ##############################
+
+    # read in gbk files
+    matche_pair_list = []
+    for each_gene in genes:
+        path_to_gbk_file = '%s/%s/%s_%sbp.gbk' % (path_to_output_act_folder, folder_name, each_gene, flanking_length)
+        gene_contig = SeqIO.read(path_to_gbk_file, "genbank")
+        matche_pair_list.append(gene_contig)
+    bin_record_list = []
+    bin_record_list.append(matche_pair_list)
+
+    # get the distance of the gene to contig ends
+    gene_1_left_len = dict_value_list[0][1]
+    gene_1_right_len = dict_value_list[0][4] - dict_value_list[0][2]
+    gene_2_left_len = dict_value_list[1][1]
+    gene_2_right_len = dict_value_list[1][4] - dict_value_list[1][2]
+
+    # create an empty diagram
+    diagram = GenomeDiagram.Diagram()
+
+    # add tracks to diagram
+    max_len = 0
+    for gene1_contig, gene2_contig in bin_record_list:
+        # set diagram track length
+        max_len = max(max_len, len(gene1_contig), len(gene2_contig))
+
+        # add gene content track for gene1_contig
+        contig_1_gene_content_track = diagram.new_track(1,
+                                                        name='%s (left %sbp, right %sbp)' % (gene1_contig.name, gene_1_left_len, gene_1_right_len),
+                                                        greytrack=True,
+                                                        greytrack_labels=1,
+                                                        greytrack_font='Helvetica',
+                                                        greytrack_fontsize=12,
+                                                        height=0.35,
+                                                        start=0,
+                                                        end=len(gene1_contig),
+                                                        scale=True,
+                                                        scale_fontsize=6,
+                                                        scale_ticks=1,
+                                                        scale_smalltick_interval=10000,
+                                                        scale_largetick_interval=10000)
+
+        # add gene content track for gene2_contig
+        contig_2_gene_content_track = diagram.new_track(1,
+                                                        name='%s (left %sbp, right %sbp)' % (gene2_contig.name, gene_2_left_len, gene_2_right_len),
+                                                        greytrack=True,
+                                                        greytrack_labels=1,
+                                                        greytrack_font='Helvetica',
+                                                        greytrack_fontsize=12,
+                                                        height=0.35,
+                                                        start=0,
+                                                        end=len(gene2_contig),
+                                                        scale=True,
+                                                        scale_fontsize=6,
+                                                        scale_ticks=1,
+                                                        scale_smalltick_interval=10000,
+                                                        scale_largetick_interval=10000)
+
+        # add blank feature/graph sets to each track
+        feature_sets_1 = contig_1_gene_content_track.new_set(type='feature')
+        feature_sets_2 = contig_2_gene_content_track.new_set(type='feature')
+
+        # add gene features to 2 blank feature sets
+        set_contig_track_features(gene1_contig, name_to_group_number_dict, genes, current_HGT_iden, feature_sets_1)
+        set_contig_track_features(gene2_contig, name_to_group_number_dict, genes, current_HGT_iden, feature_sets_2)
+
+        ####################################### add crosslink from blast results #######################################
+
+        path_to_blast_result = '%s/%s/%s.txt' % (path_to_output_act_folder, folder_name, folder_name)
+        blast_results = open(path_to_blast_result)
+
+        # parse blast results
+        for each_line in blast_results:
+            each_line_split = each_line.split('\t')
+            query = each_line_split[0]
+            identity = float(each_line_split[2])
+            query_start = int(each_line_split[6])
+            query_end = int(each_line_split[7])
+            target_start = int(each_line_split[8])
+            target_end = int(each_line_split[9])
+
+            # use color to reflect identity
+            color = colors.linearlyInterpolatedColor(colors.white, colors.red, 50, 100, identity)
+
+            # determine which is which (query/target to contig_1/contig_2)
+            # if query is contig_1
+            if query == gene1_contig.name :
+                link = CrossLink((contig_1_gene_content_track, query_start, query_end),
+                                 (contig_2_gene_content_track, target_start, target_end),
+                                 color=color,
+                                 border=color,
+                                 flip=False)
+                diagram.cross_track_links.append(link)
+
+            # if query is contig_2
+            elif query == gene2_contig.name:
+                link = CrossLink((contig_2_gene_content_track, query_start, query_end),
+                                 (contig_1_gene_content_track, target_start, target_end),
+                                 color=color,
+                                 border=color,
+                                 flip=False)
+                diagram.cross_track_links.append(link)
+
+        ############################################### Draw and Export ################################################
+
+        diagram.draw(format="linear",
+                     orientation="landscape",
+                     pagesize=(75 * cm, 25 * cm),
+                     fragments=1,
+                     start=0,
+                     end=max_len)
+
+        diagram.write('%s/%s.eps' % (path_to_output_act_folder, folder_name), "EPS")
+
+
+    # move plot to corresponding folder
+    if match_category == 'end_match':
+        os.system('mv %s/%s.eps %s/' % (path_to_output_act_folder, folder_name, pwd_at_ends_plot_folder))
+    elif match_category == 'full_length_match':
+        os.system('mv %s/%s.eps %s/' % (path_to_output_act_folder, folder_name, pwd_full_contig_match_plot_folder))
     else:
-        end_break = 0
-
-    return end_break
+        os.system('mv %s/%s.eps %s/' % (path_to_output_act_folder, folder_name, pwd_normal_plot_folder))
 
 
-def check_end_break(folder_name, flanking_length, end_seq_length, pwd_blastn_exe):
-
-    # define file name
-    recipient_gene = folder_name.split('___')[0]
-    donor_gene = folder_name.split('___')[1]
-    file_recipient_gene_3000_gbk = '%s_%sbp.gbk' % (recipient_gene, flanking_length)
-    file_donor_gene_3000_gbk = '%s_%sbp.gbk' % (donor_gene, flanking_length)
-
-    # read in recipient/donor contig
-    recipient_contig_record = SeqIO.read(file_recipient_gene_3000_gbk, 'genbank')
-    recipient_contig_seq = recipient_contig_record.seq
-    donor_contig_record = SeqIO.read(file_donor_gene_3000_gbk, 'genbank')
-    donor_contig_seq = donor_contig_record.seq
-
-    # get ending sequence of the recipient and donor genes
-    ending_seq_description = ''
-
-    # export recipient_left_end_seq
-    recipient_left_end_seq = recipient_contig_seq[0:end_seq_length]
-    recipient_left_end_id = '%s_le%s' % (recipient_gene, end_seq_length)
-    recipient_left_end_handle = '%s/%s.fasta' % (os.getcwd(), recipient_left_end_id)
-    export_dna_record(recipient_left_end_seq, recipient_left_end_id, ending_seq_description, recipient_left_end_handle)
-
-    # export recipient_right_end_seq
-    recipient_right_end_seq = recipient_contig_seq[len(recipient_contig_seq) - end_seq_length:]
-    recipient_right_end_id = '%s_re%s' % (recipient_gene, end_seq_length)
-    recipient_right_end_handle = '%s/%s.fasta' % (os.getcwd(), recipient_right_end_id)
-    export_dna_record(recipient_right_end_seq, recipient_right_end_id, ending_seq_description, recipient_right_end_handle)
-
-    # export donor_left_end_seq
-    donor_left_end_seq = donor_contig_seq[0:end_seq_length]
-    donor_left_end_id = '%s_le%s' % (donor_gene, end_seq_length)
-    donor_left_end_handle = '%s/%s.fasta' % (os.getcwd(), donor_left_end_id)
-    export_dna_record(donor_left_end_seq, donor_left_end_id, ending_seq_description, donor_left_end_handle)
-
-    # export donor_right_end_seq
-    donor_right_end_seq = donor_contig_seq[len(donor_contig_seq) - end_seq_length:]
-    donor_right_end_id = '%s_re%s' % (donor_gene, end_seq_length)
-    donor_right_end_handle = '%s/%s.fasta' % (os.getcwd(), donor_right_end_id)
-    export_dna_record(donor_right_end_seq, donor_right_end_id, ending_seq_description, donor_right_end_handle)
-
-    # run blastn between ending sequences:
-    blast_parameters = '-evalue 1e-5 -outfmt 6 -task blastn'
-    output_rle_dle = '%s/%s_rle___%s_dle.tab' % (os.getcwd(), recipient_gene, donor_gene)
-    output_rle_dre = '%s/%s_rle___%s_dre.tab' % (os.getcwd(), recipient_gene, donor_gene)
-    output_rre_dle = '%s/%s_rre___%s_dle.tab' % (os.getcwd(), recipient_gene, donor_gene)
-    output_rre_dre = '%s/%s_rre___%s_dre.tab' % (os.getcwd(), recipient_gene, donor_gene)
-    compare_end_blast_rle_dle = '%s -query %s -subject %s -out %s %s' % (
-    pwd_blastn_exe, recipient_left_end_handle, donor_left_end_handle, output_rle_dle, blast_parameters)
-    compare_end_blast_rle_dre = '%s -query %s -subject %s -out %s %s' % (
-    pwd_blastn_exe, recipient_left_end_handle, donor_right_end_handle, output_rle_dre, blast_parameters)
-    compare_end_blast_rre_dle = '%s -query %s -subject %s -out %s %s' % (
-    pwd_blastn_exe, recipient_right_end_handle, donor_left_end_handle, output_rre_dle, blast_parameters)
-    compare_end_blast_rre_dre = '%s -query %s -subject %s -out %s %s' % (
-    pwd_blastn_exe, recipient_right_end_handle, donor_right_end_handle, output_rre_dre, blast_parameters)
-    os.system(compare_end_blast_rle_dle)
-    os.system(compare_end_blast_rle_dre)
-    os.system(compare_end_blast_rre_dle)
-    os.system(compare_end_blast_rre_dre)
-
-    match_files = [output_rle_dle, output_rle_dre, output_rre_dle, output_rre_dre]
-    match_profile = []
-    for each_match in match_files:
-        match_dir_list = []
-        for each_hit in open(each_match):
-            each_hit_split = each_hit.strip().split('\t')
-            qstart = int(each_hit_split[6])
-            qend = int(each_hit_split[7])
-            sstart = int(each_hit_split[8])
-            send = int(each_hit_split[9])
-            q_direction = qend - qstart
-            s_direction = send - sstart
-            q_dir = ''
-            if q_direction > 0:
-                q_dir = 'forward'
-            if q_direction < 0:
-                q_dir = 'backward'
-            s_dir = ''
-            if s_direction > 0:
-                s_dir = 'forward'
-            if s_direction < 0:
-                s_dir = 'backward'
-            match_dir = ''
-            if q_dir == s_dir:
-                match_dir = 'same direction'
-            if q_dir != s_dir:
-                match_dir = 'opposite direction'
-            match_dir_list.append(match_dir)
-        match_dir_list_uniq = []
-        for each in match_dir_list:
-            if each not in match_dir_list_uniq:
-                match_dir_list_uniq.append(each)
-        match_profile.append(match_dir_list_uniq)
-
-    break_end = ''
-    if (match_profile[0] == ['opposite direction']) or (match_profile[1] == ['same direction']) or (match_profile[2] == ['same direction']) or (match_profile[3] == ['opposite direction']):
-        break_end = True
-    else:
-        break_end = False
-
-    return break_end
-
-
-def get_gbk_blast_act(candidates_file, gbk_file, flanking_length, end_seq_length, name_to_group_number_dict, path_to_output_act_folder, pwd_blastn_exe, keep_temp):
-
-    matches = open(candidates_file)
-
-    total = 0
-    for match in matches:
-        total += 1
-
-    n = 1
-    candidates_2_endbreak_dict = {}
-    candidates_2_endlocation_dict = {}
-
-    for match in open(candidates_file):
-        genes = match.strip().split('\t')[:-1]
-        folder_name = '___'.join(genes)
-        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + " Plotting flanking region for %d/%d: %s" % (n, total, folder_name))
-        os.mkdir('%s/%s' % (path_to_output_act_folder, folder_name))
-
-        dict_value_list = []
-        # Extract gbk and faa files
-        records = SeqIO.parse(gbk_file, 'genbank')
-        for record in records:
-            for gene_f in record.features:
-                if 'locus_tag' in gene_f.qualifiers:
-
-                    for gene_1 in genes:
-                        if gene_1 in gene_f.qualifiers["locus_tag"]:
-                            dict_value_list.append([gene_1, int(gene_f.location.start), int(gene_f.location.end), gene_f.location.strand, len(record.seq)])
-                            pwd_gbk_file = '%s/%s/%s.gbk' % (path_to_output_act_folder, folder_name, gene_1)
-                            pwd_fasta_file = '%s/%s/%s.fasta' % (path_to_output_act_folder, folder_name, gene_1)
-                            SeqIO.write(record, pwd_gbk_file, 'genbank')
-                            SeqIO.write(record, pwd_fasta_file, 'fasta')
-                            # get flanking regions
-                            get_flanking_region(pwd_gbk_file, gene_1, flanking_length)
-
-        candidates_2_endlocation_dict[folder_name] = dict_value_list
-
-        # Run Blast
-        prefix_c = '%s/%s' % (path_to_output_act_folder, folder_name)
-        output_c = '%s/%s.txt' % (prefix_c, folder_name)
-        query_c = '%s/%s_%sbp.fasta' % (prefix_c, genes[0], flanking_length)
-        subject_c = '%s/%s_%sbp.fasta' % (prefix_c, genes[1], flanking_length)
-
-        parameters_c_n = '-evalue 1e-5 -outfmt 6 -task blastn'
-        command_blast = '%s -query %s -subject %s -out %s %s' % (pwd_blastn_exe, query_c, subject_c, output_c, parameters_c_n)
-        os.system(command_blast)
-
-        # read in gbk files
-        matche_pair_list = []
-        for each_gene in genes:
-            path_to_gbk_file = '%s/%s/%s_%sbp.gbk' % (path_to_output_act_folder, folder_name, each_gene, flanking_length)
-            gene_contig = SeqIO.read(path_to_gbk_file, "genbank")
-            matche_pair_list.append(gene_contig)
-        bin_record_list = []
-        bin_record_list.append(matche_pair_list)
-
-        # create an empty diagram
-        diagram = GenomeDiagram.Diagram()
-
-        # add tracks to diagram
-        max_len = 0
-        for gene1_contig, gene2_contig in bin_record_list:
-            # set diagram track length
-            max_len = max(max_len, len(gene1_contig), len(gene2_contig))
-
-            # add gene content track for gene1_contig
-            contig_1_gene_content_track = diagram.new_track(1,
-                                                            name=gene1_contig.name,
-                                                            greytrack=True,
-                                                            greytrack_labels=1,
-                                                            greytrack_font='Helvetica',
-                                                            greytrack_fontsize=12,
-                                                            height=0.35,
-                                                            start=0,
-                                                            end=len(gene1_contig),
-                                                            scale=True,
-                                                            scale_fontsize=6,
-                                                            scale_ticks=1,
-                                                            scale_smalltick_interval=10000,
-                                                            scale_largetick_interval=10000)
-
-            # add gene content track for gene2_contig
-            contig_2_gene_content_track = diagram.new_track(1,
-                                                            name=gene2_contig.name,
-                                                            greytrack=True,
-                                                            greytrack_labels=1,
-                                                            greytrack_font='Helvetica',
-                                                            greytrack_fontsize=12,
-                                                            height=0.35,
-                                                            start=0,
-                                                            end=len(gene2_contig),
-                                                            scale=True,
-                                                            scale_fontsize=6,
-                                                            scale_ticks=1,
-                                                            scale_smalltick_interval=10000,
-                                                            scale_largetick_interval=10000)
-
-            # add blank feature/graph sets to each track
-            feature_sets_1 = contig_1_gene_content_track.new_set(type='feature')
-            feature_sets_2 = contig_2_gene_content_track.new_set(type='feature')
-
-            # add gene features to 2 blank feature sets
-            set_contig_track_features(gene1_contig, name_to_group_number_dict, genes, feature_sets_1)
-            set_contig_track_features(gene2_contig, name_to_group_number_dict, genes, feature_sets_2)
-
-            ####################################### add crosslink from blast results #######################################
-
-            path_to_blast_result = '%s/%s/%s.txt' % (path_to_output_act_folder, folder_name, folder_name)
-            blast_results = open(path_to_blast_result)
-
-            # parse blast results
-            for each_line in blast_results:
-                each_line_split = each_line.split('\t')
-                query = each_line_split[0]
-                identity = float(each_line_split[2])
-                query_start = int(each_line_split[6])
-                query_end = int(each_line_split[7])
-                target_start = int(each_line_split[8])
-                target_end = int(each_line_split[9])
-
-                # use color to reflect identity
-                color = colors.linearlyInterpolatedColor(colors.white, colors.red, 50, 100, identity)
-
-                # determine which is which (query/target to contig_1/contig_2)
-                # if query is contig_1
-                if query == gene1_contig.name :
-                    link = CrossLink((contig_1_gene_content_track, query_start, query_end),
-                                     (contig_2_gene_content_track, target_start, target_end),
-                                     color=color,
-                                     border=color,
-                                     flip=False)
-                    diagram.cross_track_links.append(link)
-
-                # if query is contig_2
-                elif query == gene2_contig.name:
-                    link = CrossLink((contig_2_gene_content_track, query_start, query_end),
-                                     (contig_1_gene_content_track, target_start, target_end),
-                                     color=color,
-                                     border=color,
-                                     flip=False)
-                    diagram.cross_track_links.append(link)
-
-            ############################################### Draw and Export ################################################
-
-            diagram.draw(format="linear",
-                         orientation="landscape",
-                         pagesize=(75 * cm, 25 * cm),
-                         fragments=1,
-                         start=0,
-                         end=max_len)
-
-            diagram.write('%s/%s.eps' % (path_to_output_act_folder, folder_name), "EPS")
-
-        # get match category
-        current_wd = os.getcwd()
-        os.chdir('%s/%s' % (path_to_output_act_folder, folder_name))
-
-        end_break = get_end_break_value(dict_value_list, end_seq_length)
-        candidates_2_endbreak_dict[folder_name] = end_break
-        os.chdir(current_wd)
-        os.chdir(path_to_output_act_folder)
-
-        if end_break == True:
-            os.system('mv %s.eps 0_end_break/' % folder_name)
-            os.chdir(current_wd)
-
-        # remove temporary folder
-        os.chdir(current_wd)
-        if keep_temp == 0:
+    # remove temporary folder
+    if keep_temp == 0:
+        shutil.rmtree('%s/%s' % (path_to_output_act_folder, folder_name), ignore_errors=True)
+        if os.path.isdir('%s/%s' % (path_to_output_act_folder, folder_name)):
             shutil.rmtree('%s/%s' % (path_to_output_act_folder, folder_name), ignore_errors=True)
-            if os.path.isdir('%s/%s' % (path_to_output_act_folder, folder_name)):
-                shutil.rmtree('%s/%s' % (path_to_output_act_folder, folder_name), ignore_errors=True)
-        n += 1
-
-    return candidates_2_endbreak_dict
 
 
 def remove_bidirection(input_file, candidate2identity_dict, output_file):
@@ -995,6 +945,7 @@ def remove_bidirection(input_file, candidate2identity_dict, output_file):
         output.write('%s\t%s\n' % (each, candidate2identity_dict[each_concatenated]))
     output.close()
 
+
 ############################################## input ##############################################
 
 parser = argparse.ArgumentParser()
@@ -1005,19 +956,23 @@ parser.add_argument('-g', required=False, default=None, help='grouping file')
 
 parser.add_argument('-blastall', required=False, default=None, help='all vs all blast results')
 
-parser.add_argument('-cov', required=False, type=int, default=70, help='coverage cutoff')
+parser.add_argument('-cov', required=False, type=int, default=70, help='coverage cutoff, deafult: 70')
 
-parser.add_argument('-al', required=False, type=int, default=200, help='alignment length cutoff')
+parser.add_argument('-al', required=False, type=int, default=200, help='alignment length cutoff, deafult: 200')
 
-parser.add_argument('-flk', required=False, type=int, default=3000, help='the length of flanking sequences to plot')
+parser.add_argument('-flk', required=False, type=int, default=10, help='the length of flanking sequences to plot (Kbp), deafult: 10')
 
-parser.add_argument('-ip', required=False, type=int, default=90, help='identity percentile cutoff')
+parser.add_argument('-ip', required=False, type=int, default=90, help='identity percentile cutoff, deafult: 90')
 
-parser.add_argument('-eb', required=False, type=int, default=1000, help='the minimal length to be considered as end break')
+parser.add_argument('-eb', required=False, type=int, default=1000, help='diatance cutoff to be considered as located at ends, deafult: 1000')
+
+parser.add_argument('-ei', required=False, type=float, default=95, help='end match identity cutoff, deafult: 95')
+
+parser.add_argument('-threads', required=False, type=int, default=1, help='number of threads, deafult: 1')
+
+parser.add_argument('-quiet', required=False, action="store_true", help='Do not report progress')
 
 parser.add_argument('-tmp', required=False, action="store_true", help='keep temporary files')
-
-parser.add_argument('-num_threads', required=False, type=int, default=1, help='number of threads for running blastn')
 
 args = vars(parser.parse_args())
 
@@ -1025,12 +980,18 @@ output_prefix = args['p']
 grouping_file = args['g']
 blast_results = args['blastall']
 cover_cutoff = args['cov']
-flanking_length = args['flk']
+flanking_length_kbp = args['flk']
 identity_percentile = args['ip']
 align_len_cutoff = args['al']
-ending_match_length = args['eb']
+end_match_length_cutoff = args['eb']
+end_match_identity_cutoff = args['ei']
 keep_temp = args['tmp']
-num_threads = args['num_threads']
+keep_quiet = args['quiet']
+num_threads = args['threads']
+
+time_format = '[%Y-%m-%d %H:%M:%S] '
+
+flanking_length = flanking_length_kbp * 1000
 
 # get path to current script
 pwd_best_match_script = sys.argv[0]
@@ -1045,30 +1006,26 @@ pwd_makeblastdb_exe = program_path_dict['makeblastdb']
 
 warnings.filterwarnings("ignore")
 
-MetaCHIP_wd = '%s_MetaCHIP_wd' % output_prefix
 
-ffn_folder =             '%s_ffn_files'       % output_prefix
-faa_folder =             '%s_faa_files'       % output_prefix
-gbk_folder =             '%s_gbk_files'       % output_prefix
+MetaCHIP_wd =            '%s_MetaCHIP_wd'  % output_prefix
+ffn_folder =             '%s_ffn_files'    % output_prefix
+faa_folder =             '%s_faa_files'    % output_prefix
+gbk_folder =             '%s_gbk_files'    % output_prefix
+combined_ffn_file =      '%s_combined.ffn' % output_prefix
+combined_faa_file =      '%s_combined.faa' % output_prefix
+log_file_name =          '%s_BM_%s.log'    % (output_prefix, datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
 
-pwd_ffn_folder =             '%s/%s' % (MetaCHIP_wd, ffn_folder)
-pwd_faa_folder =             '%s/%s' % (MetaCHIP_wd, faa_folder)
-pwd_gbk_folder =             '%s/%s' % (MetaCHIP_wd, gbk_folder)
-
-combined_ffn_file = '%s_combined.ffn' % output_prefix
-combined_gbk_file = '%s_combined.gbk' % output_prefix
-pwd_combined_ffn_file = '%s/%s' % (MetaCHIP_wd, combined_ffn_file)
-pwd_combined_gbk_file = '%s/%s' % (MetaCHIP_wd, combined_gbk_file)
-
-
-# get combined ffn and gbk files
-os.system('cat %s/*.ffn > %s' % (pwd_ffn_folder, pwd_combined_ffn_file))
-os.system('cat %s/*.gbk > %s' % (pwd_gbk_folder, pwd_combined_gbk_file))
+pwd_ffn_folder =         '%s/%s'           % (MetaCHIP_wd, ffn_folder)
+pwd_faa_folder =         '%s/%s'           % (MetaCHIP_wd, faa_folder)
+pwd_gbk_folder =         '%s/%s'           % (MetaCHIP_wd, gbk_folder)
+pwd_combined_ffn_file =  '%s/%s'           % (MetaCHIP_wd, combined_ffn_file)
+pwd_combined_faa_file =  '%s/%s'           % (MetaCHIP_wd, combined_faa_file)
+pwd_log_file_name =      '%s/%s'           % (MetaCHIP_wd, log_file_name)
 
 
 # get grouping file
 if grouping_file == None:
-    grouping_file_re = '%s/%s_grouping_g*.txt' % (MetaCHIP_wd, output_prefix)
+    grouping_file_re = '%s/%s_grouping_[dpcofgs][0-9]+.txt' % (MetaCHIP_wd, output_prefix)
     grouping_file_list = [os.path.basename(file_name) for file_name in glob.glob(grouping_file_re)]
     #grouping_file_list = re.match(grouping_file_re)
 
@@ -1079,14 +1036,20 @@ if grouping_file == None:
         print('No or multiple grouping file found, please specify with "-g" option')
         exit()
 
+
+# get grouping rank from grouping file
+grouping_rank = grouping_file.split('/')[-1].split('_')[-1][0]
+
 pwd_grouping_file = grouping_file
 
 ############################################### Define folder/file name ################################################
 
-print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Define folder/file names and create output folder')
+with open(pwd_log_file_name, 'a') as log_handle:
+    log_handle.write(datetime.now().strftime(time_format) + 'Define folder/file names and create output folder\n')
+if keep_quiet == 0:
+    print(datetime.now().strftime(time_format) + 'Define folder/file names and create output folder')
 
-
-MetaCHIP_op_folder = '%s_HGTs_ip%s_al%sbp_c%s_e%sbp_g%s' % (output_prefix, str(identity_percentile), str(align_len_cutoff), str(cover_cutoff), str(ending_match_length), get_number_of_group(pwd_grouping_file))
+MetaCHIP_op_folder = '%s_HGTs_ip%s_al%sbp_c%s_ei%sbp_f%skbp_%s%s' % (output_prefix, str(identity_percentile), str(align_len_cutoff), str(cover_cutoff), str(end_match_identity_cutoff), flanking_length_kbp, grouping_rank, get_number_of_group(pwd_grouping_file))
 
 pwd_MetaCHIP_op_folder = '%s/%s' % (MetaCHIP_wd, MetaCHIP_op_folder)
 
@@ -1094,7 +1057,7 @@ iden_distrib_plot_folder =                          'identity_distribution'
 qual_idens_file =                                   'qualified_identities.txt'
 qual_idens_file_gg =                                'qualified_identities_gg.txt'
 qual_idens_file_gg_sorted =                         'qualified_identities_gg_sorted.txt'
-unploted_groups_file =                              'unploted_groups.txt'
+unploted_groups_file =                              '0_unploted_groups.txt'
 qual_idens_with_group_filename =                    'qualified_identities_with_group.txt'
 qual_idens_with_group_sorted_filename =             'qualified_identities_with_group_sorted.txt'
 subjects_in_one_line_filename =                     'subjects_in_one_line.txt'
@@ -1105,8 +1068,10 @@ op_candidates_only_gene_file_name_uniq =            'HGT_candidates_uniq.txt'
 op_candidates_only_gene_uniq_end_break =            'HGT_candidates_BM.txt'
 op_candidates_seq_nc =                              'HGT_candidates_BM_nc.fasta'
 op_candidates_seq_aa =                              'HGT_candidates_BM_aa.fasta'
-op_act_folder_name =                                'Flanking_regions'
-gbk_subset_file =                                   'combined_subset.gbk'
+op_act_folder_name =                                'Flanking_region_plots'
+normal_folder_name =                                '1_Plots_normal'
+end_match_folder_name =                             '2_Plots_end_match'
+full_length_match_folder_name =                     '3_Plots_full_length_match'
 
 pwd_iden_distrib_plot_folder =                      '%s/%s/%s'    % (MetaCHIP_wd, MetaCHIP_op_folder, iden_distrib_plot_folder)
 pwd_qual_iden_file =                                '%s/%s/%s'    % (MetaCHIP_wd, MetaCHIP_op_folder, qual_idens_file)
@@ -1123,10 +1088,11 @@ pwd_op_candidates_only_gene_file_uniq =             '%s/%s/%s'    % (MetaCHIP_wd
 pwd_op_cans_only_gene_uniq_end_break =              '%s/%s/%s'    % (MetaCHIP_wd, MetaCHIP_op_folder, op_candidates_only_gene_uniq_end_break)
 pwd_op_candidates_seq_nc =                          '%s/%s/%s'    % (MetaCHIP_wd, MetaCHIP_op_folder, op_candidates_seq_nc)
 pwd_op_candidates_seq_aa =                          '%s/%s/%s'    % (MetaCHIP_wd, MetaCHIP_op_folder, op_candidates_seq_aa)
-pwd_gbk_subset_file =                               '%s/%s/%s'    % (MetaCHIP_wd, MetaCHIP_op_folder, gbk_subset_file)
 pwd_op_act_folder =                                 '%s/%s/%s'    % (MetaCHIP_wd, MetaCHIP_op_folder, op_act_folder_name)
+pwd_normal_folder =                                 '%s/%s/%s/%s' % (MetaCHIP_wd, MetaCHIP_op_folder, op_act_folder_name, normal_folder_name)
+pwd_end_match_folder =                              '%s/%s/%s/%s' % (MetaCHIP_wd, MetaCHIP_op_folder, op_act_folder_name, end_match_folder_name)
+pwd_full_length_match_folder =                      '%s/%s/%s/%s' % (MetaCHIP_wd, MetaCHIP_op_folder, op_act_folder_name, full_length_match_folder_name)
 pwd_grouping_file_with_id =                         '%s/%s/%s'    % (MetaCHIP_wd, MetaCHIP_op_folder, 'grouping_with_id.txt')
-
 
 blast_db_folder = '%s_blastdb' % output_prefix
 pwd_blast_db_folder = '%s/%s' % (MetaCHIP_wd, blast_db_folder)
@@ -1134,48 +1100,14 @@ pwd_blast_db_folder = '%s/%s' % (MetaCHIP_wd, blast_db_folder)
 pwd_blast_results = ''
 if blast_results != None:
     pwd_blast_results = blast_results
-if blast_results == None:
-    pwd_blast_results =                             '%s/%s_all_vs_all_ffn.tab'       % (MetaCHIP_wd, output_prefix)
+else:
+    pwd_blast_results = '%s/%s_all_vs_all_ffn.tab' % (MetaCHIP_wd, output_prefix)
 
-# check whether file exist
-# unfound_inputs = []
-# for each_input in [pwd_grouping_file, pwd_prokka_output]:
-#     if (not os.path.isfile(each_input)) and (not os.path.isdir(each_input)):
-#         unfound_inputs.append(each_input)
-#
-# if run_blastn == 0:
-#     if not os.path.isfile(pwd_blast_results):
-#         unfound_inputs.append(pwd_blast_results)
-#
-# if len(unfound_inputs) > 0:
-#     for each_unfound in unfound_inputs:
-#         print('%s not found' % each_unfound)
-#     exit()
 
 ########################################################################################################################
 
-# run blastn if specified
-if blast_results == None:
-    if os.path.isdir(pwd_blast_db_folder):
-        shutil.rmtree(pwd_blast_db_folder)
-    os.mkdir(pwd_blast_db_folder)
-
-    os.system('cp %s %s' % (pwd_combined_ffn_file, pwd_blast_db_folder))
-    makeblastdb_cmd = '%s -in %s/%s -dbtype nucl -parse_seqids' % (pwd_makeblastdb_exe, pwd_blast_db_folder, combined_ffn_file)
-    os.system(makeblastdb_cmd)
-    blast_parameters = '-evalue 1e-5 -num_threads %s -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen" -task blastn' % num_threads
-    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Running blastn, be patient...')
-    os.system('%s -query %s -db %s/%s -out %s %s' % (pwd_blastn_exe, pwd_combined_ffn_file, pwd_blast_db_folder, combined_ffn_file, pwd_blast_results, blast_parameters))
-
-
 # create outputs folder
-if os.path.isdir(pwd_MetaCHIP_op_folder):
-    shutil.rmtree(pwd_MetaCHIP_op_folder, ignore_errors=True)
-    if os.path.isdir(pwd_MetaCHIP_op_folder):
-        shutil.rmtree(pwd_MetaCHIP_op_folder, ignore_errors=True)
-    os.makedirs(pwd_MetaCHIP_op_folder)
-else:
-    os.makedirs(pwd_MetaCHIP_op_folder)
+force_create_folder(pwd_MetaCHIP_op_folder)
 
 
 # index grouping file
@@ -1195,26 +1127,45 @@ for each_bin in open(pwd_grouping_file_with_id):
     name_to_group_number_dict[bin_name] = bin_group_number
     name_to_group_dict[bin_name] = bin_group
 
+
 ####################################################### Main code ######################################################
 
-sleep(1)
-print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Plotting identity distribution between each pair of groups')
+with open(pwd_log_file_name, 'a') as log_handle:
+    log_handle.write(datetime.now().strftime(time_format) + 'Filtering blast matches with the following criteria: Query name != Subject name, Alignment length >= %sbp and coverage >= %s%s\n' % (align_len_cutoff, cover_cutoff, '%'))
+if keep_quiet == 0:
+    print(datetime.now().strftime(time_format) + 'Filtering blast matches with the following criteria: Query name != Subject name, Alignment length >= %sbp and coverage >= %s%s' % (align_len_cutoff, cover_cutoff, '%'))
+
 
 # get qualified identities after alignment length and coverage filter (self-match excluded)
-all_identities = get_all_identity_list(pwd_blast_results, genome_name_list, align_len_cutoff, cover_cutoff, pwd_qual_iden_file)
+out_temp = open(pwd_qual_iden_file, 'w')
+for match in open(pwd_blast_results):
+    match_split = match.strip().split('\t')
+    query = match_split[0]
+    subject = match_split[1]
+    align_len = int(match_split[3])
+    query_len = int(match_split[12])
+    subject_len = int(match_split[13])
+    query_bin_name = '_'.join(query.split('_')[:-1])
+    subject_bin_name = '_'.join(subject.split('_')[:-1])
+    coverage_q = float("{0:.2f}".format(float(align_len) * 100 / float(query_len)))
+    coverage_s = float("{0:.2f}".format(float(align_len) * 100 / float(subject_len)))
+
+    # only work on genomes included in grouping file
+    if (query_bin_name in genome_name_list) and (subject_bin_name in genome_name_list):
+
+        # filter blast hits
+        if (query_bin_name != subject_bin_name) and (align_len >= int(align_len_cutoff)) and (coverage_q >= int(cover_cutoff)) and (coverage_s >= int(cover_cutoff)):
+            out_temp.write(match)
+out_temp.close()
+
 
 # create folder to hold group-group identity distribution plot
 os.makedirs(pwd_iden_distrib_plot_folder)
 
-# plot overall identity distribution
-all_identities_plot_title = 'All_vs_All'
-plot_identity_list(all_identities, 'None', all_identities_plot_title, pwd_iden_distrib_plot_folder)
-
 
 # replace query and subject name with query_group-subject_group and sort new file
-qualified_identities = open(pwd_qual_iden_file)
 qualified_identities_g_g = open(pwd_qual_iden_file_gg, 'w')
-for each_identity in qualified_identities:
+for each_identity in open(pwd_qual_iden_file):
     each_identity_split = each_identity.strip().split('\t')
     query = each_identity_split[0]
     subject = each_identity_split[1]
@@ -1233,16 +1184,23 @@ for each_identity in qualified_identities:
 qualified_identities_g_g.close()
 os.system('cat %s | sort > %s' % (pwd_qual_iden_file_gg, pwd_qual_iden_file_gg_sorted))
 
+
+sleep(1)
+with open(pwd_log_file_name, 'a') as log_handle:
+    log_handle.write(datetime.now().strftime(time_format) + 'Plotting identity distribution between each pair of groups\n')
+if keep_quiet == 0:
+    print(datetime.now().strftime(time_format) + 'Plotting identity distribution between each pair of groups')
+
 # get identities for each group pair, plot identity distribution and generate group_pair to identity dict
-qualified_identities_g = open(pwd_qual_iden_file_gg_sorted)
-unploted_groups = open(pwd_unploted_groups_file, 'w')
+with open(pwd_unploted_groups_file, 'a') as unploted_groups_handle:
+    unploted_groups_handle.write('Group\tHits_number\n')
 current_group_pair_name = ''
 current_group_pair_identities = []
 group_pair_iden_cutoff_dict = {}
 ploted_group = 1
 minimum_plot_number = 10
 group_pair_iden_cutoff_file = open(pwd_group_pair_iden_cutoff_file, 'w')
-for each_identity_g in qualified_identities_g:
+for each_identity_g in open(pwd_qual_iden_file_gg_sorted):
     each_identity_g_split = each_identity_g.strip().split('\t')
     group_pair = each_identity_g_split[0]
     identity = float(each_identity_g_split[1])
@@ -1267,12 +1225,14 @@ do()
 group_pair_iden_cutoff_file.close()
 
 sleep(1)
-print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Analyzing Blast matches to get HGT candidates')
+with open(pwd_log_file_name, 'a') as log_handle:
+    log_handle.write(datetime.now().strftime(time_format) + 'Analyzing Blast matches to get HGT candidates\n')
+if keep_quiet == 0:
+    print(datetime.now().strftime(time_format) + 'Analyzing Blast matches to get HGT candidates')
 
 # add group information to qualified identities and sort it according to group.
-qualified_identities_no_cutoff = open(pwd_qual_iden_file)
 qualified_matches_with_group = open(pwd_qual_idens_with_group, 'w')
-for qualified_identity in qualified_identities_no_cutoff:
+for qualified_identity in open(pwd_qual_iden_file):
     qualified_identity_split = qualified_identity.strip().split('\t')
     query = qualified_identity_split[0]
     query_split = query.split('_')
@@ -1306,44 +1266,54 @@ for each_candidate_pair in open(pwd_op_candidates_with_group_file):
 
 remove_bidirection(pwd_op_candidates_only_gene_file, candidate2identity_dict, pwd_op_candidates_only_gene_file_uniq)
 
-#################################################### Get ACT images ####################################################
 
-sleep(1)
-print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Preparing subset of combined.gbk file for flanking region plotting')
+################################################# plot flanking region #################################################
 
-# get gene list of all candidates
-all_candidates_genes = []
-for match in open(pwd_op_candidates_only_gene_file):
-    match_split = match.strip().split('\t')
-    for gene in match_split:
-        if gene not in all_candidates_genes:
-            all_candidates_genes.append(gene)
-
-# get subset of combined gbk file
-gbk_subset = open(pwd_gbk_subset_file, 'w')
-records_recorded = []
-for record in SeqIO.parse(pwd_combined_gbk_file, 'genbank'):
-    record_id = record.id
-    for gene_f in record.features:
-        if 'locus_tag' in gene_f.qualifiers:
-            for gene_r in all_candidates_genes:
-                if gene_r in gene_f.qualifiers["locus_tag"]:
-                    if record_id not in records_recorded:
-                        SeqIO.write(record, gbk_subset, 'genbank')
-                        records_recorded.append(record_id)
-gbk_subset.close()
-
+with open(pwd_log_file_name, 'a') as log_handle:
+    log_handle.write(datetime.now().strftime(time_format) + "Plotting flanking regions with %s cores\n" % num_threads)
+if keep_quiet == 0:
+    print(datetime.now().strftime(time_format) + "Plotting flanking regions with %s cores" % num_threads)
 
 # create folder to hold ACT output
 os.makedirs(pwd_op_act_folder)
-os.makedirs('%s/0_end_break' % pwd_op_act_folder)
+os.makedirs(pwd_normal_folder)
+os.makedirs(pwd_end_match_folder)
+os.makedirs(pwd_full_length_match_folder)
 
-# plot flanking regions
-candidates_2_endbreak_dict = get_gbk_blast_act(pwd_op_candidates_only_gene_file_uniq, pwd_gbk_subset_file, flanking_length, ending_match_length, name_to_group_number_dict, pwd_op_act_folder, pwd_blastn_exe, keep_temp)
+# initialize manager.dict
+manager = mp.Manager()
+candidates_2_contig_match_category_dict_mp = manager.dict()
 
-# add end break information to output file
+list_for_multiple_arguments_flanking_regions = []
+for match in open(pwd_op_candidates_only_gene_file_uniq):
+    list_for_multiple_arguments_flanking_regions.append([match,
+                                                         pwd_gbk_folder,
+                                                         flanking_length,
+                                                         end_match_length_cutoff,
+                                                         name_to_group_number_dict,
+                                                         pwd_op_act_folder,
+                                                         pwd_normal_folder,
+                                                         pwd_end_match_folder,
+                                                         pwd_full_length_match_folder,
+                                                         pwd_blastn_exe,
+                                                         keep_temp,
+                                                         candidates_2_contig_match_category_dict_mp,
+                                                         end_match_identity_cutoff])
+
+pool_flanking_regions = mp.Pool(processes=num_threads)
+pool_flanking_regions.map(get_gbk_blast_act2, list_for_multiple_arguments_flanking_regions)
+pool_flanking_regions.close()
+pool_flanking_regions.join()
+
+# convert mp.dict to normal dict
+candidates_2_contig_match_category_dict = {each_key: each_value for each_key, each_value in candidates_2_contig_match_category_dict_mp.items()}
+
+
+####################################################################################################
+
+# add at_end information to output file
 output_file = open(pwd_op_cans_only_gene_uniq_end_break, 'w')
-output_file.write('Gene_1\tGene_2\tGene_1_group\tGene_2_group\tIdentity(nc)\tEnd_break\n')
+output_file.write('Gene_1\tGene_2\tGene_1_group\tGene_2_group\tIdentity\tend_match\tfull_length_match\n')
 all_candidate_genes = []
 for each_candidate in open(pwd_op_candidates_only_gene_file_uniq):
     each_candidate_split = each_candidate.strip().split('\t')
@@ -1357,27 +1327,37 @@ for each_candidate in open(pwd_op_candidates_only_gene_file_uniq):
     donor_genome_group = donor_genome_group_id.split('_')[0]
     identity = each_candidate_split[2]
     concatenated = '%s___%s' % (recipient_gene, donor_gene)
-    end_break = candidates_2_endbreak_dict[concatenated]
+
+    end_match_value = 'no'
+    if candidates_2_contig_match_category_dict[concatenated] == 'end_match':
+        end_match_value = 'yes'
+
+    full_length_match_value = 'no'
+    if candidates_2_contig_match_category_dict[concatenated] == 'full_length_match':
+        full_length_match_value = 'yes'
+
     # write to output files
-    if end_break == 1:
-        output_file.write('%s\t%s\t%s\t%s\t%s\t%s\n' % (recipient_gene, donor_gene, recipient_genome_group, donor_genome_group, identity, 'yes' ))
-    else:
-        output_file.write('%s\t%s\t%s\t%s\t%s\t%s\n' % (recipient_gene, donor_gene, recipient_genome_group, donor_genome_group, identity, 'no'))
+    output_file.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\n' % (recipient_gene, donor_gene, recipient_genome_group, donor_genome_group, identity, end_match_value, full_length_match_value))
+
 output_file.close()
 
 # get qualified HGT candidates
 qualified_HGT_candidates = []
 for each_candidate_2 in open(pwd_op_cans_only_gene_uniq_end_break):
     each_candidate_2_split = each_candidate_2.strip().split('\t')
-    end_break_2 = each_candidate_2_split[5]
-    if end_break_2 == 'no':
+    at_ends_2 = each_candidate_2_split[5]
+    if at_ends_2 == 'no':
         if each_candidate_2_split[0] not in qualified_HGT_candidates:
             qualified_HGT_candidates.append(each_candidate_2_split[0])
         if each_candidate_2_split[1] not in qualified_HGT_candidates:
             qualified_HGT_candidates.append(each_candidate_2_split[1])
 
 # export nc and aa sequence of candidate HGTs
-print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Extracting nc and aa sequences for predicted HGTs')
+with open(pwd_log_file_name, 'a') as log_handle:
+    log_handle.write(datetime.now().strftime(time_format) + 'Extracting nc and aa sequences for predicted HGTs\n')
+if keep_quiet == 0:
+    print(datetime.now().strftime(time_format) + 'Extracting nc and aa sequences for predicted HGTs')
+
 candidates_seq_nc_handle = open(pwd_op_candidates_seq_nc, 'w')
 candidates_seq_aa_handle = open(pwd_op_candidates_seq_aa, 'w')
 for each_seq in SeqIO.parse(pwd_combined_ffn_file, 'fasta'):
@@ -1391,22 +1371,23 @@ candidates_seq_aa_handle.close()
 
 # remove temporary files
 if keep_temp == 0:
-    sleep(1)
-    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Deleting temporary files')
+    with open(pwd_log_file_name, 'a') as log_handle:
+        log_handle.write(datetime.now().strftime(time_format) + 'Deleting temporary files\n')
+    if keep_quiet == 0:
+        print(datetime.now().strftime(time_format) + 'Deleting temporary files')
     os.remove(pwd_qual_iden_file)
     os.remove(pwd_qual_iden_file_gg)
     os.remove(pwd_qual_iden_file_gg_sorted)
     os.remove(pwd_qual_idens_with_group)
     os.remove(pwd_qual_idens_with_group_sorted)
     os.remove(pwd_subjects_in_one_line)
-    os.remove(pwd_gbk_subset_file)
     os.remove(pwd_op_candidates_only_gene_file_uniq)
     os.remove(pwd_op_candidates_with_group_file)
     os.remove(pwd_op_candidates_only_gene_file)
 
 sleep(1)
-print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Done for Best-match approach prediction!')
-print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' You may want to run the Phylogenetic approach for further validation.')
-print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' All protein orthologs within the input genomes need to be obtained for the Phylogenetic approach, you can get it with the following commands:')
-print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' $ cd %s' % MetaCHIP_wd)
-print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' $ get_homologues.pl -f 70 -t 3 -S 70 -E 1e-05 -C 70 -G -n 16 -d %s' % gbk_folder)
+with open(pwd_log_file_name, 'a') as log_handle:
+    log_handle.write(datetime.now().strftime(time_format) + 'Done for Best-match approach.\n')
+if keep_quiet == 0:
+    print(datetime.now().strftime(time_format) + 'Done for Best-match approach.')
+

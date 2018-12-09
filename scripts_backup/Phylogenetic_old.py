@@ -465,7 +465,10 @@ pwd_grouping_file_with_id =      '%s/%s'      % (pwd_MetaCHIP_op_folder, 'groupi
 
 
 get_homologues_wd_subdirs = [d for d in os.listdir(pwd_get_homologues_wd) if os.path.isdir(os.path.join(pwd_get_homologues_wd, d))]
-get_homologues_wd_subdirs.remove('tmp')
+
+if 'tmp' in get_homologues_wd_subdirs:
+    get_homologues_wd_subdirs.remove('tmp')
+
 ortholog_group_folder_name = get_homologues_wd_subdirs[0]
 pwd_ortholog_group_folder = '%s/%s' % (pwd_get_homologues_wd, ortholog_group_folder_name)
 
@@ -488,6 +491,9 @@ for match_group in candidates_file:
     if not match_group.startswith('Gene_1'):
         match_group_split = match_group.strip().split('\t')[:2]
         candidates_list.append(match_group_split)
+
+
+print(datetime.now().strftime('[%Y-%m-%d %H:%M:%S]') + ' Read in ortholog information into dictionary')
 
 # get all ortholog groups
 ortholog_group_file_re = '%s/*.fna' % pwd_ortholog_group_folder
@@ -577,11 +583,11 @@ candidate_2_predictions_dict = {}
 candidate_2_possible_direction_dict = {}
 
 # get gene tree for each orthologous and run Ranger-DTL
-print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Get gene tree for each orthologous and run Ranger-DTL-U')
+print(datetime.now().strftime('[%Y-%m-%d %H:%M:%S]') + ' Get gene tree for each orthologous and run Ranger-DTL-U')
 n = 1
 for each_candidates in candidates_list:
     process_name = '___'.join(each_candidates)
-    print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + " Processing %s/%s: %s" % (str(n), str(len(candidates_list)), process_name))
+    print(datetime.now().strftime('[%Y-%m-%d %H:%M:%S]') + " Processing %s/%s: %s" % (str(n), str(len(candidates_list)), process_name))
 
     # get ortholog_list for each match pairs
     ortholog_list = [] # ortholog_list == gene_member, need to modify!!!!!
@@ -589,7 +595,7 @@ for each_candidates in candidates_list:
         if (each_candidates[0] in clusters_dict[each]) or (each_candidates[1] in clusters_dict[each]):
             ortholog_list += clusters_dict[each]
     if len(ortholog_list) == 0:
-        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' No orthologes for the current HGT candidates')
+        print(datetime.now().strftime('[%Y-%m-%d %H:%M:%S]') + ' No orthologes for the current HGT candidates')
         candidate_2_predictions_dict[process_name] = []
         candidate_2_possible_direction_dict[process_name] = []
     else:
@@ -699,6 +705,10 @@ for each_candidates in candidates_list:
 
 ############################################ get gene tree and species tree ############################################
 
+        # get species tree subset
+        species_tree_file_name = '___'.join(each_candidates) + '_species_tree'
+        get_species_tree_newick(pwd_SCG_tree_wd, genome_subset, pwd_fasttree_exe, pwd_tree_folder, species_tree_file_name)
+
         # run mafft and fasttree to get gene tree
         pwd_seq_file_uniq = '%s/%s' % (pwd_tree_folder, gene_tree_seq_uniq)
         pwd_seq_file_1st_aln = '%s/%s.aln' % (pwd_tree_folder, seq_file_name_prefix)
@@ -706,9 +716,6 @@ for each_candidates in candidates_list:
         os.system('%s --quiet --maxiterate 1000 --globalpair %s > %s'% (pwd_mafft_exe, pwd_seq_file_uniq, pwd_seq_file_1st_aln))
         os.system('%s -quiet %s > %s' % (pwd_fasttree_exe, pwd_seq_file_1st_aln, pwd_gene_tree_newick))
 
-        # get species tree subset
-        species_tree_file_name = '___'.join(each_candidates) + '_species_tree'
-        get_species_tree_newick(pwd_SCG_tree_wd, genome_subset, pwd_fasttree_exe, pwd_tree_folder, species_tree_file_name)
 
         # plot  tree
         if plot_tree == 1:
@@ -864,7 +871,7 @@ for each_candidates in candidates_list:
     n += 1
 
 # add results to output file of best blast match approach
-print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Add Ranger-DTL predicted direction to HGT_candidates.txt')
+print(datetime.now().strftime('[%Y-%m-%d %H:%M:%S]') + ' Add Ranger-DTL predicted direction to HGT_candidates.txt')
 combined_output_handle = open(pwd_candidates_file_ET, 'w')
 combined_output_validated_handle = open(pwd_candidates_file_ET_validated, 'w')
 combined_output_validated_handle.write('Gene_1\tGene_2\tGenome_1_ID\tGenome_2_ID\tIdentity\tEnd_break\tDirection\n' % ())
@@ -911,12 +918,12 @@ for each_candidate in SeqIO.parse(pwd_candidates_seq_file, 'fasta'):
 combined_output_validated_fasta_nc_handle.close()
 combined_output_validated_fasta_aa_handle.close()
 
-print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Done for Tree approach!')
+print(datetime.now().strftime('[%Y-%m-%d %H:%M:%S]') + ' Done for Tree approach!')
 
 
 ################################################### Get_circlize_plot ##################################################
 
-print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Plotting gene flow between groups')
+print(datetime.now().strftime('[%Y-%m-%d %H:%M:%S]') + ' Plotting gene flow between groups')
 
 # get path to circos_HGT.R
 circos_HGT_R = '%s/circos_HGT.R' % phylogenetic_script_path
@@ -1011,5 +1018,5 @@ os.remove('tmp1_sorted.txt')
 os.remove('tmp1_sorted_count.txt')
 os.remove(matrix_filename)
 
-print(datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' Gene flow plot exported to %s' % circos_plot_name.split('/')[-1])
+print(datetime.now().strftime('[%Y-%m-%d %H:%M:%S]') + ' Gene flow plot exported to %s' % circos_plot_name.split('/')[-1])
 
