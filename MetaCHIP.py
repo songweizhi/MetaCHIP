@@ -144,7 +144,6 @@ if __name__ == '__main__':
     PG_parser.add_argument('-p',            required=True,  help='output prefix')
     PG_parser.add_argument('-r',            required=True,  help='grouping rank')
     PG_parser.add_argument('-g',            required=False, help='grouping file')
-    PG_parser.add_argument('-tree',         required=False, default=None, help='species (SCG) tree')
     PG_parser.add_argument('-cov',          required=False, type=int, default=75, help='coverage cutoff, deafult: 75')
     PG_parser.add_argument('-al',           required=False, type=int, default=200, help='alignment length cutoff, deafult: 200')
     PG_parser.add_argument('-flk',          required=False, type=int, default=10, help='the length of flanking sequences to plot (Kbp), deafult: 10')
@@ -170,7 +169,6 @@ if __name__ == '__main__':
     pwd_cfg_file = '%s/config.txt' % MetaCHIP_script_path
     config_dict = get_program_path_dict(pwd_cfg_file)
     config_dict['path_to_hmm'] = '%s/phylo.hmm' % MetaCHIP_script_path
-    config_dict['path_to_hmm_id_file'] = '%s/phylo.hmm.id.txt' % MetaCHIP_script_path
     config_dict['circos_HGT_R'] = '%s/circos_HGT.R' % MetaCHIP_script_path
 
 

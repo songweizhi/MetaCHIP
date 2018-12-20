@@ -2,6 +2,7 @@ prodigal=prodigal
 hmmsearch=hmmsearch
 hmmfetch=hmmfetch
 hmmalign=hmmalign
+hmmstat=hmmstat
 mafft=mafft
 #fasttree=FastTree
 fasttree=/Users/songweizhi/Softwares/FastTree/FastTree

@@ -18,7 +18,6 @@
 
 import os
 import re
-import sys
 import glob
 import shutil
 import warnings
@@ -525,29 +524,6 @@ def get_ctg_match_cate_and_identity_distribution_plot(pwd_candidates_file_ET, pw
     plt.clf()
 
 
-def subset_species_tree_worker(argument_list):
-        each_candidates = argument_list[0]
-        pwd_SCG_tree_all = argument_list[1]
-        clusters_dict = argument_list[2]
-        pwd_tree_folder = argument_list[3]
-
-        # get ortholog_list for each match pairs
-        ortholog_list = []
-        for each in clusters_dict:
-            if (each_candidates[0] in clusters_dict[each]) or (each_candidates[1] in clusters_dict[each]):
-                ortholog_list += clusters_dict[each]
-
-        if ortholog_list != []:
-            genome_subset = set()
-            for each_g in ortholog_list:
-                each_g_genome = '_'.join(each_g.split('_')[:-1])
-                genome_subset.add(each_g_genome)
-
-            # get species tree subset
-            pwd_species_tree_newick = '%s/%s_species_tree.newick' % (pwd_tree_folder, '___'.join(each_candidates))
-            subset_tree(pwd_SCG_tree_all, genome_subset, pwd_species_tree_newick)
-
-
 def extract_gene_tree_seq_worker(argument_list):
 
     each_to_process =               argument_list[0]
@@ -781,7 +757,6 @@ def PG(args, config_dict):
     output_prefix =             args['p']
     grouping_level =            args['r']
     grouping_file =             args['g']
-    SCG_tree =                  args['tree']
     cover_cutoff =              args['cov']
     align_len_cutoff =          args['al']
     flanking_length_kbp =       args['flk']
@@ -837,7 +812,6 @@ def PG(args, config_dict):
     MetaCHIP_op_folder = '%s_%s%s_HGTs_ip%s_al%sbp_c%s_ei%sbp_f%skbp' % (output_prefix, grouping_level, group_num, str(identity_percentile), str(align_len_cutoff), str(cover_cutoff), str(end_match_identity_cutoff), flanking_length_kbp)
 
     genome_size_file_name =                             '%s_all_genome_size.txt'                      % (output_prefix)
-    gbk_folder =                                        '%s_%s%s_gbk_files'                           % (output_prefix, grouping_level, group_num)
     tree_folder =                                       '%s_%s%s_PG_tree_folder'                      % (output_prefix, grouping_level, group_num)
     ranger_inputs_folder_name =                         '%s_%s%s_PG_Ranger_input'                     % (output_prefix, grouping_level, group_num)
     ranger_outputs_folder_name =                        '%s_%s%s_PG_Ranger_output'                    % (output_prefix, grouping_level, group_num)
@@ -852,12 +826,9 @@ def PG(args, config_dict):
     candidates_file_name_ET_validated_fasta_aa =        '%s_%s%s_HGTs_PG_aa.fasta'                    % (output_prefix, grouping_level, group_num)
     flanking_region_plot_folder_name =                  '%s_%s%s_Flanking_region_plots'               % (output_prefix, grouping_level, group_num)
     newick_tree_file =                                  '%s_%s%s_species_tree.newick'                 % (output_prefix, grouping_level, group_num)
-    combined_ffn_file =                                 '%s_all_combined_ffn.fasta'                   % (output_prefix)
     combined_faa_file =                                 '%s_%s%s_combined_faa.fasta'                  % (output_prefix, grouping_level, group_num)
     grouping_id_to_taxon_file_name =                    '%s_%s%s_group_to_taxon.txt'                  % (output_prefix, grouping_level, group_num)
-    usearch_cluster_to_gene_file =                      '%s_%s%s_gene_clusters.txt'                   % (output_prefix, grouping_level, group_num)
     grouping_file_with_id_filename =                    '%s_%s%s_grouping_with_id.txt'                % (output_prefix, grouping_level, group_num)
-    combined_ffn_file_subset =                          '%s_%s%s_combined_subset.ffn'                 % (output_prefix, grouping_level, group_num)
     combined_faa_file_subset =                          '%s_%s%s_combined_subset.faa'                 % (output_prefix, grouping_level, group_num)
     plot_identity_distribution_BM =                     '%s_%s%s_plot_HGT_identity_BM.png'            % (output_prefix, grouping_level, group_num)
     plot_identity_distribution_PG =                     '%s_%s%s_plot_HGT_identity_PG.png'            % (output_prefix, grouping_level, group_num)
@@ -897,11 +868,8 @@ def PG(args, config_dict):
     pwd_ranger_outputs_folder =                         '%s/%s'                           % (pwd_MetaCHIP_op_folder, ranger_outputs_folder_name)
     pwd_tree_folder =                                   '%s/%s'                           % (pwd_MetaCHIP_op_folder, tree_folder)
     pwd_combined_faa_file =                             '%s/%s'                           % (MetaCHIP_wd, combined_faa_file)
-    pwd_combined_ffn_file =                             '%s/%s'                           % (MetaCHIP_wd, combined_ffn_file)
     pwd_combined_faa_file_subset =                      '%s/%s'                           % (pwd_MetaCHIP_op_folder, combined_faa_file_subset)
-    pwd_combined_ffn_file_subset =                      '%s/%s'                           % (pwd_MetaCHIP_op_folder, combined_ffn_file_subset)
     pwd_genome_size_file =                              '%s/%s'                           % (MetaCHIP_wd, genome_size_file_name)
-    pwd_usearch_cluster_to_gene_file =                  '%s/%s'                           % (MetaCHIP_wd, usearch_cluster_to_gene_file)
     pwd_newick_tree_file =                              '%s/%s'                           % (MetaCHIP_wd, newick_tree_file)
     pwd_grouping_id_to_taxon_file =                     '%s/%s'                           % (MetaCHIP_wd, grouping_id_to_taxon_file_name)
     pwd_grouping_file_with_id =                         '%s/%s/%s'                        % (MetaCHIP_wd, MetaCHIP_op_folder, grouping_file_with_id_filename)
@@ -930,13 +898,6 @@ def PG(args, config_dict):
     # for report and log
     report_and_log(('Get gene/genome member in gene/species tree for each BM predicted HGT'), pwd_log_file, keep_quiet)
 
-    # get all ortholog groups
-    clusters_dict = {}
-    for cluster in open(pwd_usearch_cluster_to_gene_file):
-        cluster_split = cluster.strip().split('\t')
-        cluster_id = cluster_split[0]
-        current_gene_member = cluster_split[1].split(',')
-        clusters_dict[cluster_id] = current_gene_member
 
     # get bin_record_list and genome name list
     bin_record_list = []

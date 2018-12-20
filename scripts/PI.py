@@ -21,7 +21,6 @@ from __future__ import division
 
 import os
 import re
-import sys
 import glob
 import shutil
 import warnings
@@ -393,15 +392,27 @@ def prodigal_parser(seq_file, sco_file, prefix, output_folder):
     bin_faa_file_handle.close()
 
 
-def sep_combined_hmm(combined_hmm_file, hmm_id_file, hmm_profile_sep_folder, hmmfetch_exe):
+def sep_combined_hmm(combined_hmm_file, hmm_profile_sep_folder, hmmfetch_exe, pwd_hmmstat_exe):
 
-    for each_hmm_id in open(hmm_id_file):
+    # extract hmm profile id from phylo.hmm
+    pwd_phylo_hmm_stat_txt = '%s/phylo.hmm.stat.txt' % hmm_profile_sep_folder
+    hmmstat_cmd = '%s %s > %s' % (pwd_hmmstat_exe, combined_hmm_file, pwd_phylo_hmm_stat_txt)
+    os.system(hmmstat_cmd)
 
-        hmmfetch_cmd = '%s %s %s > %s/%s.hmm' % (hmmfetch_exe,
-                                                 combined_hmm_file,
-                                                 each_hmm_id.strip(),
-                                                 hmm_profile_sep_folder,
-                                                 each_hmm_id.strip())
+    # get hmm profile id file
+    hmm_id_list = []
+    for each_profile in open(pwd_phylo_hmm_stat_txt):
+        if not each_profile.startswith('#'):
+            each_profile_split = each_profile.strip().split(' ')
+            if each_profile_split != ['']:
+                each_profile_split_no_space = []
+                for each_element in each_profile_split:
+                    if each_element != '':
+                        each_profile_split_no_space.append(each_element)
+                hmm_id_list.append(each_profile_split_no_space[2])
+
+    for each_hmm_id in hmm_id_list:
+        hmmfetch_cmd = '%s %s %s > %s/%s.hmm' % (hmmfetch_exe, combined_hmm_file, each_hmm_id, hmm_profile_sep_folder, each_hmm_id)
         os.system(hmmfetch_cmd)
 
 
@@ -549,10 +560,10 @@ def hmmalign_worker(argument_list):
     pwd_hmm_profile_folder = argument_list[2]
     pwd_hmmalign_exe = argument_list[3]
 
-    pwd_hmm_file =      '%s/%s.hmm'               % (pwd_hmm_profile_folder, fastaFile_basename)
-    pwd_seq_in =        '%s/%s.fasta'             % (pwd_SCG_tree_wd, fastaFile_basename)
-    pwd_aln_out_tmp =   '%s/%s_aligned_tmp.fasta' % (pwd_SCG_tree_wd, fastaFile_basename)
-    pwd_aln_out =       '%s/%s_aligned.fasta'     % (pwd_SCG_tree_wd, fastaFile_basename)
+    pwd_hmm_file =    '%s/%s.hmm'               % (pwd_hmm_profile_folder, fastaFile_basename)
+    pwd_seq_in =      '%s/%s.fasta'             % (pwd_SCG_tree_wd, fastaFile_basename)
+    pwd_aln_out_tmp = '%s/%s_aligned_tmp.fasta' % (pwd_SCG_tree_wd, fastaFile_basename)
+    pwd_aln_out =     '%s/%s_aligned.fasta'     % (pwd_SCG_tree_wd, fastaFile_basename)
 
     hmmalign_cmd = '%s --trim --outformat PSIBLAST %s %s > %s ; rm %s' % (pwd_hmmalign_exe, pwd_hmm_file, pwd_seq_in, pwd_aln_out_tmp, pwd_seq_in)
     os.system(hmmalign_cmd)
@@ -620,14 +631,13 @@ def PI(args, config_dict):
 
     # read in config file
     path_to_hmm =           config_dict['path_to_hmm']
-    path_to_hmm_id_file =   config_dict['path_to_hmm_id_file']
     pwd_makeblastdb_exe =   config_dict['makeblastdb']
     pwd_blastn_exe =        config_dict['blastn']
     pwd_prodigal_exe =      config_dict['prodigal']
     pwd_hmmsearch_exe =     config_dict['hmmsearch']
     pwd_hmmfetch_exe =      config_dict['hmmfetch']
     pwd_hmmalign_exe =      config_dict['hmmalign']
-    pwd_mafft_exe =         config_dict['mafft']
+    pwd_hmmstat_exe =       config_dict['hmmstat']
     pwd_usearch_exe =       config_dict['usearch']
     pwd_fasttree_exe =      config_dict['fasttree']
 
@@ -1014,7 +1024,7 @@ def PI(args, config_dict):
 
     # fetch combined hmm profiles
     force_create_folder(pwd_hmm_profile_sep_folder)
-    sep_combined_hmm(path_to_hmm, path_to_hmm_id_file, pwd_hmm_profile_sep_folder, pwd_hmmfetch_exe)
+    sep_combined_hmm(path_to_hmm, pwd_hmm_profile_sep_folder, pwd_hmmfetch_exe, pwd_hmmstat_exe)
 
     # Call hmmalign to align all single fasta files with hmms
     files = os.listdir(pwd_SCG_tree_wd)
@@ -1068,13 +1078,9 @@ def PI(args, config_dict):
         file_out.write('>' + element + '\n' + concatAlignment[element] + '\n')
     file_out.close()
 
-
     # remove columns with low coverage and low consensus
     report_and_log(('Removing columns from concatenated alignment represented by <%s%s of genomes and with an amino acid consensus <%s%s' % (minimal_cov_in_msa, '%', min_consensus_in_msa, '%')), pwd_log_file, keep_quiet)
-
     remove_low_cov_and_consensus_columns(pwd_combined_alignment_file_tmp, minimal_cov_in_msa, min_consensus_in_msa, pwd_combined_alignment_file)
-
-    #os.system('rm %s' % pwd_combined_alignment_file_tmp)
 
 
     ########################################### get species tree (fasttree) ############################################
@@ -1092,28 +1098,28 @@ def PI(args, config_dict):
 
     ################################################### run Usearch ####################################################
 
-    report_and_log('Running Usearch to get gene clusters', pwd_log_file, keep_quiet)
-
-    # combine ffn and faa files (not all of them)
+    # combine faa files
     os.system('cat %s/*.faa > %s' % (pwd_faa_folder, pwd_combined_faa_file))
 
-    # sorted combined.faa
-    usearch_cmd_sortbylength = '%s -sortbylength %s -fastaout %s -minseqlength 10 -quiet' % (pwd_usearch_exe, pwd_combined_faa_file, pwd_combined_faa_file_sorted)
-    os.system(usearch_cmd_sortbylength)
-
-    # run cluster_fast
-    usearch_cluster_parameters = '-id 0.3 -sort length -query_cov 0.7 -target_cov 0.7 -minqt 0.7 -maxqt 1.43 -quiet'
-    usearch_cmd_cluster_fast = '%s -cluster_fast %s -uc %s %s' % (pwd_usearch_exe, pwd_combined_faa_file_sorted, pwd_usearch_output_txt, usearch_cluster_parameters)
-    os.system(usearch_cmd_cluster_fast)
-
-    # remove tmp file
-    os.system('rm %s' % pwd_combined_faa_file_sorted)
-
-    # get qualified gene clusters
-    min_gene_number_in_cluster = 3
-    get_qualified_gene_cluster(pwd_usearch_output_txt, min_gene_number_in_cluster, output_prefix, pwd_usearch_cluster_to_gene_file)
-
-    report_and_log(('Gene clusters exported to %s' % usearch_cluster_to_gene_file), pwd_log_file, keep_quiet)
+    # report_and_log('Running Usearch to get gene clusters', pwd_log_file, keep_quiet)
+    #
+    # # sorted combined.faa
+    # usearch_cmd_sortbylength = '%s -sortbylength %s -fastaout %s -minseqlength 10 -quiet' % (pwd_usearch_exe, pwd_combined_faa_file, pwd_combined_faa_file_sorted)
+    # os.system(usearch_cmd_sortbylength)
+    #
+    # # run cluster_fast
+    # usearch_cluster_parameters = '-id 0.3 -sort length -query_cov 0.7 -target_cov 0.7 -minqt 0.7 -maxqt 1.43 -quiet'
+    # usearch_cmd_cluster_fast = '%s -cluster_fast %s -uc %s %s' % (pwd_usearch_exe, pwd_combined_faa_file_sorted, pwd_usearch_output_txt, usearch_cluster_parameters)
+    # os.system(usearch_cmd_cluster_fast)
+    #
+    # # remove tmp file
+    # os.system('rm %s' % pwd_combined_faa_file_sorted)
+    #
+    # # get qualified gene clusters
+    # min_gene_number_in_cluster = 3
+    # get_qualified_gene_cluster(pwd_usearch_output_txt, min_gene_number_in_cluster, output_prefix, pwd_usearch_cluster_to_gene_file)
+    #
+    # report_and_log(('Gene clusters exported to %s' % usearch_cluster_to_gene_file), pwd_log_file, keep_quiet)
 
 
     ############################################### run all vs all blastn ##############################################
