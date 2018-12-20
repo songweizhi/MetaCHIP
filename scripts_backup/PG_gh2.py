@@ -21,10 +21,10 @@ import re
 import sys
 import glob
 import shutil
-import warnings
+import argparse
 import numpy as np
 from ete3 import Tree
-from Bio import SeqIO, AlignIO, Align
+from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.Alphabet import IUPAC
 from Bio.SeqRecord import SeqRecord
@@ -55,17 +55,6 @@ def force_create_folder(folder_to_create):
                 if os.path.isdir(folder_to_create):
                     shutil.rmtree(folder_to_create, ignore_errors=True)
     os.mkdir(folder_to_create)
-
-
-def get_group_num_from_grouping_file(grouping_file):
-    group_list = set()
-    for each_line in open(grouping_file):
-        each_line_split = each_line.strip().split(',')
-        group_list.add(each_line_split[0])
-
-    group_num = len(group_list)
-
-    return group_num
 
 
 class BinRecord(object):
@@ -249,151 +238,6 @@ def get_species_tree_newick(tmp_folder, each_subset, pwd_fasttree_exe, tree_fold
     #Phylo.draw_ascii(species_tree)
 
 
-def remove_low_cov_and_consensus_columns(alignment_file_in, minimal_cov, min_consensus, alignment_file_out):
-
-    def list_to_segments(list_in):
-
-        segments_out = []
-        current_element = None
-        current_segment = [None, None]
-        for each_element in list_in:
-
-            # for the first ellment
-            if current_element == None:
-                current_element = each_element
-                current_segment = [each_element, each_element]
-
-            elif each_element == current_element + 1:
-                current_segment[1] = each_element
-                current_element = each_element
-
-            elif each_element != current_element + 1:
-
-                # add segment to list
-                segments_out.append(current_segment)
-
-                # resetting segment
-                current_segment = [each_element, each_element]
-                current_element = each_element
-
-        # add segment to list
-        segments_out.append(current_segment)
-
-        return segments_out
-
-    def remove_columns_from_msa(alignment_in, cols_to_remove):
-
-        # get 0 based index of all wanted columns
-        cols_to_remove_0_base = [(i - 1) for i in cols_to_remove]
-        aln_cols_index_all = list(range(alignment_in.get_alignment_length()))
-        aln_cols_index_wanted = []
-        for i in aln_cols_index_all:
-            if i not in cols_to_remove_0_base:
-                aln_cols_index_wanted.append(i)
-
-        # get wanted alignment segments
-        wanted_segments = list_to_segments(aln_cols_index_wanted)
-
-        # create an empty Alignment object
-        alignment_new = Align.MultipleSeqAlignment([])
-        for sequence in alignment_in:
-            new_seq_object = Seq('')
-            new_seq_record = SeqRecord(new_seq_object)
-            new_seq_record.id = sequence.id
-            new_seq_record.description = sequence.description
-            alignment_new.append(new_seq_record)
-
-        # add wanted columns to empty Alignment object
-        for segment in wanted_segments:
-
-            # for single column segment
-            if segment[0] == segment[1]:
-                segment_value = alignment_in[:, segment[0]]
-
-                m = 0
-                for each_seq in alignment_new:
-                    each_seq.seq = Seq(str(each_seq.seq) + segment_value[m])
-                    m += 1
-
-            # for multiple columns segment
-            else:
-                segment_value = alignment_in[:, (segment[0]):(segment[1] + 1)]
-                alignment_new += segment_value
-
-        return alignment_new
-
-    def remove_low_cov_columns(alignment_in, min_cov_cutoff):
-
-        # get columns with low coverage
-        sequence_number = len(alignment_in)
-        total_col_num = alignment_in.get_alignment_length()
-        low_cov_columns = []
-        n = 0
-        while n < total_col_num:
-            current_column = alignment_in[:, n]
-            dash_number = current_column.count('-')
-            gap_percent = (dash_number / sequence_number) * 100
-
-            if gap_percent > min_cov_cutoff:
-                low_cov_columns.append(n + 1)
-
-            n += 1
-
-        # remove identified columns
-        alignment_new = remove_columns_from_msa(alignment_in, low_cov_columns)
-
-        return alignment_new
-
-    def remove_low_consensus_columns(alignment_in, min_css_cutoff):
-
-        # get columns with low coverage
-        sequence_number = len(alignment_in)
-        total_col_num = alignment_in.get_alignment_length()
-        low_css_columns = []
-        n = 0
-        while n < total_col_num:
-            current_column = alignment_in[:, n]
-
-            # get all aa in current column
-            aa_list = set()
-            for aa in current_column:
-                aa_list.add(aa)
-
-            # get maximum aa percent
-            most_abundant_aa_percent = 0
-            for each_aa in aa_list:
-                each_aa_percent = (current_column.count(each_aa) / sequence_number) * 100
-                if each_aa_percent > most_abundant_aa_percent:
-                    most_abundant_aa_percent = each_aa_percent
-
-            # if maximum percent lower than provided cutoff, add current column to low consensus column list
-            if most_abundant_aa_percent < min_css_cutoff:
-                low_css_columns.append(n + 1)
-
-            n += 1
-
-        # remove identified columns
-        alignment_new = remove_columns_from_msa(alignment_in, low_css_columns)
-
-        return alignment_new
-
-    # read in alignment
-    alignment = AlignIO.read(alignment_file_in, "fasta")
-
-    # remove_low_cov_columns
-    alignment_cov = remove_low_cov_columns(alignment, minimal_cov)
-
-    # remove_low_consensus_columns
-    alignment_cov_css = remove_low_consensus_columns(alignment_cov, min_consensus)
-
-    # write filtered alignment
-    alignment_file_out_handle = open(alignment_file_out, 'w')
-    for each_seq in alignment_cov_css:
-        alignment_file_out_handle.write('>%s\n' % str(each_seq.id))
-        alignment_file_out_handle.write('%s\n' % str(each_seq.seq))
-    alignment_file_out_handle.close()
-
-
 def plot_identity_distribution(identity_list, plot_file):
     num_bins = 50
     plt.hist(identity_list,
@@ -547,168 +391,135 @@ def subset_species_tree_worker(argument_list):
             pwd_species_tree_newick = '%s/%s_species_tree.newick' % (pwd_tree_folder, '___'.join(each_candidates))
             subset_tree(pwd_SCG_tree_all, genome_subset, pwd_species_tree_newick)
 
-
+# modified !!!
 def extract_gene_tree_seq_worker(argument_list):
 
-    each_to_process =               argument_list[0]
-    pwd_tree_folder =               argument_list[1]
-    pwd_combined_faa_file_subset =  argument_list[2]
-    pwd_blastp_exe =                argument_list[3]
-    pwd_mafft_exe =                 argument_list[4]
-    pwd_fasttree_exe =              argument_list[5]
-    genome_to_group_dict =          argument_list[6]
-    genome_name_list =              argument_list[7]
-    HGT_query_to_subjects_dict =    argument_list[8]
-    pwd_SCG_tree_all =              argument_list[9]
+        each_to_process = argument_list[0]
+        candidates_gene_id_dict = argument_list[1]
+        pwd_tree_folder = argument_list[2]
+        pwd_combined_faa_file_subset = argument_list[3]
+        pwd_blastp_exe = argument_list[4]
+        pwd_mafft_exe = argument_list[5]
+        pwd_fasttree_exe = argument_list[6]
+        genome_to_group_dict = argument_list[7]
+        genome_name_list = argument_list[8]
 
-    gene_1 = each_to_process[0]
-    gene_2 = each_to_process[1]
-    HGT_genome_1 = '_'.join(gene_1.split('_')[:-1])
-    HGT_genome_2 = '_'.join(gene_2.split('_')[:-1])
-    paired_groups = [genome_to_group_dict[HGT_genome_1], genome_to_group_dict[HGT_genome_2]]
+        gene_1 = each_to_process[0]
+        gene_2 = each_to_process[1]
+        HGT_genome_1 = '_'.join(gene_1.split('_')[:-1])
+        HGT_genome_2 = '_'.join(gene_2.split('_')[:-1])
+        paired_groups = [genome_to_group_dict[HGT_genome_1], genome_to_group_dict[HGT_genome_2]]
 
+        blast_output =          '%s/%s___%s_gene_tree_blast.tab'           % (pwd_tree_folder, gene_1, gene_2)
+        blast_output_sorted =   '%s/%s___%s_gene_tree_blast_sorted.tab'    % (pwd_tree_folder, gene_1, gene_2)
+        gene_tree_seq =         '%s/%s___%s_gene_tree.seq'                 % (pwd_tree_folder, gene_1, gene_2)
+        gene_tree_seq_uniq =    '%s/%s___%s_gene_tree_uniq.seq'            % (pwd_tree_folder, gene_1, gene_2)
+        self_seq =              '%s/%s___%s_gene_tree_selfseq.seq'         % (pwd_tree_folder, gene_1, gene_2)
+        non_self_seq =          '%s/%s___%s_gene_tree_nonselfseq.seq'      % (pwd_tree_folder, gene_1, gene_2)
+        pwd_seq_file_1st_aln =  '%s/%s___%s_gene_tree.aln'                 % (pwd_tree_folder, gene_1, gene_2)
+        pwd_gene_tree_newick =  '%s/%s___%s_gene_tree.newick'              % (pwd_tree_folder, gene_1, gene_2)
 
-    each_to_process_concate = '___'.join(each_to_process)
-    blast_output =              '%s/%s___%s_gene_tree_blast.tab'        % (pwd_tree_folder, gene_1, gene_2)
-    blast_output_sorted =       '%s/%s___%s_gene_tree_blast_sorted.tab' % (pwd_tree_folder, gene_1, gene_2)
-    gene_tree_seq =             '%s/%s___%s_gene_tree.seq'              % (pwd_tree_folder, gene_1, gene_2)
-    gene_tree_seq_uniq =        '%s/%s___%s_gene_tree_uniq.seq'         % (pwd_tree_folder, gene_1, gene_2)
-    self_seq =                  '%s/%s___%s_gene_tree_selfseq.seq'      % (pwd_tree_folder, gene_1, gene_2)
-    non_self_seq =              '%s/%s___%s_gene_tree_nonselfseq.seq'   % (pwd_tree_folder, gene_1, gene_2)
-    pwd_seq_file_1st_aln =      '%s/%s___%s_gene_tree.1.aln'            % (pwd_tree_folder, gene_1, gene_2)
-    pwd_seq_file_2nd_aln =      '%s/%s___%s_gene_tree.2.aln'            % (pwd_tree_folder, gene_1, gene_2)
-    pwd_gene_tree_newick =      '%s/%s___%s_gene_tree.newick'           % (pwd_tree_folder, gene_1, gene_2)
-    pwd_species_tree_newick =   '%s/%s_species_tree.newick'             % (pwd_tree_folder, each_to_process_concate)
+        each_to_process_concate = '___'.join(each_to_process)
+        current_gene_member = candidates_gene_id_dict[each_to_process_concate]
 
-    ################################################## Get gene tree ###################################################
+        current_gene_member_only_counted_genomes = []
+        for gene_member in current_gene_member:
+            gene_member_genome = '_'.join(gene_member.split('_')[:-1])
+            if gene_member_genome in genome_name_list:
+                current_gene_member_only_counted_genomes.append(gene_member)
 
-    current_gene_member_BM = set()
-    current_gene_member_BM.add(gene_1)
-    current_gene_member_BM.add(gene_2)
-    for gene_1_subject in HGT_query_to_subjects_dict[gene_1]:
-        current_gene_member_BM.add(gene_1_subject)
-    for gene_2_subject in HGT_query_to_subjects_dict[gene_2]:
-        current_gene_member_BM.add(gene_2_subject)
+        current_gene_member_only_counted_and_paired_group = []
+        for gene_member in current_gene_member_only_counted_genomes:
+            current_gene_genome = '_'.join(gene_member.split('_')[:-1])
+            current_genome_group = genome_to_group_dict[current_gene_genome]
+            if current_genome_group in paired_groups:
+                current_gene_member_only_counted_and_paired_group.append(gene_member)
 
+        # genes to extract
+        genes_to_extract_list = []
+        if len(current_gene_member_only_counted_and_paired_group) < 3:
+            genes_to_extract_list = current_gene_member_only_counted_genomes
+        else:
+            genes_to_extract_list = current_gene_member_only_counted_and_paired_group
 
-    current_gene_member_grouped = []
-    for gene_member in current_gene_member_BM:
-        gene_member_genome = '_'.join(gene_member.split('_')[:-1])
-        if gene_member_genome in genome_name_list:
-            current_gene_member_grouped.append(gene_member)
-
-    current_gene_member_grouped_from_paired_group = []
-    for gene_member in current_gene_member_grouped:
-        current_gene_genome = '_'.join(gene_member.split('_')[:-1])
-        current_genome_group = genome_to_group_dict[current_gene_genome]
-        if current_genome_group in paired_groups:
-            current_gene_member_grouped_from_paired_group.append(gene_member)
-
-    # genes to extract
-    if len(current_gene_member_grouped_from_paired_group) < 3:
-        genes_to_extract_list = current_gene_member_grouped
-    else:
-        genes_to_extract_list = current_gene_member_grouped_from_paired_group
-
-    # get sequences of othorlog group to build gene tree
-    output_handle = open(gene_tree_seq, "w")
-    for seq_record in SeqIO.parse(pwd_combined_faa_file_subset, 'fasta'):
-        # if seq_record.id in current_gene_member:
-        if seq_record.id in genes_to_extract_list:
-            output_handle.write('>%s\n' % seq_record.id)
-            output_handle.write('%s\n' % str(seq_record.seq))
-    output_handle.close()
+        # get sequences of othorlog group to build gene tree
+        output_handle = open(gene_tree_seq, "w")
+        for seq_record in SeqIO.parse(pwd_combined_faa_file_subset, 'fasta'):
+            #if seq_record.id in current_gene_member:
+            if seq_record.id in genes_to_extract_list:
+                output_handle.write('>%s\n' % seq_record.id)
+                output_handle.write('%s\n' % str(seq_record.seq))
+        output_handle.close()
 
 
-    self_seq_handle = open(self_seq, 'w')
-    non_self_seq_handle = open(non_self_seq, 'w')
-    non_self_seq_num = 0
-    for each_seq in SeqIO.parse(gene_tree_seq, 'fasta'):
-        each_seq_genome_id = '_'.join(each_seq.id.split('_')[:-1])
-        if each_seq.id in each_to_process:
-            SeqIO.write(each_seq, self_seq_handle, 'fasta')
-        elif each_seq_genome_id not in [HGT_genome_1, HGT_genome_2]:
-            SeqIO.write(each_seq, non_self_seq_handle, 'fasta')
-            non_self_seq_num += 1
-    self_seq_handle.close()
-    non_self_seq_handle.close()
+        if len(genes_to_extract_list) > 2:
+            self_seq_handle = open(self_seq, 'w')
+            non_self_seq_handle = open(non_self_seq, 'w')
+            for each_seq in SeqIO.parse(gene_tree_seq, 'fasta'):
+                each_seq_genome_id = '_'.join(each_seq.id.split('_')[:-1])
+                if each_seq.id in each_to_process:
+                    SeqIO.write(each_seq, self_seq_handle, 'fasta')
+                elif (each_seq_genome_id != HGT_genome_1) and (each_seq_genome_id != HGT_genome_2):
+                    SeqIO.write(each_seq, non_self_seq_handle, 'fasta')
+            self_seq_handle.close()
+            non_self_seq_handle.close()
 
+            # run blast
+            os.system('%s -query %s -subject %s -outfmt 6 -out %s' % (pwd_blastp_exe, self_seq, non_self_seq, blast_output))
+            os.system('cat %s | sort > %s' % (blast_output, blast_output_sorted))
 
-    # run blast
-    genome_subset = set()
-    if non_self_seq_num > 0:
-        os.system('%s -query %s -subject %s -outfmt 6 -out %s' % (pwd_blastp_exe, self_seq, non_self_seq, blast_output))
-        os.system('cat %s | sort > %s' % (blast_output, blast_output_sorted))
-
-        # get best match from each genome
-        current_query_subject_genome = ''
-        current_bit_score = 0
-        current_best_match = ''
-        best_match_list = []
-        for each_hit in open(blast_output_sorted):
-            each_hit_split = each_hit.strip().split('\t')
-            query = each_hit_split[0]
-            subject = each_hit_split[1]
-            subject_genome = '_'.join(subject.split('_')[:-1])
-            query_subject_genome = '%s___%s' % (query, subject_genome)
-            bit_score = float(each_hit_split[11])
-            if current_query_subject_genome == '':
-                current_query_subject_genome = query_subject_genome
-                current_bit_score = bit_score
-                current_best_match = subject
-            elif current_query_subject_genome == query_subject_genome:
-                if bit_score > current_bit_score:
+            # get best match from each genome
+            current_query_subject_genome = ''
+            current_bit_score = 0
+            current_best_match = ''
+            best_match_list = []
+            for each_hit in open(blast_output_sorted):
+                each_hit_split = each_hit.strip().split('\t')
+                query = each_hit_split[0]
+                subject = each_hit_split[1]
+                subject_genome = '_'.join(subject.split('_')[:-1])
+                query_subject_genome = '%s___%s' % (query, subject_genome)
+                bit_score = float(each_hit_split[11])
+                if current_query_subject_genome == '':
+                    current_query_subject_genome = query_subject_genome
                     current_bit_score = bit_score
                     current_best_match = subject
-            elif current_query_subject_genome != query_subject_genome:
-                best_match_list.append(current_best_match)
-                current_query_subject_genome = query_subject_genome
-                current_bit_score = bit_score
-                current_best_match = subject
-        best_match_list.append(current_best_match)
+                elif current_query_subject_genome == query_subject_genome:
+                    if bit_score > current_bit_score:
+                        current_bit_score = bit_score
+                        current_best_match = subject
+                elif current_query_subject_genome != query_subject_genome:
+                    best_match_list.append(current_best_match)
+                    current_query_subject_genome = query_subject_genome
+                    current_bit_score = bit_score
+                    current_best_match = subject
+            best_match_list.append(current_best_match)
 
-        # export sequences
-        gene_tree_seq_all = best_match_list + each_to_process
-        gene_tree_seq_uniq_handle = open(gene_tree_seq_uniq, 'w')
-        for each_seq2 in SeqIO.parse(gene_tree_seq, 'fasta'):
-            if each_seq2.id in gene_tree_seq_all:
-                gene_tree_seq_uniq_handle.write('>%s\n' % each_seq2.id)
-                gene_tree_seq_uniq_handle.write('%s\n' % str(each_seq2.seq))
-        gene_tree_seq_uniq_handle.close()
+            # export sequences
+            gene_tree_seq_all = best_match_list + each_to_process
+            gene_tree_seq_uniq_handle = open(gene_tree_seq_uniq, 'w')
+            for each_seq2 in SeqIO.parse(gene_tree_seq, 'fasta'):
+                if each_seq2.id in gene_tree_seq_all:
+                    gene_tree_seq_uniq_handle.write('>%s\n' % each_seq2.id)
+                    gene_tree_seq_uniq_handle.write('%s\n' % str(each_seq2.seq))
+            gene_tree_seq_uniq_handle.close()
 
-        cmd_mafft = '%s --quiet %s > %s' % (pwd_mafft_exe, gene_tree_seq_uniq, pwd_seq_file_1st_aln)
-        for each_gene in SeqIO.parse(gene_tree_seq_uniq, 'fasta'):
-            each_gene_genome = '_'.join(str(each_gene.id).split('_')[:-1])
-            genome_subset.add(each_gene_genome)
-    else:
-        cmd_mafft = '%s --quiet %s > %s' % (pwd_mafft_exe, gene_tree_seq, pwd_seq_file_1st_aln)
-        for each_gene in SeqIO.parse(gene_tree_seq, 'fasta'):
-            each_gene_genome = '_'.join(str(each_gene.id).split('_')[:-1])
-            genome_subset.add(each_gene_genome)
+            cmd_mafft = '%s --quiet --maxiterate 1000 --globalpair %s > %s' % (pwd_mafft_exe, gene_tree_seq_uniq, pwd_seq_file_1st_aln)
+        else:
+            cmd_mafft = '%s --quiet --maxiterate 1000 --globalpair %s > %s' % (pwd_mafft_exe, gene_tree_seq, pwd_seq_file_1st_aln)
 
-    # run mafft
-    os.system(cmd_mafft)
+        cmd_fasttree = '%s -quiet %s > %s' % (pwd_fasttree_exe, pwd_seq_file_1st_aln, pwd_gene_tree_newick)
+        os.system(cmd_mafft)
+        os.system(cmd_fasttree)
 
-    # remove columns in alignment
-    remove_low_cov_and_consensus_columns(pwd_seq_file_1st_aln, 50, 50, pwd_seq_file_2nd_aln)
-
-    # run fasttree
-    cmd_fasttree = '%s -quiet -wag %s > %s' % (pwd_fasttree_exe, pwd_seq_file_2nd_aln, pwd_gene_tree_newick)
-    os.system(cmd_fasttree)
-
-    # Get species tree
-    subset_tree(pwd_SCG_tree_all, genome_subset, pwd_species_tree_newick)
-
-    # remove temp files
-    os.remove(self_seq)
-    os.remove(gene_tree_seq)
-    os.remove(pwd_seq_file_1st_aln)
-    os.remove(pwd_seq_file_2nd_aln)
-    if non_self_seq_num > 0:
+        # remove temp files
+        os.remove(self_seq)
         os.remove(non_self_seq)
         os.remove(blast_output)
         os.remove(blast_output_sorted)
+        os.remove(gene_tree_seq)
         os.remove(gene_tree_seq_uniq)
+        os.remove(pwd_seq_file_1st_aln)
 
 
 def Ranger_worker(argument_list):
@@ -776,95 +587,87 @@ def Ranger_worker(argument_list):
         os.system(ranger_cmd)
 
 
-def PG(args, config_dict):
+############################################## main ##############################################
 
-    output_prefix =             args['p']
-    grouping_level =            args['r']
-    grouping_file =             args['g']
-    SCG_tree =                  args['tree']
-    cover_cutoff =              args['cov']
-    align_len_cutoff =          args['al']
-    flanking_length_kbp =       args['flk']
-    identity_percentile =       args['ip']
+def PG(args):
+
+    output_prefix = args['p']
+    grouping_file = args['g']
+    ortholog_group_folder_name = args['o']
+    SCG_tree_all = args['tree']
+    cover_cutoff = args['cov']
+    align_len_cutoff = args['al']
+    flanking_length_kbp = args['flk']
+    identity_percentile = args['ip']
     end_match_identity_cutoff = args['ei']
-    num_threads =               args['t']
-    keep_quiet =                args['quiet']
+    num_threads = args['t']
+    keep_quiet = args['quiet']
+
+    time_format = '[%Y-%m-%d %H:%M:%S] '
+
+    # get path to current script
+    pwd_phylogenetic_script = sys.argv[0]
+    phylogenetic_script_path, file_name = os.path.split(pwd_phylogenetic_script)
+    circos_HGT_R =  '%s/circos_HGT.R'   % phylogenetic_script_path
 
     # read in config file
-    pwd_ranger_exe =    config_dict['ranger']
-    pwd_mafft_exe =     config_dict['mafft']
-    pwd_fasttree_exe =  config_dict['fasttree']
-    pwd_blastp_exe =    config_dict['blastp']
-    circos_HGT_R =      config_dict['circos_HGT_R']
+    pwd_cfg_file = '%s/config.txt' % phylogenetic_script_path
+    program_path_dict = get_program_path_dict(pwd_cfg_file)
 
-    warnings.filterwarnings("ignore")
-
-
-    #################################### find matched grouping file if not provided  ###################################
-
-    MetaCHIP_wd =   '%s_MetaCHIP_wd'              % output_prefix
-    pwd_log_file =  '%s/%s_%s_PG_%s.log'  % (MetaCHIP_wd, output_prefix, grouping_level, datetime.now().strftime('%Y-%m-%d_%Hh-%Mm-%Ss_%f'))
-
-
-    pwd_grouping_file = ''
-    group_num = 0
-    if grouping_file is None:
-
-        grouping_file_re = '%s/%s_%s*_grouping.txt' % (MetaCHIP_wd, output_prefix, grouping_level)
-        grouping_file_list = [os.path.basename(file_name) for file_name in glob.glob(grouping_file_re)]
-
-        if len(grouping_file_list) == 1:
-            detected_grouping_file = grouping_file_list[0]
-            pwd_grouping_file = '%s/%s' % (MetaCHIP_wd, detected_grouping_file)
-            group_num = get_group_num_from_grouping_file(pwd_grouping_file)
-            report_and_log(('Found grouping file %s, input genomes were clustered into %s groups' % (detected_grouping_file, group_num)), pwd_log_file, keep_quiet)
-
-        elif len(grouping_file_list) == 0:
-            report_and_log(('No grouping file detected, please specify with "-g" option'), pwd_log_file, keep_quiet)
-            exit()
-
-        else:
-            report_and_log(('Multiple grouping file detected, please specify with "-g" option'), pwd_log_file, keep_quiet)
-            exit()
-
-    else:  # with provided grouping file
-        pwd_grouping_file = grouping_file
-        group_num = get_group_num_from_grouping_file(pwd_grouping_file)
+    pwd_ranger_exe = program_path_dict['ranger']
+    pwd_mafft_exe = program_path_dict['mafft']
+    pwd_fasttree_exe = program_path_dict['fasttree']
+    pwd_blastp_exe = program_path_dict['blastp']
 
 
     ############################################### Define folder/file name ################################################
 
-    MetaCHIP_op_folder = '%s_%s%s_HGTs_ip%s_al%sbp_c%s_ei%sbp_f%skbp' % (output_prefix, grouping_level, group_num, str(identity_percentile), str(align_len_cutoff), str(cover_cutoff), str(end_match_identity_cutoff), flanking_length_kbp)
+    MetaCHIP_wd =            '%s_MetaCHIP_wd' % output_prefix
+    log_file_name =          '%s_PG_%s.log'   % (output_prefix, datetime.now().strftime('%Y-%m-%d_%Hh-%Mm-%Ss_%f'))
+    gbk_folder =             '%s_gbk_files'   % output_prefix
+    get_homologues_wd =      '%s_homologues'  % gbk_folder
+    pwd_get_homologues_wd =  '%s/%s'          % (MetaCHIP_wd, get_homologues_wd)
+    pwd_log_file_name =      '%s/%s'          % (MetaCHIP_wd, log_file_name)
 
-    genome_size_file_name =                             '%s_all_genome_size.txt'                      % (output_prefix)
-    gbk_folder =                                        '%s_%s%s_gbk_files'                           % (output_prefix, grouping_level, group_num)
-    tree_folder =                                       '%s_%s%s_PG_tree_folder'                      % (output_prefix, grouping_level, group_num)
-    ranger_inputs_folder_name =                         '%s_%s%s_PG_Ranger_input'                     % (output_prefix, grouping_level, group_num)
-    ranger_outputs_folder_name =                        '%s_%s%s_PG_Ranger_output'                    % (output_prefix, grouping_level, group_num)
-    candidates_file_name =                              '%s_%s%s_HGTs_BM.txt'                         % (output_prefix, grouping_level, group_num)
-    candidates_seq_file_name =                          '%s_%s%s_HGTs_BM_nc.fasta'                    % (output_prefix, grouping_level, group_num)
-    candidates_file_name_ET =                           '%s_%s%s_HGTs_PG.txt'                         % (output_prefix, grouping_level, group_num)
-    candidates_file_name_ET_validated =                 '%s_%s%s_HGTs_PG_validated.txt'               % (output_prefix, grouping_level, group_num)
-    candidates_file_name_ET_validated_STAT_png =        '%s_%s%s_HGTs_PG_validated_stats.png'         % (output_prefix, grouping_level, group_num)
-    candidates_file_name_ET_validated_STAT_group_txt =  '%s_%s%s_HGTs_PG_validated_group_stats.txt'   % (output_prefix, grouping_level, group_num)
-    candidates_file_name_ET_validated_STAT_genome_txt = '%s_%s%s_HGTs_PG_validated_genome_stats.txt'  % (output_prefix, grouping_level, group_num)
-    candidates_file_name_ET_validated_fasta_nc =        '%s_%s%s_HGTs_PG_nc.fasta'                    % (output_prefix, grouping_level, group_num)
-    candidates_file_name_ET_validated_fasta_aa =        '%s_%s%s_HGTs_PG_aa.fasta'                    % (output_prefix, grouping_level, group_num)
-    flanking_region_plot_folder_name =                  '%s_%s%s_Flanking_region_plots'               % (output_prefix, grouping_level, group_num)
-    newick_tree_file =                                  '%s_%s%s_species_tree.newick'                 % (output_prefix, grouping_level, group_num)
-    combined_ffn_file =                                 '%s_all_combined_ffn.fasta'                   % (output_prefix)
-    combined_faa_file =                                 '%s_%s%s_combined_faa.fasta'                  % (output_prefix, grouping_level, group_num)
-    grouping_id_to_taxon_file_name =                    '%s_%s%s_group_to_taxon.txt'                  % (output_prefix, grouping_level, group_num)
-    usearch_cluster_to_gene_file =                      '%s_%s%s_gene_clusters.txt'                   % (output_prefix, grouping_level, group_num)
-    grouping_file_with_id_filename =                    '%s_%s%s_grouping_with_id.txt'                % (output_prefix, grouping_level, group_num)
-    combined_ffn_file_subset =                          '%s_%s%s_combined_subset.ffn'                 % (output_prefix, grouping_level, group_num)
-    combined_faa_file_subset =                          '%s_%s%s_combined_subset.faa'                 % (output_prefix, grouping_level, group_num)
-    plot_identity_distribution_BM =                     '%s_%s%s_plot_HGT_identity_BM.png'            % (output_prefix, grouping_level, group_num)
-    plot_identity_distribution_PG =                     '%s_%s%s_plot_HGT_identity_PG.png'            % (output_prefix, grouping_level, group_num)
-    plot_at_ends_number =                               '%s_%s%s_plot_ctg_match_category.png'         % (output_prefix, grouping_level, group_num)
-    plot_circos =                                       '%s_%s%s_plot_circos_PG.png'                  % (output_prefix, grouping_level, group_num)
-    HGT_query_to_subjects_filename =                    '%s_%s%s_HGT_query_to_subjects.txt'           % (output_prefix, grouping_level, group_num)
+    # get grouping file
+    if grouping_file == None:
+        grouping_file_re = '%s/%s_grouping_g*.txt' % (MetaCHIP_wd, output_prefix)
+        grouping_file_list = [os.path.basename(file_name) for file_name in glob.glob(grouping_file_re)]
 
+        if len(grouping_file_list) == 1:
+            grouping_file = '%s/%s' % (MetaCHIP_wd, grouping_file_list[0])
+
+        if len(grouping_file_list) != 1:
+            print('No or multiple grouping file found, please specify with "-g" option')
+            exit()
+
+    pwd_grouping_file = grouping_file
+    grouping_rank = grouping_file.split('/')[-1].split('_')[-1][0]
+
+    MetaCHIP_op_folder = '%s_HGTs_ip%s_al%sbp_c%s_ei%sbp_f%skbp_%s%s' % (output_prefix, str(identity_percentile), str(align_len_cutoff), str(cover_cutoff), str(end_match_identity_cutoff), flanking_length_kbp, grouping_rank, get_number_of_group(pwd_grouping_file))
+
+    pwd_MetaCHIP_op_folder = '%s/%s' % (MetaCHIP_wd, MetaCHIP_op_folder)
+
+    tree_folder =                                       'tree_folder'
+    tree_plots_folder =                                 'tree_plots'
+    gene_tree_newick_folder =                           'gene_tree_newick'
+    species_tree_folder_plot =                          'species_tree_plot'
+    species_tree_folder_ranger =                        'species_tree'
+    ranger_inputs_folder_name =                         'Ranger_input'
+    ranger_outputs_folder_name =                        'Ranger_output'
+    candidates_file_name =                              'HGT_candidates_BM.txt'
+    candidates_seq_file_name =                          'HGT_candidates_BM_nc.fasta'
+    candidates_file_name_ET =                           'HGT_candidates_PG.txt'
+    candidates_file_name_ET_validated =                 'HGT_candidates_PG_validated.txt'
+    candidates_file_name_ET_validated_STAT_png =        'HGT_candidates_PG_validated_stats.png'
+    candidates_file_name_ET_validated_STAT_group_txt =  'HGT_candidates_PG_validated_group_stats.txt'
+    candidates_file_name_ET_validated_STAT_genome_txt = 'HGT_candidates_PG_validated_genome_stats.txt'
+    candidates_file_name_ET_validated_fasta_nc =        'HGT_candidates_PG_nc.fasta'
+    candidates_file_name_ET_validated_fasta_aa =        'HGT_candidates_PG_aa.fasta'
+    ranger_wd_name =                                    'Ranger-DTL_wd'
+    output_tree_folder_name =                           'PG_wd'
+    tree_image_folder_name =                            'combined_tree_images'
+    flanking_region_plot_folder_name =                  'Flanking_region_plots'
     normal_folder_name =                                '1_Plots_normal'
     normal_folder_name_PG_validated =                   '1_Plots_normal_PG_validated'
     at_ends_folder_name =                               '2_Plots_end_match'
@@ -872,7 +675,16 @@ def PG(args, config_dict):
     full_contig_match_folder_name =                     '3_Plots_full_length_match'
     full_contig_match_folder_name_PG_validated =        '3_Plots_full_length_match_PG_validated'
 
-    pwd_MetaCHIP_op_folder =                            '%s/%s'                           % (MetaCHIP_wd, MetaCHIP_op_folder)
+    combined_ffn_file =                                 '%s_combined.ffn'                 % output_prefix
+    combined_faa_file =                                 '%s_combined.faa'                 % output_prefix
+    combined_faa_file_subset =                          '%s_combined_subset.faa'          % output_prefix
+    plot_identity_distribution_BM =                     '%s_plot_HGT_identity_BM.png'     % output_prefix
+    plot_identity_distribution_PG =                     '%s_plot_HGT_identity_PG.png'     % output_prefix
+    plot_at_ends_number =                               '%s_plot_ctg_match_category.png'  % output_prefix
+    plot_HGT_num_each_genome =                          '%s_plot_HGT_num_each_genome.png' % output_prefix
+    plot_circos =                                       '%s_plot_circos_PG.png'           % output_prefix
+    genome_size_file_name =                             '%s_genome_size.txt'              % (output_prefix)
+    grouping_id_to_taxon_file =                         '%s_group_to_taxon_%s.txt'        % (output_prefix, grouping_rank)
     pwd_candidates_file =                               '%s/%s'                           % (pwd_MetaCHIP_op_folder, candidates_file_name)
     pwd_candidates_seq_file =                           '%s/%s'                           % (pwd_MetaCHIP_op_folder, candidates_seq_file_name)
     pwd_candidates_file_ET =                            '%s/%s'                           % (pwd_MetaCHIP_op_folder, candidates_file_name_ET)
@@ -885,7 +697,9 @@ def PG(args, config_dict):
     pwd_plot_identity_distribution_BM =                 '%s/%s'                           % (pwd_MetaCHIP_op_folder, plot_identity_distribution_BM)
     pwd_plot_identity_distribution_PG =                 '%s/%s'                           % (pwd_MetaCHIP_op_folder, plot_identity_distribution_PG)
     pwd_plot_at_ends_number =                           '%s/%s'                           % (pwd_MetaCHIP_op_folder, plot_at_ends_number)
+    pwd_plot_HGT_num_each_genome =                      '%s/%s'                           % (pwd_MetaCHIP_op_folder, plot_HGT_num_each_genome)
     pwd_plot_circos =                                   '%s/%s'                           % (pwd_MetaCHIP_op_folder, plot_circos)
+    pwd_ranger_wd =                                     '%s/%s/%s/'                       % (pwd_MetaCHIP_op_folder, output_tree_folder_name, ranger_wd_name)
     pwd_flanking_region_plot_folder =                   '%s/%s'                           % (pwd_MetaCHIP_op_folder, flanking_region_plot_folder_name)
     pwd_1_normal_folder =                               '%s/%s'                           % (pwd_flanking_region_plot_folder, normal_folder_name)
     pwd_1_normal_folder_PG_validated =                  '%s/%s'                           % (pwd_flanking_region_plot_folder, normal_folder_name_PG_validated)
@@ -893,50 +707,92 @@ def PG(args, config_dict):
     pwd_2_at_ends_folder_PG_validated =                 '%s/%s'                           % (pwd_flanking_region_plot_folder, at_ends_folder_name_PG_validated)
     pwd_3_full_contig_match_folder =                    '%s/%s'                           % (pwd_flanking_region_plot_folder, full_contig_match_folder_name)
     pwd_3_full_contig_match_folder_PG_validated =       '%s/%s'                           % (pwd_flanking_region_plot_folder, full_contig_match_folder_name_PG_validated)
-    pwd_ranger_inputs_folder =                          '%s/%s'                           % (pwd_MetaCHIP_op_folder, ranger_inputs_folder_name)
-    pwd_ranger_outputs_folder =                         '%s/%s'                           % (pwd_MetaCHIP_op_folder, ranger_outputs_folder_name)
-    pwd_tree_folder =                                   '%s/%s'                           % (pwd_MetaCHIP_op_folder, tree_folder)
-    pwd_combined_faa_file =                             '%s/%s'                           % (MetaCHIP_wd, combined_faa_file)
+    pwd_ranger_inputs_folder =                          '%s/%s'                           % (pwd_ranger_wd, ranger_inputs_folder_name)
+    pwd_ranger_outputs_folder =                         '%s/%s'                           % (pwd_ranger_wd, ranger_outputs_folder_name)
+    pwd_op_tree_folder =                                '%s/%s'                           % (pwd_MetaCHIP_op_folder, output_tree_folder_name)
+    pwd_tree_image_folder =                             '%s/%s'                           % (pwd_op_tree_folder, tree_image_folder_name)
+    pwd_tree_folder =                                   '%s/%s'                           % (pwd_op_tree_folder, tree_folder)
+    pwd_tree_plots_folder =                             '%s/%s'                           % (pwd_op_tree_folder, tree_plots_folder)
+    pwd_gene_tree_newick_folder =                       '%s/%s'                           % (pwd_op_tree_folder, gene_tree_newick_folder)
+    pwd_species_tree_folder_plot =                      '%s/%s'                           % (pwd_op_tree_folder, species_tree_folder_plot)
+    pwd_species_tree_folder_ranger =                    '%s/%s'                           % (pwd_op_tree_folder, species_tree_folder_ranger)
+    pwd_grouping_file_with_id =                         '%s/%s'                           % (pwd_MetaCHIP_op_folder, 'grouping_with_id.txt')
     pwd_combined_ffn_file =                             '%s/%s'                           % (MetaCHIP_wd, combined_ffn_file)
-    pwd_combined_faa_file_subset =                      '%s/%s'                           % (pwd_MetaCHIP_op_folder, combined_faa_file_subset)
-    pwd_combined_ffn_file_subset =                      '%s/%s'                           % (pwd_MetaCHIP_op_folder, combined_ffn_file_subset)
+    pwd_combined_faa_file =                             '%s/%s'                           % (MetaCHIP_wd, combined_faa_file)
+    pwd_combined_faa_file_subset =                      '%s/%s'                           % (pwd_op_tree_folder, combined_faa_file_subset)
     pwd_genome_size_file =                              '%s/%s'                           % (MetaCHIP_wd, genome_size_file_name)
-    pwd_usearch_cluster_to_gene_file =                  '%s/%s'                           % (MetaCHIP_wd, usearch_cluster_to_gene_file)
-    pwd_newick_tree_file =                              '%s/%s'                           % (MetaCHIP_wd, newick_tree_file)
-    pwd_grouping_id_to_taxon_file =                     '%s/%s'                           % (MetaCHIP_wd, grouping_id_to_taxon_file_name)
-    pwd_grouping_file_with_id =                         '%s/%s/%s'                        % (MetaCHIP_wd, MetaCHIP_op_folder, grouping_file_with_id_filename)
-    pwd_HGT_query_to_subjects_file =                    '%s/%s/%s'                        % (MetaCHIP_wd, MetaCHIP_op_folder, HGT_query_to_subjects_filename)
+    pwd_grouping_id_to_taxon_file =                     '%s/%s'                           % (MetaCHIP_wd, grouping_id_to_taxon_file)
+
+    pwd_circlize_plot_tmp1_txt =                        '%s/HGT_candidates_PG_validated_tmp1.txt'               % (pwd_MetaCHIP_op_folder)
+    pwd_circlize_plot_tmp1_sorted_txt =                 '%s/HGT_candidates_PG_validated_tmp1_sorted.txt'        % (pwd_MetaCHIP_op_folder)
+    pwd_circlize_plot_tmp1_sorted_count_txt =           '%s/HGT_candidates_PG_validated_tmp1_sorted_count.txt'  % (pwd_MetaCHIP_op_folder)
+    pwd_circlize_plot_matrix_filename =                 '%s/HGT_candidates_PG_validated_matrix.csv'             % (pwd_MetaCHIP_op_folder)
+
+
+    pwd_ortholog_group_folder = ortholog_group_folder_name
+
+
+    ################################################### Create folders #####################################################
+
+    # prepare folders
+    force_create_folder(pwd_op_tree_folder)
+    force_create_folder(pwd_tree_folder)
+    force_create_folder(pwd_ranger_wd)
+    force_create_folder(pwd_ranger_inputs_folder)
+    force_create_folder(pwd_ranger_outputs_folder)
 
 
     ###################################### store ortholog information into dictionary ######################################
 
-    # create folders
-    force_create_folder(pwd_tree_folder)
-
     # get list of match pair list
+    candidates_file = open(pwd_candidates_file)
     candidates_list = []
-    candidates_list_genes = set()
-    for match_group in open(pwd_candidates_file):
+    for match_group in candidates_file:
         if not match_group.startswith('Gene_1'):
             match_group_split = match_group.strip().split('\t')[:2]
             candidates_list.append(match_group_split)
-            candidates_list_genes.add(match_group_split[0])
-            candidates_list_genes.add(match_group_split[1])
 
+    # report
     if candidates_list == []:
-        report_and_log(('No HGT detected by BM approach, program exited!'), pwd_log_file, keep_quiet)
+        print('no BM candidate')
         exit()
 
     # for report and log
-    report_and_log(('Get gene/genome member in gene/species tree for each BM predicted HGT'), pwd_log_file, keep_quiet)
+    report_and_log(('store ortholog information into dictionary'), pwd_log_file_name, keep_quiet)
 
     # get all ortholog groups
+    ortholog_group_file_re = '%s/*.fna' % pwd_ortholog_group_folder
+    ortholog_group_file_list = [os.path.basename(file_name) for file_name in glob.glob(ortholog_group_file_re)]
+
+    clusters_original = [os.path.basename(file_name) for file_name in glob.glob('%s/*.fna' % pwd_ortholog_group_folder)]
+
+    clusters = []
+    for cluster_o in clusters_original:
+        if "\'" in cluster_o:
+            cmd_line_name_fna = cluster_o.replace('\'', '\\\'')
+            cluster_new_fna = cluster_o.replace('\'', '')
+            clusters.append(cluster_new_fna)
+            os.system('mv %s/%s %s/%s' % (pwd_ortholog_group_folder, cmd_line_name_fna, pwd_ortholog_group_folder, cluster_new_fna))
+        else:
+            clusters.append(cluster_o)
+
+    # get dict to hold members of each ortholog group
     clusters_dict = {}
-    for cluster in open(pwd_usearch_cluster_to_gene_file):
-        cluster_split = cluster.strip().split('\t')
-        cluster_id = cluster_split[0]
-        current_gene_member = cluster_split[1].split(',')
-        clusters_dict[cluster_id] = current_gene_member
+    for cluster in clusters:
+        cluster_key = cluster.split('.')[0]
+        cluster_value = []
+        members = open(pwd_ortholog_group_folder + '/' + cluster)
+        for member in members:
+            if member.startswith('>'):
+                member_name = member.split('|')[0][4:-1]
+                cluster_value.append(member_name)
+        clusters_dict[cluster_key] = cluster_value
+
+    # report
+    if clusters_dict == {}:
+        print('No orthologs found!')
+        exit()
+
 
     # get bin_record_list and genome name list
     bin_record_list = []
@@ -961,25 +817,80 @@ def PG(args, config_dict):
         bin_group_without_underscore_list.append(bin_group_without_underscore)
 
 
+    ####################################################### Main Code ######################################################
+
+    # get species tree for all input genomes
+    SCG_tree_wd =     '%s_get_SCG_tree_wd' % output_prefix
+    pwd_SCG_tree_wd = '%s/%s'              % (MetaCHIP_wd, SCG_tree_wd)
+
+    # check whether SCG tree exist
+    pwd_SCG_tree_all = ''
+    if SCG_tree_all != None:
+        pwd_SCG_tree_all = SCG_tree_all
+    elif SCG_tree_all == None:
+        pwd_SCG_tree_all_default = '%s/%s_species_tree.newick' % (MetaCHIP_wd, output_prefix)
+
+        if os.path.isfile(pwd_SCG_tree_all_default) == True:
+            pwd_SCG_tree_all = pwd_SCG_tree_all_default
+        else:
+            print(datetime.now().strftime(time_format) + 'Specice tree for all input genomes not found, please provide with -t option')
+            exit()
+
+
+    ############################################### get species tree subset ################################################
+
+    # for report and log
+    report_and_log(('get species tree subset for each ortholog'), pwd_log_file_name, keep_quiet)
+
+    # put multiple arguments in list
+    list_for_multiple_arguments_subset_species_tree = []
+    for each_candidate in candidates_list:
+        list_for_multiple_arguments_subset_species_tree.append([each_candidate, pwd_SCG_tree_all, clusters_dict, pwd_tree_folder])
+
+    pool = mp.Pool(processes=num_threads)
+    pool.map(subset_species_tree_worker, list_for_multiple_arguments_subset_species_tree)
+    pool.close()
+    pool.join()
+
+
     ###################################################### Get dicts #######################################################
 
-    # get HGT_query_to_subjects dict
-    HGT_query_to_subjects_dict = {}
-    gene_id_overall = set()
-    for each_candidate in open(pwd_HGT_query_to_subjects_file):
-        each_candidate_split = each_candidate.strip().split('\t')
-        query = each_candidate_split[0]
-        subjects = each_candidate_split[1].split(',')
-        if query in candidates_list_genes:
-            HGT_query_to_subjects_dict[query] = subjects
-            for each_subject in subjects:
-                gene_id_overall.add(each_subject)
+    # get species tree
+    candidate_2_predictions_dict = {}
+    candidate_2_possible_direction_dict = {}
+    candidates_list_for_Phylogenetic = []
+    candidates_bin_id_dict = {}
+    candidates_gene_id_dict = {}
+    gene_id_overall = []
+    for each_candidates in candidates_list:
+        process_name = '___'.join(each_candidates)
+        # get ortholog_list for each match pairs
+        ortholog_list = [] # ortholog_list == gene_member, need to modify!!!!!
+        for each in clusters_dict:
+            if (each_candidates[0] in clusters_dict[each]) or (each_candidates[1] in clusters_dict[each]):
+                ortholog_list += clusters_dict[each]
+        if len(ortholog_list) == 0:
+            candidate_2_predictions_dict[process_name] = []
+            candidate_2_possible_direction_dict[process_name] = []
+        else:
+            # uniq ortholog_list, why??????
+            gene_member = set()
+            genome_subset = set()
+            for each_g in ortholog_list:
+                each_g_genome = '_'.join(each_g.split('_')[:-1])
+                gene_member.add(each_g)
+                genome_subset.add(each_g_genome)
+
+            candidates_list_for_Phylogenetic.append(each_candidates)
+            candidates_bin_id_dict[process_name] = genome_subset
+            candidates_gene_id_dict[process_name] = gene_member
+            gene_id_overall += gene_member
 
 
     ################################# Prepare subset of faa_file for building gene tree ####################################
 
     # for report and log
-    report_and_log(('Prepare subset of %s for building gene tree' % combined_faa_file), pwd_log_file, keep_quiet)
+    report_and_log(('Prepare subset of %s for building gene tree' % combined_faa_file), pwd_log_file_name, keep_quiet)
 
     # uniq gene id list
     gene_id_uniq_set = set()
@@ -995,24 +906,24 @@ def PG(args, config_dict):
     pwd_combined_faa_file_subset_handle.close()
 
 
-    ################################## Extract gene sequences, run mafft and fasttree ##################################
+    #################################### Extract gene sequences, run mafft and fasttree ####################################
 
     # for report and log
-    report_and_log(('Get species/gene tree for %s BM approach identified HGTs with %s cores' % (len(candidates_list), num_threads)), pwd_log_file, keep_quiet)
+    report_and_log(('Running mafft and fasttree with %s cores' % num_threads), pwd_log_file_name, keep_quiet)
 
     # put multiple arguments in list
     list_for_multiple_arguments_extract_gene_tree_seq = []
-    for each_to_extract in candidates_list:
+    for each_to_extract in candidates_list_for_Phylogenetic:
         list_for_multiple_arguments_extract_gene_tree_seq.append([each_to_extract,
+                                                                  candidates_gene_id_dict,
                                                                   pwd_tree_folder,
                                                                   pwd_combined_faa_file_subset,
                                                                   pwd_blastp_exe,
                                                                   pwd_mafft_exe,
                                                                   pwd_fasttree_exe,
                                                                   name_to_group_dict,
-                                                                  genome_name_list,
-                                                                  HGT_query_to_subjects_dict,
-                                                                  pwd_newick_tree_file])
+                                                                  genome_name_list])
+
     pool = mp.Pool(processes=num_threads)
     pool.map(extract_gene_tree_seq_worker, list_for_multiple_arguments_extract_gene_tree_seq)
     pool.close()
@@ -1021,17 +932,17 @@ def PG(args, config_dict):
 
     ##################################################### Run Ranger-DTL ###################################################
 
-    # prepare folders
-    force_create_folder(pwd_ranger_inputs_folder)
-    force_create_folder(pwd_ranger_outputs_folder)
-
     # for report and log
-    report_and_log(('Running Ranger-DTL2 with dated mode'), pwd_log_file, keep_quiet)
+    report_and_log(('Running Ranger-DTL2'), pwd_log_file_name, keep_quiet)
 
     # put multiple arguments in list
     list_for_multiple_arguments_Ranger = []
-    for each_paired_tree in candidates_list:
-        list_for_multiple_arguments_Ranger.append([each_paired_tree, pwd_ranger_inputs_folder, pwd_tree_folder, pwd_ranger_exe, pwd_ranger_outputs_folder])
+    for each_paired_tree in candidates_list_for_Phylogenetic:
+        list_for_multiple_arguments_Ranger.append([each_paired_tree,
+                                                   pwd_ranger_inputs_folder,
+                                                   pwd_tree_folder,
+                                                   pwd_ranger_exe,
+                                                   pwd_ranger_outputs_folder])
 
     pool = mp.Pool(processes=num_threads)
     pool.map(Ranger_worker, list_for_multiple_arguments_Ranger)
@@ -1042,11 +953,10 @@ def PG(args, config_dict):
     ########################################### parse Ranger-DTL prediction result #########################################
 
     # for report and log
-    report_and_log(('Parsing Ranger prediction results'), pwd_log_file, keep_quiet)
+    report_and_log(('Parsing Ranger prediction results'), pwd_log_file_name, keep_quiet)
 
-    candidate_2_predictions_dict = {}
     candidate_2_possible_direction_dict = {}
-    for each_ranger_prediction in candidates_list:
+    for each_ranger_prediction in candidates_list_for_Phylogenetic:
         each_ranger_prediction_concate = '___'.join(each_ranger_prediction)
         ranger_out_file_name = each_ranger_prediction_concate + '_ranger_output.txt'
         pwd_ranger_result = '%s/%s' % (pwd_ranger_outputs_folder, ranger_out_file_name)
@@ -1073,6 +983,7 @@ def PG(args, config_dict):
         candidate_2_predictions_dict[each_ranger_prediction_concate] = predicted_transfers
 
         # get two possible transfer situation
+        candidate_split_group = []
         candidate_split_gene = each_ranger_prediction_concate.split('___')
         candidate_split_gene_only_genome = []
         for each_candidate in candidate_split_gene:
@@ -1088,7 +999,7 @@ def PG(args, config_dict):
     #################################################### combine results ###################################################
 
     # for report and log
-    report_and_log(('Add Ranger-DTL predicted direction to HGT_candidates.txt'), pwd_log_file, keep_quiet)
+    report_and_log(('Add Ranger-DTL predicted direction to HGT_candidates.txt'), pwd_log_file_name, keep_quiet)
 
     # add results to output file of best blast match approach
     combined_output_handle = open(pwd_candidates_file_ET, 'w')
@@ -1142,7 +1053,7 @@ def PG(args, config_dict):
     combined_output_validated_fasta_aa_handle.close()
 
     # for report and log
-    report_and_log(('Done for Phylogenetic approach!'), pwd_log_file, keep_quiet)
+    report_and_log(('Done for Phylogenetic approach!'), pwd_log_file_name, keep_quiet)
 
 
     ###################################### separate PG validated flanking region plots #####################################
@@ -1198,7 +1109,7 @@ def PG(args, config_dict):
     ########################################################################################################################
 
     # for report and log
-    report_and_log(('Plot stats of identified HGTs'), pwd_log_file, keep_quiet)
+    report_and_log(('Plot stats of identified HGTs'), pwd_log_file_name, keep_quiet)
 
     # read in prediction results
     HGT_num_BM_at_end = 0
@@ -1401,7 +1312,7 @@ def PG(args, config_dict):
 
     # subplot 2
     plt.subplot(222)
-    plt.bar(x_range_group, group_list_uniq_count, tick_label=group_id_with_taxon, align='center', alpha=0.5, linewidth=0, color=color_list_according_group_uniq)
+    plt.bar(x_range_group, group_list_uniq_count, tick_label=group_id_with_taxon, align='center', alpha=0.5, color=color_list_according_group_uniq)
     plt.xticks(x_range_group, group_id_with_taxon, rotation=315, fontsize=xticks_fontsize_group,horizontalalignment='left')
 
     # subplot 3
@@ -1413,7 +1324,7 @@ def PG(args, config_dict):
 
     # subplot 4
     plt.subplot(224)
-    plt.bar(x_range_group, group_list_uniq_count_normalized, tick_label=group_id_with_taxon, align='center', alpha=0.5, linewidth=0, color=color_list_according_group_uniq)
+    plt.bar(x_range_group, group_list_uniq_count_normalized, tick_label=group_id_with_taxon, align='center', alpha=0.5, color=color_list_according_group_uniq)
     plt.xlabel('Group')
     plt.xticks(x_range_group, group_id_with_taxon, rotation=315, fontsize=xticks_fontsize_group,horizontalalignment='left')
 
@@ -1431,12 +1342,6 @@ def PG(args, config_dict):
     # 1. not end match
     # 2. not full length match
     # 3. PG validated
-
-    pwd_cir_plot_t1 =              '%s/%s_%s%s_cir_plot_t1.txt'              % (pwd_MetaCHIP_op_folder, output_prefix, grouping_level, group_num)
-    pwd_cir_plot_t1_sorted =       '%s/%s_%s%s_cir_plot_t1_sorted.txt'       % (pwd_MetaCHIP_op_folder, output_prefix, grouping_level, group_num)
-    pwd_cir_plot_t1_sorted_count = '%s/%s_%s%s_cir_plot_t1_sorted_count.txt' % (pwd_MetaCHIP_op_folder, output_prefix, grouping_level, group_num)
-    pwd_cir_plot_matrix_filename = '%s/%s_%s%s_cir_plot_matrix.csv'          % (pwd_MetaCHIP_op_folder, output_prefix, grouping_level, group_num)
-
 
     name2id_dict = {}
     transfers = []
@@ -1456,7 +1361,7 @@ def PG(args, config_dict):
                 name2id_dict[Genome_2] = Genome_2_ID
             transfers.append(Direction)
 
-    tmp1 = open(pwd_cir_plot_t1, 'w')
+    tmp1 = open(pwd_circlize_plot_tmp1_txt, 'w')
     all_group_id = []
     for each_t in transfers:
         each_t_split = each_t.split('-->')
@@ -1471,12 +1376,12 @@ def PG(args, config_dict):
         tmp1.write('%s,%s\n' % (donor_id, recipient_id))
     tmp1.close()
 
-    os.system('cat %s | sort > %s' % (pwd_cir_plot_t1, pwd_cir_plot_t1_sorted))
+    os.system('cat %s | sort > %s' % (pwd_circlize_plot_tmp1_txt, pwd_circlize_plot_tmp1_sorted_txt))
 
     current_t = ''
     count = 0
-    tmp2 = open(pwd_cir_plot_t1_sorted_count, 'w')
-    for each_t2 in open(pwd_cir_plot_t1_sorted):
+    tmp2 = open(pwd_circlize_plot_tmp1_sorted_count_txt, 'w')
+    for each_t2 in open(pwd_circlize_plot_tmp1_sorted_txt):
         each_t2 = each_t2.strip()
         if current_t == '':
             current_t = each_t2
@@ -1492,7 +1397,7 @@ def PG(args, config_dict):
 
     # read in count as dict
     transfer_count = {}
-    for each_3 in open(pwd_cir_plot_t1_sorted_count):
+    for each_3 in open(pwd_circlize_plot_tmp1_sorted_count_txt):
         each_3_split = each_3.strip().split(',')
         key = '%s,%s' % (each_3_split[0], each_3_split[1])
         value = each_3_split[2]
@@ -1500,7 +1405,7 @@ def PG(args, config_dict):
 
     all_group_id = sorted(all_group_id)
 
-    matrix_file = open(pwd_cir_plot_matrix_filename, 'w')
+    matrix_file = open(pwd_circlize_plot_matrix_filename, 'w')
     matrix_file.write('\t' + '\t'.join(all_group_id) + '\n')
     for each_1 in all_group_id:
         row = [each_1]
@@ -1514,24 +1419,23 @@ def PG(args, config_dict):
     matrix_file.close()
 
     # get plot with R
-    os.system('Rscript %s -m %s -p %s' % (circos_HGT_R, pwd_cir_plot_matrix_filename, pwd_plot_circos))
+    os.system('Rscript %s -m %s -p %s' % (circos_HGT_R, pwd_circlize_plot_matrix_filename, pwd_plot_circos))
 
     # for report and log
-    report_and_log(('Gene flow plot exported to: %s' % plot_circos), pwd_log_file, keep_quiet)
+    report_and_log(('Gene flow plot exported to: %s' % plot_circos), pwd_log_file_name, keep_quiet)
 
 
     ################################################### remove tmp files ###################################################
 
     # for report and log
-    report_and_log(('Deleting temporary files'), pwd_log_file, keep_quiet)
+    report_and_log(('Deleting temporary files'), pwd_log_file_name, keep_quiet)
 
     # remove tmp files
-    os.remove(pwd_cir_plot_t1)
-    os.remove(pwd_cir_plot_t1_sorted)
-    os.remove(pwd_cir_plot_t1_sorted_count)
-    os.remove(pwd_cir_plot_matrix_filename)
+    os.remove(pwd_circlize_plot_tmp1_txt)
+    os.remove(pwd_circlize_plot_tmp1_sorted_txt)
+    os.remove(pwd_circlize_plot_tmp1_sorted_count_txt)
+    os.remove(pwd_circlize_plot_matrix_filename)
     os.remove(pwd_combined_faa_file_subset)
 
     # for report and log
-    report_and_log(('All done!'), pwd_log_file, keep_quiet)
-
+    report_and_log(('All done!'), pwd_log_file_name, keep_quiet)
