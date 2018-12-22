@@ -614,6 +614,37 @@ def parallel_blastn_worker(argument_list):
     os.system(blastn_cmd)
 
 
+def create_blastn_job_script(wd_on_katana, job_script_folder, job_script_file_name, node_num, ppn_num, memory, walltime,
+                             email, modules_list, cmd):
+    # Prepare header
+    line_1 = '#!/bin/bash'
+    line_2 = '#PBS -l nodes=%s:ppn=%s' % (str(node_num), str(ppn_num))
+    line_3 = '#PBS -l vmem=%sgb' % str(memory)
+    line_4 = '#PBS -l walltime=%s' % walltime
+    line_5 = '#PBS -j oe'
+    line_6 = '#PBS -M %s' % email
+    line_7 = '#PBS -m ae'
+    header = '%s\n%s\n%s\n%s\n%s\n%s\n%s\n' % (line_1, line_2, line_3, line_4, line_5, line_6, line_7)
+
+    # Prepare module lines
+    module_lines = ''
+    for module in modules_list:
+        module_lines += 'module load %s\n' % module
+
+    # write to qsub files
+    output_file_handle = open('%s/%s' % (job_script_folder, job_script_file_name), 'w')
+    output_file_handle.write(header)
+    output_file_handle.write(module_lines)
+    output_file_handle.write('cd %s\n' % wd_on_katana)
+    output_file_handle.write('%s\n' % cmd)
+    output_file_handle.close()
+
+    current_wd = os.getcwd()
+    os.chdir(job_script_folder)
+    os.system('qsub %s' % job_script_file_name)
+    os.chdir(current_wd)
+
+
 def PI(args, config_dict):
 
     # read in arguments
@@ -626,7 +657,9 @@ def PI(args, config_dict):
     num_threads =           args['t']
     keep_quiet =            args['quiet']
     nonmeta_mode =          args['nonmeta']
+    qsub_on =               args['qsub']
     noblast =               args['noblast']
+
 
 
     # read in config file
@@ -645,6 +678,14 @@ def PI(args, config_dict):
     minimal_cov_in_msa = 50
     min_consensus_in_msa = 25
     blast_parameters = '-evalue 1e-5 -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen" -task blastn'
+
+    wd_on_katana = os.getcwd()
+    node_num = 1
+    ppn_num = 3
+    memory = 20
+    walltime = '11:59:00'
+    email = '244289990@qq.com'
+    modules_list = ['blast+/2.6.0']
 
 
     #################################################### check input ###################################################
@@ -770,6 +811,7 @@ def PI(args, config_dict):
     blast_results_file =                 '%s_all_all_vs_all_blastn.tab'         % (output_prefix)
     blast_result_folder =                '%s_all_blastn_results'                % (output_prefix)
     blast_cmd_file =                     '%s_all_blastn_commands.txt'           % (output_prefix)
+    blast_job_scripts_folder =           '%s_all_blastn_job_scripts'            % (output_prefix)
 
     grouping_file_name =                 '%s_%s%s_grouping.txt'                 % (output_prefix, grouping_level, group_num)
     grouping_plot_name =                 '%s_%s%s_grouping.png'                 % (output_prefix, grouping_level, group_num)
@@ -812,6 +854,7 @@ def PI(args, config_dict):
     pwd_hmm_profile_sep_folder =         '%s/%s/%s'                             % (MetaCHIP_wd, SCG_tree_wd, hmm_profile_sep_folder)
     pwd_newick_tree_file =               '%s/%s'                                % (MetaCHIP_wd, newick_tree_file)
     pwd_blast_result_folder =            '%s/%s'                                % (MetaCHIP_wd, blast_result_folder)
+    pwd_blast_job_scripts_folder =       '%s/%s'                                % (MetaCHIP_wd, blast_job_scripts_folder)
     pwd_blast_cmd_file =                 '%s/%s'                                % (MetaCHIP_wd, blast_cmd_file)
 
 
@@ -920,7 +963,7 @@ def PI(args, config_dict):
         processing = 1
         for each_genome in input_genome_file_name_list:
 
-            if (processing/200).is_integer() is True:
+            if (processing/100).is_integer() is True:
                 report_and_log(('Calculating genome size for the %sth genome' % processing), pwd_log_file, keep_quiet)
 
             pwd_each_genome = '%s/%s' % (input_genome_folder, each_genome)
@@ -1156,13 +1199,25 @@ def PI(args, config_dict):
         if noblast is True:
             report_and_log(('All-vs-all blastn disabled, please run blastn with commands provided in: %s' % blast_cmd_file), pwd_log_file, keep_quiet)
         else:
-            report_and_log(('Running blastn for all input genomes with %s cores, blast results exported to: %s' % (num_threads, pwd_blast_result_folder)), pwd_log_file, keep_quiet)
+            if qsub_on is True:
 
-            # run blastn with multiprocessing
-            pool = mp.Pool(processes=num_threads)
-            pool.map(parallel_blastn_worker, list_for_multiple_arguments_blastn)
-            pool.close()
-            pool.join()
+                # create job scripts folder
+                force_create_folder(pwd_blast_job_scripts_folder)
+
+                for ffn_file in ffn_file_list:
+                    ffn_file_basename = '.'.join(ffn_file.split('.')[:-1])
+                    job_script_file_name = 'qsub_blastn_%s.sh' % ffn_file_basename
+                    blastn_cmd = '%s -query %s/%s -db %s -out %s/%s %s' % (pwd_blastn_exe, pwd_prodigal_output_folder, ffn_file, pwd_blast_db, pwd_blast_result_folder, '%s_blastn.tab' % ffn_file_basename, blast_parameters)
+                    create_blastn_job_script(wd_on_katana, pwd_blast_job_scripts_folder, job_script_file_name, node_num, ppn_num, memory, walltime, email, modules_list, blastn_cmd)
+
+            else:
+                report_and_log(('Running blastn for all input genomes with %s cores, blast results exported to: %s' % (num_threads, pwd_blast_result_folder)), pwd_log_file, keep_quiet)
+
+                # run blastn with multiprocessing
+                pool = mp.Pool(processes=num_threads)
+                pool.map(parallel_blastn_worker, list_for_multiple_arguments_blastn)
+                pool.close()
+                pool.join()
 
 
     ############################################### for report and log file ##############################################
