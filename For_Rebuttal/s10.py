@@ -16,9 +16,7 @@ for soil_genome in open(soil_genome_id):
 
 soil_hgts = set()
 for each_hgt in open(MetaCHIP_hgts):
-
     if not each_hgt.startswith('Gene_1\tGene_2'):
-
         each_hgt_split = each_hgt.strip().split('\t')
         gene_1 = each_hgt_split[0]
         gene_2 = each_hgt_split[1]
@@ -28,12 +26,9 @@ for each_hgt in open(MetaCHIP_hgts):
         gene_2_genome = '_'.join(gene_2.split('_')[:-1])
         donor_genome = direction.split('-->')[0]
         recipient_genome = direction.split('-->')[1]
-
         if identity >= 99:
-
             if gene_1_genome in soil_genome_id_list:
                 soil_hgts.add(gene_1)
-
             if gene_2_genome in soil_genome_id_list:
                 soil_hgts.add(gene_2)
 
@@ -115,32 +110,5 @@ for blast_hit in open(recent_soil_hgt_blast_output):
     if (identity == 100) and (query_cov == 1):
         validated_recent_hgt.add(query)
 
-
 print(len(validated_recent_hgt))
-
-
-
-#
-#
-#
-#
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

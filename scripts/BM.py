@@ -492,7 +492,6 @@ def get_candidates(targets_group_file, gene_with_g_file_name, gene_only_name_fil
                         if candidate_iden >= qg_sg_iden_cutoff:
                             output_1.write('%s\t%s\n' % (query, nsg_maximum_gene_name_dict[maximum_average_g]))
                             output_2.write('%s\t%s\n' % (query_gene_name, nsg_maximum_gene_name_dict[maximum_average_g].split('|')[1]))
-
     output_1.close()
     output_2.close()
 
@@ -589,61 +588,6 @@ def check_full_lenght_and_end_match(qualified_ctg_match_list, identity_cutoff):
             # situation 4
             elif (best_hit_same_match_direction is False) and (best_hit_query_start <= best_hit_end_gap_len) and (best_hit_subject_end <= best_hit_end_gap_len):
                 match_category = 'end_match'
-
-    return match_category
-
-
-def check_full_lenght_and_end_match_backup(blast_hit, aln_len_cutoff, identity_cutoff):
-    blast_hit_split = blast_hit.strip().split('\t')
-    identity = float(blast_hit_split[2])
-    align_len = int(blast_hit_split[3])
-    query_start = int(blast_hit_split[6])
-    query_end = int(blast_hit_split[7])
-    subject_start = int(blast_hit_split[8])
-    subject_end = int(blast_hit_split[9])
-    query_len = int(blast_hit_split[12])
-    subject_len = int(blast_hit_split[13])
-
-    # print('query %s:%s-%s\nsubject %s:%s-%s' % (query_len, query_start, query_end, subject_len, subject_start, subject_end))
-
-    # get the coverage for query and subject
-    query_cov = align_len / query_len
-    subject_cov = align_len / subject_len
-
-    # check match direction
-    query_direction = query_end - query_start
-    subject_direction = subject_end - subject_start
-    same_match_direction = True
-    if ((query_direction > 0) and (subject_direction < 0)) or ((query_direction < 0) and (subject_direction > 0)):
-        same_match_direction = False
-
-    # get match category
-    match_category = 'normal'
-
-    # full length match: coverage cutoff 95%, identity cutoff 99%, minimal algnment length 200 bp
-    if (query_cov >= 0.95) or (subject_cov >= 0.95):
-        match_category = 'full_length_match'
-
-    # end match, allow 20 bp differences in the ends
-    elif (align_len > aln_len_cutoff) and (identity > identity_cutoff):
-
-        end_gap_len = 200
-
-        # situation 1
-        if (same_match_direction is True) and (query_len - query_end <= end_gap_len) and (subject_start <= end_gap_len):
-            match_category = 'end_match'
-
-        # situation 2
-        elif (same_match_direction is True) and (query_start <= end_gap_len) and (subject_len - subject_end <= end_gap_len):
-            match_category = 'end_match'
-
-        # situation 3
-        elif (same_match_direction is False) and (query_len - query_end <= end_gap_len) and (subject_len - subject_start <= end_gap_len):
-            match_category = 'end_match'
-
-        # situation 4
-        elif (same_match_direction is False) and (query_start <= end_gap_len) and (subject_end <= end_gap_len):
-            match_category = 'end_match'
 
     return match_category
 

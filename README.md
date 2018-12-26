@@ -24,13 +24,12 @@ Dependencies:
 [circlize](https://cran.r-project.org/web/packages/circlize/index.html)
 
 + [Prodigal](https://github.com/hyattpd/Prodigal), 
-[HMMER](http://hmmer.org),
-[MAFFT](https://mafft.cbrc.jp/alignment/software/),
+[Hmmer](http://hmmer.org),
+[Mafft](https://mafft.cbrc.jp/alignment/software/),
 [FastTree](http://www.microbesonline.org/fasttree/),
 [BLAST+](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download),
 [Ranger-DTL 2.0](https://compbio.engr.uconn.edu/software/RANGER-DTL/),
-[Get_Homologues](https://github.com/eead-csic-compbio/get_homologues)
-
+[Usearch](https://www.drive5.com/usearch/)
 
 How to install:
 ---
@@ -46,7 +45,6 @@ Notes:
 which holds the taxonomic classification of input genomes. An example of the taxonomic classification results can be found 
 at [example_dataset/taxon_classification.tsv](https://github.com/songweizhi/MetaCHIP/blob/master/example_dataset/taxon_classification.tsv)
 1. [GTDB-Tk](https://github.com/Ecogenomics/GTDBTk) is recommended for taxonomic classification of input genomes.
-1. [Get_Homologues](https://github.com/eead-csic-compbio/get_homologues) is needed to get the Ortholog groups within the input genomes.
 
 
 How to run:
@@ -81,4 +79,3 @@ Output files:
 1. Gene flow between groups.
 
     ![Gene_flow](images/Gene_flow.jpg)
-

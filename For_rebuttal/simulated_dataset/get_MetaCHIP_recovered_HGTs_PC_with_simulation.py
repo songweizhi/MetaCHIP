@@ -152,21 +152,22 @@ def get_recovered_HGTs_PC_m0(gene_distribution, transferred_gene_seq, donor_geno
     return len(query_with_identical_HGT_BM), len(query_with_identical_HGT_PG), len(HGT_with_right_direction)
 
 
-wd = '/Users/songweizhi/Desktop/bootstrap1_m0'
 
-mutation_level = 0
+mutation_level = 30
 
+wd = '/Users/songweizhi/Desktop/with_simulation/m%s' % mutation_level
+
+transferred_gene_seq =          'input_sequence_mutant_nc_m%s.fasta'    % mutation_level
+HGT_BM_seq =                    'm%s_c2_HGTs_BM_nc.fasta'               % mutation_level
+HGT_PG_seq =                    'm%s_c2_HGTs_PG_nc.fasta'               % mutation_level
+HGT_candidates_PG_validated =   'm%s_c2_HGTs_PG_validated.txt'          % mutation_level
 
 os.chdir(wd)
 
-transferred_gene_seq = 'input_sequence_mutant_nc.fasta'
-HGT_BM_seq = 'HGT_candidates_BM_nc.fasta'
-HGT_PG_seq = 'HGT_candidates_PG_nc.fasta'
-gene_distribution = 'gene_distribution_bootstrap_1.txt'
-HGT_candidates_PG_validated = 'HGT_candidates_PG_validated.txt'
-donor_genome_marker = 'SB'
-recipient_genome_marker = 'SM'
 
+donor_genome_marker = 'A'
+recipient_genome_marker = 'B'
+gene_distribution = 'distribution_of_transfers.txt'
 
 
 if mutation_level == 0:

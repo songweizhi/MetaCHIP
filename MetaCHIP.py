@@ -31,7 +31,6 @@ add option -force
 report progress for every 100 processes (if n/100 is int)
 replace all-vs-all blastn with usearch
 
-
 PI:
 if there is a Usearch error, break the pipeline
 provide qsub option for running blast  
@@ -40,7 +39,6 @@ combine grouping and group_to_taxon file
 BM:
 not print if disabled: [2018-12-09 21:54:32] Plotting flanking regions with 16 cores
 
-
 PG:
 change text direction for circos plot
 report the number of low cov and low css columns in alignment
@@ -48,9 +46,9 @@ run mafft in fast mode if sequence number higher than 200
 error ocurred during plot if no HGT validated by PG
 steps move to PG.py: uclust, get species tree
 faa subset file to PG_wd
-
-# removed %s columns from the concatenated msa with low coverage 
-# removed %s columns from the concatenated msa with consensus
+removed %s columns from the concatenated msa with low coverage 
+removed %s columns from the concatenated msa with consensus
+make a tmp folder 
 
 '''
 
@@ -174,3 +172,4 @@ if __name__ == '__main__':
         BM(args, config_dict)
     if args['subparser_name'] == 'PG':
         PG(args, config_dict)
+

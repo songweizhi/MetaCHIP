@@ -545,27 +545,29 @@ def extract_gene_tree_seq_worker(argument_list):
 
 
     each_to_process_concate = '___'.join(each_to_process)
-    blast_output =              '%s/%s___%s_gene_tree_blast.tab'        % (pwd_tree_folder, gene_1, gene_2)
-    blast_output_sorted =       '%s/%s___%s_gene_tree_blast_sorted.tab' % (pwd_tree_folder, gene_1, gene_2)
-    gene_tree_seq =             '%s/%s___%s_gene_tree.seq'              % (pwd_tree_folder, gene_1, gene_2)
-    gene_tree_seq_uniq =        '%s/%s___%s_gene_tree_uniq.seq'         % (pwd_tree_folder, gene_1, gene_2)
-    self_seq =                  '%s/%s___%s_gene_tree_selfseq.seq'      % (pwd_tree_folder, gene_1, gene_2)
-    non_self_seq =              '%s/%s___%s_gene_tree_nonselfseq.seq'   % (pwd_tree_folder, gene_1, gene_2)
-    pwd_seq_file_1st_aln =      '%s/%s___%s_gene_tree.1.aln'            % (pwd_tree_folder, gene_1, gene_2)
-    pwd_seq_file_2nd_aln =      '%s/%s___%s_gene_tree.2.aln'            % (pwd_tree_folder, gene_1, gene_2)
-    pwd_gene_tree_newick =      '%s/%s___%s_gene_tree.newick'           % (pwd_tree_folder, gene_1, gene_2)
-    pwd_species_tree_newick =   '%s/%s_species_tree.newick'             % (pwd_tree_folder, each_to_process_concate)
+    blast_output =            '%s/%s___%s_gene_tree_blast.tab'        % (pwd_tree_folder, gene_1, gene_2)
+    blast_output_sorted =     '%s/%s___%s_gene_tree_blast_sorted.tab' % (pwd_tree_folder, gene_1, gene_2)
+    gene_tree_seq =           '%s/%s___%s_gene_tree.seq'              % (pwd_tree_folder, gene_1, gene_2)
+    gene_tree_seq_uniq =      '%s/%s___%s_gene_tree_uniq.seq'         % (pwd_tree_folder, gene_1, gene_2)
+    self_seq =                '%s/%s___%s_gene_tree_selfseq.seq'      % (pwd_tree_folder, gene_1, gene_2)
+    non_self_seq =            '%s/%s___%s_gene_tree_nonselfseq.seq'   % (pwd_tree_folder, gene_1, gene_2)
+    pwd_seq_file_1st_aln =    '%s/%s___%s_gene_tree.1.aln'            % (pwd_tree_folder, gene_1, gene_2)
+    pwd_seq_file_2nd_aln =    '%s/%s___%s_gene_tree.2.aln'            % (pwd_tree_folder, gene_1, gene_2)
+    pwd_gene_tree_newick =    '%s/%s___%s_gene_tree.newick'           % (pwd_tree_folder, gene_1, gene_2)
+    pwd_species_tree_newick = '%s/%s_species_tree.newick'             % (pwd_tree_folder, each_to_process_concate)
 
     ################################################## Get gene tree ###################################################
 
     current_gene_member_BM = set()
     current_gene_member_BM.add(gene_1)
     current_gene_member_BM.add(gene_2)
-    for gene_1_subject in HGT_query_to_subjects_dict[gene_1]:
-        current_gene_member_BM.add(gene_1_subject)
-    for gene_2_subject in HGT_query_to_subjects_dict[gene_2]:
-        current_gene_member_BM.add(gene_2_subject)
 
+    if gene_1 in HGT_query_to_subjects_dict:
+        for gene_1_subject in HGT_query_to_subjects_dict[gene_1]:
+            current_gene_member_BM.add(gene_1_subject)
+    if gene_2 in HGT_query_to_subjects_dict:
+        for gene_2_subject in HGT_query_to_subjects_dict[gene_2]:
+            current_gene_member_BM.add(gene_2_subject)
 
     current_gene_member_grouped = []
     for gene_member in current_gene_member_BM:
@@ -716,25 +718,43 @@ def Ranger_worker(argument_list):
         ################################################################################################################
 
         # change species tree leaf name for Ranger-DTL2, replace "_" with "XXXXX", then, replace "." with "SSSSS"
-        for each_gr_leaf in species_tree:
-            each_gr_leaf_name = each_gr_leaf.name
-            if '_' in each_gr_leaf_name:
-                each_gr_leaf_name_no_Underline = 'XXXXX'.join(each_gr_leaf_name.split('_'))
-                each_gr_leaf.name = each_gr_leaf_name_no_Underline
-                if '.' in each_gr_leaf_name_no_Underline:
-                    each_gr_leaf_name_no_Underline_no_dot = 'SSSSS'.join(each_gr_leaf_name_no_Underline.split('.'))
-                    each_gr_leaf.name = each_gr_leaf_name_no_Underline_no_dot
+        for each_st_leaf in species_tree:
+            each_st_leaf_name = each_st_leaf.name
+
+            # replace '-' with 'XXXXX'
+            if '_' in each_st_leaf_name:
+                each_st_leaf_name_no_Underline = 'XXXXX'.join(each_st_leaf_name.split('_'))
+            else:
+                each_st_leaf_name_no_Underline = each_st_leaf_name
+
+            # replace '.' with 'SSSSS'
+            if '.' in each_st_leaf_name_no_Underline:
+                each_st_leaf_name_no_Underline_no_dot = 'SSSSS'.join(each_st_leaf_name_no_Underline.split('.'))
+            else:
+                each_st_leaf_name_no_Underline_no_dot= each_st_leaf_name_no_Underline
+
+            # rename species tree leaf name
+            each_st_leaf.name = each_st_leaf_name_no_Underline_no_dot
 
 
         # change gene tree leaf name for Ranger-DTL2, replace "_" with "XXXXX", then, replace "." with "SSSSS"
-        for each_gr_leaf in gene_tree:
-            each_gr_leaf_name = each_gr_leaf.name
-            if '_' in each_gr_leaf_name:
-                each_gr_leaf_name_no_Underline = 'XXXXX'.join(each_gr_leaf_name.split('_')[:-1])
-                each_gr_leaf.name = each_gr_leaf_name_no_Underline
-                if '.' in each_gr_leaf_name_no_Underline:
-                    each_gr_leaf_name_no_Underline_no_dot = 'SSSSS'.join(each_gr_leaf_name_no_Underline.split('.'))
-                    each_gr_leaf.name = each_gr_leaf_name_no_Underline_no_dot
+        for each_gt_leaf in gene_tree:
+            each_gt_leaf_name = each_gt_leaf.name
+
+            # replace '-' with 'XXXXX'
+            if '_' in each_gt_leaf_name:
+                each_gt_leaf_name_no_Underline = 'XXXXX'.join(each_gt_leaf_name.split('_')[:-1])
+            else:
+                each_gt_leaf_name_no_Underline = each_gt_leaf_name
+
+            # replace '.' with 'SSSSS'
+            if '.' in each_gt_leaf_name_no_Underline:
+                each_gt_leaf_name_no_Underline_no_dot = 'SSSSS'.join(each_gt_leaf_name_no_Underline.split('.'))
+            else:
+                each_gt_leaf_name_no_Underline_no_dot = each_gt_leaf_name_no_Underline
+
+            # rename gene tree leaf name
+            each_gt_leaf.name = each_gt_leaf_name_no_Underline_no_dot
 
 
         ################################################################################################################
@@ -843,37 +863,37 @@ def PG(args, config_dict):
     full_contig_match_folder_name =                     '3_Plots_full_length_match'
     full_contig_match_folder_name_PG_validated =        '3_Plots_full_length_match_PG_validated'
 
-    pwd_MetaCHIP_op_folder =                            '%s/%s'                           % (MetaCHIP_wd, MetaCHIP_op_folder)
-    pwd_candidates_file =                               '%s/%s'                           % (pwd_MetaCHIP_op_folder, candidates_file_name)
-    pwd_candidates_seq_file =                           '%s/%s'                           % (pwd_MetaCHIP_op_folder, candidates_seq_file_name)
-    pwd_candidates_file_ET =                            '%s/%s'                           % (pwd_MetaCHIP_op_folder, candidates_file_name_ET)
-    pwd_candidates_file_ET_validated =                  '%s/%s'                           % (pwd_MetaCHIP_op_folder, candidates_file_name_ET_validated)
-    pwd_candidates_file_ET_validated_STAT_png =         '%s/%s'                           % (pwd_MetaCHIP_op_folder, candidates_file_name_ET_validated_STAT_png)
-    pwd_candidates_file_ET_validated_STAT_group_txt =   '%s/%s'                           % (pwd_MetaCHIP_op_folder, candidates_file_name_ET_validated_STAT_group_txt)
-    pwd_candidates_file_ET_validated_STAT_genome_txt =  '%s/%s'                           % (pwd_MetaCHIP_op_folder, candidates_file_name_ET_validated_STAT_genome_txt)
-    pwd_candidates_file_ET_validated_fasta_nc =         '%s/%s'                           % (pwd_MetaCHIP_op_folder, candidates_file_name_ET_validated_fasta_nc)
-    pwd_candidates_file_ET_validated_fasta_aa =         '%s/%s'                           % (pwd_MetaCHIP_op_folder, candidates_file_name_ET_validated_fasta_aa)
-    pwd_plot_identity_distribution_BM =                 '%s/%s'                           % (pwd_MetaCHIP_op_folder, plot_identity_distribution_BM)
-    pwd_plot_identity_distribution_PG =                 '%s/%s'                           % (pwd_MetaCHIP_op_folder, plot_identity_distribution_PG)
-    pwd_plot_at_ends_number =                           '%s/%s'                           % (pwd_MetaCHIP_op_folder, plot_at_ends_number)
-    pwd_plot_circos =                                   '%s/%s'                           % (pwd_MetaCHIP_op_folder, plot_circos)
-    pwd_flanking_region_plot_folder =                   '%s/%s'                           % (pwd_MetaCHIP_op_folder, flanking_region_plot_folder_name)
-    pwd_1_normal_folder =                               '%s/%s'                           % (pwd_flanking_region_plot_folder, normal_folder_name)
-    pwd_1_normal_folder_PG_validated =                  '%s/%s'                           % (pwd_flanking_region_plot_folder, normal_folder_name_PG_validated)
-    pwd_2_at_ends_folder =                              '%s/%s'                           % (pwd_flanking_region_plot_folder, at_ends_folder_name)
-    pwd_2_at_ends_folder_PG_validated =                 '%s/%s'                           % (pwd_flanking_region_plot_folder, at_ends_folder_name_PG_validated)
-    pwd_3_full_contig_match_folder =                    '%s/%s'                           % (pwd_flanking_region_plot_folder, full_contig_match_folder_name)
-    pwd_3_full_contig_match_folder_PG_validated =       '%s/%s'                           % (pwd_flanking_region_plot_folder, full_contig_match_folder_name_PG_validated)
-    pwd_ranger_inputs_folder =                          '%s/%s'                           % (pwd_MetaCHIP_op_folder, ranger_inputs_folder_name)
-    pwd_ranger_outputs_folder =                         '%s/%s'                           % (pwd_MetaCHIP_op_folder, ranger_outputs_folder_name)
-    pwd_tree_folder =                                   '%s/%s'                           % (pwd_MetaCHIP_op_folder, tree_folder)
-    pwd_combined_faa_file =                             '%s/%s'                           % (MetaCHIP_wd, combined_faa_file)
-    pwd_combined_faa_file_subset =                      '%s/%s'                           % (pwd_MetaCHIP_op_folder, combined_faa_file_subset)
-    pwd_genome_size_file =                              '%s/%s'                           % (MetaCHIP_wd, genome_size_file_name)
-    pwd_newick_tree_file =                              '%s/%s'                           % (MetaCHIP_wd, newick_tree_file)
-    pwd_grouping_id_to_taxon_file =                     '%s/%s'                           % (MetaCHIP_wd, grouping_id_to_taxon_file_name)
-    pwd_grouping_file_with_id =                         '%s/%s/%s'                        % (MetaCHIP_wd, MetaCHIP_op_folder, grouping_file_with_id_filename)
-    pwd_HGT_query_to_subjects_file =                    '%s/%s/%s'                        % (MetaCHIP_wd, MetaCHIP_op_folder, HGT_query_to_subjects_filename)
+    pwd_MetaCHIP_op_folder =                            '%s/%s'                                       % (MetaCHIP_wd, MetaCHIP_op_folder)
+    pwd_candidates_file =                               '%s/%s'                                       % (pwd_MetaCHIP_op_folder, candidates_file_name)
+    pwd_candidates_seq_file =                           '%s/%s'                                       % (pwd_MetaCHIP_op_folder, candidates_seq_file_name)
+    pwd_candidates_file_ET =                            '%s/%s'                                       % (pwd_MetaCHIP_op_folder, candidates_file_name_ET)
+    pwd_candidates_file_ET_validated =                  '%s/%s'                                       % (pwd_MetaCHIP_op_folder, candidates_file_name_ET_validated)
+    pwd_candidates_file_ET_validated_STAT_png =         '%s/%s'                                       % (pwd_MetaCHIP_op_folder, candidates_file_name_ET_validated_STAT_png)
+    pwd_candidates_file_ET_validated_STAT_group_txt =   '%s/%s'                                       % (pwd_MetaCHIP_op_folder, candidates_file_name_ET_validated_STAT_group_txt)
+    pwd_candidates_file_ET_validated_STAT_genome_txt =  '%s/%s'                                       % (pwd_MetaCHIP_op_folder, candidates_file_name_ET_validated_STAT_genome_txt)
+    pwd_candidates_file_ET_validated_fasta_nc =         '%s/%s'                                       % (pwd_MetaCHIP_op_folder, candidates_file_name_ET_validated_fasta_nc)
+    pwd_candidates_file_ET_validated_fasta_aa =         '%s/%s'                                       % (pwd_MetaCHIP_op_folder, candidates_file_name_ET_validated_fasta_aa)
+    pwd_plot_identity_distribution_BM =                 '%s/%s'                                       % (pwd_MetaCHIP_op_folder, plot_identity_distribution_BM)
+    pwd_plot_identity_distribution_PG =                 '%s/%s'                                       % (pwd_MetaCHIP_op_folder, plot_identity_distribution_PG)
+    pwd_plot_at_ends_number =                           '%s/%s'                                       % (pwd_MetaCHIP_op_folder, plot_at_ends_number)
+    pwd_plot_circos =                                   '%s/%s'                                       % (pwd_MetaCHIP_op_folder, plot_circos)
+    pwd_flanking_region_plot_folder =                   '%s/%s'                                       % (pwd_MetaCHIP_op_folder, flanking_region_plot_folder_name)
+    pwd_1_normal_folder =                               '%s/%s'                                       % (pwd_flanking_region_plot_folder, normal_folder_name)
+    pwd_1_normal_folder_PG_validated =                  '%s/%s'                                       % (pwd_flanking_region_plot_folder, normal_folder_name_PG_validated)
+    pwd_2_at_ends_folder =                              '%s/%s'                                       % (pwd_flanking_region_plot_folder, at_ends_folder_name)
+    pwd_2_at_ends_folder_PG_validated =                 '%s/%s'                                       % (pwd_flanking_region_plot_folder, at_ends_folder_name_PG_validated)
+    pwd_3_full_contig_match_folder =                    '%s/%s'                                       % (pwd_flanking_region_plot_folder, full_contig_match_folder_name)
+    pwd_3_full_contig_match_folder_PG_validated =       '%s/%s'                                       % (pwd_flanking_region_plot_folder, full_contig_match_folder_name_PG_validated)
+    pwd_ranger_inputs_folder =                          '%s/%s'                                       % (pwd_MetaCHIP_op_folder, ranger_inputs_folder_name)
+    pwd_ranger_outputs_folder =                         '%s/%s'                                       % (pwd_MetaCHIP_op_folder, ranger_outputs_folder_name)
+    pwd_tree_folder =                                   '%s/%s'                                       % (pwd_MetaCHIP_op_folder, tree_folder)
+    pwd_combined_faa_file =                             '%s/%s'                                       % (MetaCHIP_wd, combined_faa_file)
+    pwd_combined_faa_file_subset =                      '%s/%s'                                       % (pwd_MetaCHIP_op_folder, combined_faa_file_subset)
+    pwd_genome_size_file =                              '%s/%s'                                       % (MetaCHIP_wd, genome_size_file_name)
+    pwd_newick_tree_file =                              '%s/%s'                                       % (MetaCHIP_wd, newick_tree_file)
+    pwd_grouping_id_to_taxon_file =                     '%s/%s'                                       % (MetaCHIP_wd, grouping_id_to_taxon_file_name)
+    pwd_grouping_file_with_id =                         '%s/%s/%s'                                    % (MetaCHIP_wd, MetaCHIP_op_folder, grouping_file_with_id_filename)
+    pwd_HGT_query_to_subjects_file =                    '%s/%s/%s'                                    % (MetaCHIP_wd, MetaCHIP_op_folder, HGT_query_to_subjects_filename)
 
 
     ###################################### store ortholog information into dictionary ######################################
@@ -1495,4 +1515,3 @@ def PG(args, config_dict):
 
     # for report and log
     report_and_log(('All done!'), pwd_log_file, keep_quiet)
-

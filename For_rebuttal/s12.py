@@ -71,6 +71,7 @@ MetaCHIP_hgts_nc_seq = 'Total2094_g664_HGTs_PG_nc.fasta'
 subject_seq = '/Users/songweizhi/Desktop/nature_rebuttal/Soil_HGT_sequences_by_id.fasta'
 blast_parameters = '-evalue 1e-5 -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen" -task blastn'
 
+for_flk_check = {'taxon557722_02738', 'taxon388272_03250', 'taxon573060_02904', 'taxon393116_01098', 'taxon465517_02806', 'taxon387344_02262', 'taxon232721_02183', 'taxon439843_04086', 'taxon488537_00265', 'taxon326423_01838', 'taxon232721_01413', 'taxon445970_02007', 'taxon290338_00780', 'taxon319224_00262', 'taxon228410_02557', 'taxon94122_04456', 'taxon525904_01130', 'taxon272620_05045', 'taxon208963_01238', 'taxon484021_03164', 'taxon232721_01399', 'taxon264198_05971', 'taxon208963_01240', 'taxon445970_00243', 'taxon232721_02544', 'taxon290338_00789', 'taxon388272_03269', 'taxon290338_00783', 'taxon557722_02742', 'taxon388272_03257', 'taxon573060_02907', 'taxon445970_00298', 'taxon388272_03271', 'taxon266264_01327', 'taxon388272_03254', 'taxon388272_03253'}
 
 # get 16s identity dict
 iden_dict = {}
@@ -88,6 +89,7 @@ for each in open('/Users/songweizhi/Desktop/output_min700bp.tab'):
             if iden > iden_dict[key]:
                 iden_dict[key] = iden
 
+print(len(iden_dict))
 
 soil_genome_id_list = set()
 for soil_genome in open(soil_genome_id):
@@ -95,9 +97,6 @@ for soil_genome in open(soil_genome_id):
 
 
 hgts_involving_soil = set()
-
-recent_num = 0
-total_num = 0
 for each_hgt in open(MetaCHIP_hgts):
     if not each_hgt.startswith('Gene_1\tGene_2'):
         each_hgt_split = each_hgt.strip().split('\t')
@@ -114,11 +113,79 @@ for each_hgt in open(MetaCHIP_hgts):
         if key_value in iden_dict:
             iden_16s = iden_dict[key_value]
 
-        if (identity > 99):
-            recent_num += 1
+        if (identity > 99) and (iden_16s < 97):
 
-        total_num += 1
+            # get genes transferred within soil genomes
+            if (recipient_genome in soil_genome_id_list) and (donor_genome in soil_genome_id_list):
 
-print(total_num)
-print(recent_num)
+                # # way 1
+                # hgts_involving_soil.add(gene_1)
+                # hgts_involving_soil.add(gene_2)
+
+                # way 2
+                if gene_1_genome == recipient_genome:
+                    hgts_involving_soil.add(gene_1)
+                if gene_2_genome == recipient_genome:
+                    hgts_involving_soil.add(gene_2)
+
+            else:
+                # get genes transferred to soil genomes
+                if (recipient_genome in soil_genome_id_list) and (donor_genome not in soil_genome_id_list):
+                    if gene_1_genome == recipient_genome:
+                        hgts_involving_soil.add(gene_1)
+                    if gene_2_genome == recipient_genome:
+                        hgts_involving_soil.add(gene_2)
+
+                # get genes transferred from soil genomes
+                if (donor_genome in soil_genome_id_list) and (recipient_genome not in soil_genome_id_list):
+                    if gene_1_genome == donor_genome:
+                        hgts_involving_soil.add(gene_1)
+                    if gene_2_genome == donor_genome:
+                        hgts_involving_soil.add(gene_2)
+
+
+print('The number of recent HGTs involving soil genome: %s' % len(hgts_involving_soil))
+
+# extract HGT sequences
+hgts_seq_involving_soil_handle = open('hgts_seq_involving_soil.fasta', 'w')
+for each_seq in SeqIO.parse(MetaCHIP_hgts_nc_seq, 'fasta'):
+    if str(each_seq.id) in hgts_involving_soil:
+        hgts_seq_involving_soil_handle.write('>%s\n' % str(each_seq.id))
+        hgts_seq_involving_soil_handle.write('%s\n' % str(each_seq.seq))
+hgts_seq_involving_soil_handle.close()
+
+# run blast between genes transferred and pubished sequence fragments
+blast_output_hgts_involving_soil = 'blast_output_hgts_involving_soil.tab'
+blast_command_involving_soil = 'blastn -query %s -subject %s -out %s %s' % ('hgts_seq_involving_soil.fasta', subject_seq, blast_output_hgts_involving_soil, blast_parameters)
+os.system(blast_command_involving_soil)
+
+# parse blast results for recent HGTs
+overlapped_predictions_involving_soil = get_overlapped_predictions(blast_output_hgts_involving_soil)
+#print(len(overlapped_predictions_involving_soil))
+print('The number of overlapped predictions: %s' % len(overlapped_predictions_involving_soil))
+
+
+# get sequence length dict
+gene_length_dict = {}
+for each_seq in SeqIO.parse(MetaCHIP_hgts_nc_seq, 'fasta'):
+    gene_length_dict[str(each_seq.id)] = len(str(each_seq.seq))
+
+
+for_flk_check = set()
+n = 0
+shorter500 = 0
+for each_gene in hgts_involving_soil:
+    if each_gene not in overlapped_predictions_involving_soil:
+        n += 1
+        #print('%s\t%s' % (each_gene, gene_length_dict[each_gene]))
+        if gene_length_dict[each_gene] <= 500:
+            shorter500 += 1
+            for_flk_check.add(each_gene)
+
+
+print(n)
+print(shorter500)
+
+print(for_flk_check)
+print(len(for_flk_check))
 
