@@ -3,6 +3,7 @@
 
 Publication
 ---
+
 + **Song WZ**, Wemheuer B, Zhang S, Steensen K, Thomas T* (2018) MetaCHIP: community-level horizontal gene transfer identification through the combination of best-match and explicit phylogenetic tree approaches. Microbiome **(Under review)** [PDF](https://songweizhi.github.io/assets/pdfs/Publication_2018_MetaCHIP_manuscript.pdf) 
 + Contact: Weizhi Song (songwz03@gmail.com), Torsten Thomas (t.thomas@unsw.edu.au)
 + Affiliation: The Centre for Marine Bio-Innovation (CMB), The University of New South Wales, Sydney, Australia
@@ -63,25 +64,37 @@ How to run:
 
 Output files:
 ---
+
 1. Identified HGT candidates.
 
-    |Gene_1|Gene_2|Genome_1_ID|Genome_2_ID|Identity|At_ends|Direction|
-    |---|---|---|---|---|---|---|
-    |AAM_03063|BAD_01456|A_1|B_1|100.0|no|AAM<-BAD|
-    |AMAU_05759|BHS_02873|A_4|B_4|79.02|no|AMAU<-BHS|
-    |BAD_00475|AAM_01658|B_1|A_1|74.354|no|BAD<-AAM|
-    |BDS_01877|AMAC_00215|B_2|A_3|100.0|no|BDS<-AMAC|
-    |BGC_01656|AKV_01272|B_3|A_2|100.0|yes|BGC<-AKV|
-    |BNM_00983|AMAC_00159|B_5|A_3|75.269|no|BNM<-AMAC|
-    |BNM_02093|AMS_03378|B_5|A_5|100.0|yes|BNM<-AMS|
-    |BNM_02445|AMS_01681|B_5|A_5|77.961|no|BNM<-AMS|
-    |BNM_02717|AAM_02737|B_5|A_1|74.47|no|BNM<-AAM|
+    |Gene_1|Gene_2|Gene_1_group|Gene_2_group|Identity|end_match|full_length_match|Direction|
+    |---|---|---|---|---|---|---|---|
+    |AAM_03063|BAD_01456|A|B|100.0|no|no|AAM<-BAD|
+    |AMAU_05759|BHS_02873|A|B|79.02|yes|no|AMAU<-BHS|
+    |BAD_00475|AAM_01658|B|A|74.354|no|no|BAD<-AAM|
+    |BDS_01877|AMAC_00215|B|A|100.0|no|yes|BDS<-AMAC|
+    |BGC_01656|AKV_01272|B|A|100.0|no|no|BGC<-AKV|
+    |BNM_00983|AMAC_00159|B|A|75.269|no|no|BNM<-AMAC|
+    |BNM_02093|AMS_03378|B|A|100.0|yes|no|BNM<-AMS|
+    |BNM_02445|AMS_01681|B|A|77.961|no|yes|BNM<-AMS|
+    |BNM_02717|AAM_02737|B|A|74.47|no|no|BNM<-AAM|
 
 1. Identity distribution for each group pair.
 
     ![identity_distribution](images/identity_distribution.png)
 
 1. Flanking regions of identified HGTs.
+
+    ![flanking_regions](images/flanking_regions.jpg)
+    
+1. Examples of contig end match.
+
+    ![end_match_1](images/end_match_1.eps)
+    ![end_match_2](images/end_match_2.eps)
+    ![end_match_3](images/end_match_3.eps)
+    ![end_match_4](images/end_match_4.eps)
+    
+1. Examples of contig full length match
 
     ![flanking_regions](images/flanking_regions.jpg)
 
