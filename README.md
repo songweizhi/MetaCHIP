@@ -11,19 +11,19 @@ Publication
 Dependencies:
 ---
 
-#### Python libraries
+### Python libraries
 * [BioPython](https://github.com/biopython/biopython.github.io/): Python tools for computational molecular biology.
 * [Numpy](http://www.numpy.org): fundamental package for scientific computing with Python.
 * [SciPy](https://www.scipy.org): Python-based ecosystem for mathematics, science, and engineering.
 * [Matplotlib](http://matplotlib.org): Python plotting library.
 * [ETE3](http://etetoolkit.org): environment for tree exploration in Python.
 
-#### R packages
+### R packages
 * [optparse](https://cran.r-project.org/web/packages/optparse/index.html): command line option parser in R.
 * [ape](https://cran.r-project.org/web/packages/ape/index.html): package for analyses of phylogenetics and evolution in R.
 * [circlize](https://cran.r-project.org/web/packages/circlize/index.html): package for circular visualization.
 
-#### Third-party software
+### Third-party software
 MetaCHIP makes use of the following 3rd party dependencies and assumes these are on your system path. Specify full path 
 to their executables in the config file if they are not on the system path.  
 * [Prodigal](https://github.com/hyattpd/Prodigal): protein-coding gene prediction tool for prokaryotic genomes.
