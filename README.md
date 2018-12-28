@@ -65,7 +65,7 @@ How to run:
 Output files:
 ---
 
-1. Identified HGT candidates.
+1. Identified HGT candidates. See some example of contig end_match and full_length_match below. 
 
     |Gene_1|Gene_2|Gene_1_group|Gene_2_group|Identity|end_match|full_length_match|Direction|
     |---|---|---|---|---|---|---|---|
@@ -79,26 +79,23 @@ Output files:
     |BNM_02445|AMS_01681|B|A|77.961|no|yes|BNM<-AMS|
     |BNM_02717|AAM_02737|B|A|74.47|no|no|BNM<-AAM|
 
-1. Identity distribution for each group pair.
-
-    ![identity_distribution](images/identity_distribution.png)
-
-1. Flanking regions of identified HGTs.
-
+1. Flanking regions of identified HGT candidates.
     ![flanking_regions](images/flanking_regions.jpg)
-    
-1. Examples of contig end match.
-
-    ![end_match_1](images/end_match_1.jpg)
         
+1. Gene flow between groups.
+    ![Gene_flow](images/Gene_flow.jpg)
+    
+1. Identity distribution of identified HGT candidates.
+    ![HGT_identity_distribution](images/HGT_identity_distribution.png)
+
+1. The number of identified HGT candidates in each genome/group.
+    ![HGT_per_genome_group](images/HGT_per_genome_group.png)
+ 
+1. Examples of contig end match.
+    ![end_match_1](images/end_match_1.jpg)   
     ![end_match_2](images/end_match_2.jpg)
         
 1. Examples of contig full length match
-
     ![full_length_match_1](images/full_length_match_1.jpg)
-    
     ![full_length_match_2](images/full_length_match_2.jpg)
     
-1. Gene flow between groups.
-
-    ![Gene_flow](images/Gene_flow.jpg)
