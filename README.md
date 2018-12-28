@@ -89,15 +89,20 @@ Output files:
     
 1. Examples of contig end match.
 
-    ![end_match_1](images/end_match_1.eps)
-    ![end_match_2](images/end_match_2.eps)
-    ![end_match_3](images/end_match_3.eps)
-    ![end_match_4](images/end_match_4.eps)
+    ![end_match_1](images/end_match_1.jpg)
+    
+    ![end_match_2](images/end_match_2.jpg)
+    
+    ![end_match_3](images/end_match_3.jpg)
+    
+    ![end_match_4](images/end_match_4.jpg)
     
 1. Examples of contig full length match
 
-    ![flanking_regions](images/flanking_regions.jpg)
-
+    ![full_length_match_1](images/full_length_match_1.jpg)
+    
+    ![full_length_match_2](images/full_length_match_2.jpg)
+    
 1. Gene flow between groups.
 
     ![Gene_flow](images/Gene_flow.jpg)
