@@ -11,7 +11,7 @@ Publication
 Dependencies:
 ---
 
-##### Python libraries
+### Python libraries
 * [BioPython](https://github.com/biopython/biopython.github.io/)
 * [ETE3](http://etetoolkit.org)
 * [Numpy](http://www.numpy.org)
@@ -19,13 +19,13 @@ Dependencies:
 * [Matplotlib](http://matplotlib.org)
 
 
-##### R packages
+### R packages
 * [optparse](https://cran.r-project.org/web/packages/optparse/index.html)
 * [ape](https://cran.r-project.org/web/packages/ape/index.html)
 * [circlize](https://cran.r-project.org/web/packages/circlize/index.html)
 
 
-##### Third-party software
+### Third-party software
 GTDB-Tk makes use of the following 3rd party dependencies and assumes these are on your system path:
 * [Prodigal](https://github.com/hyattpd/Prodigal)
 * [Hmmer](http://hmmer.org)
