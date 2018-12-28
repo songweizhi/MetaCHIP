@@ -11,29 +11,36 @@ Publication
 Dependencies:
 ---
 
-+ Python packages:
-[BioPython](https://github.com/biopython/biopython.github.io/),
-[ETE3](http://etetoolkit.org),
-[Numpy](http://www.numpy.org),
-[SciPy](https://www.scipy.org),
-[Matplotlib](http://matplotlib.org)
+##### Python libraries
+* [BioPython](https://github.com/biopython/biopython.github.io/)
+* [ETE3](http://etetoolkit.org)
+* [Numpy](http://www.numpy.org)
+* [SciPy](https://www.scipy.org)
+* [Matplotlib](http://matplotlib.org)
 
-+ R packages:
-[optparse](https://cran.r-project.org/web/packages/optparse/index.html),
-[ape](https://cran.r-project.org/web/packages/ape/index.html),
-[circlize](https://cran.r-project.org/web/packages/circlize/index.html)
 
-+ [Prodigal](https://github.com/hyattpd/Prodigal), 
-[Hmmer](http://hmmer.org),
-[Mafft](https://mafft.cbrc.jp/alignment/software/),
-[FastTree](http://www.microbesonline.org/fasttree/),
-[BLAST+](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download),
-[Ranger-DTL 2.0](https://compbio.engr.uconn.edu/software/RANGER-DTL/),
-[Usearch](https://www.drive5.com/usearch/)
+##### R packages
+* [optparse](https://cran.r-project.org/web/packages/optparse/index.html)
+* [ape](https://cran.r-project.org/web/packages/ape/index.html)
+* [circlize](https://cran.r-project.org/web/packages/circlize/index.html)
+
+
+##### Third-party software
+GTDB-Tk makes use of the following 3rd party dependencies and assumes these are on your system path:
+* [Prodigal](https://github.com/hyattpd/Prodigal)
+* [Hmmer](http://hmmer.org)
+* [Mafft](https://mafft.cbrc.jp/alignment/software/)
+* [FastTree](http://www.microbesonline.org/fasttree/)
+* [BLAST+](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download)
+* [Ranger-DTL 2.0](https://compbio.engr.uconn.edu/software/RANGER-DTL/)
+* [Usearch](https://www.drive5.com/usearch/)
 
 
 How to install:
 ---
+1. Install the 
+
+
 1. Download MetaCHIP scripts and decompress.
 1. Isntall required softwares and Python modules.
 1. Modify the config file according to the location of required softwares.
