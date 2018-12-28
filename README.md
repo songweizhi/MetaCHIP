@@ -31,6 +31,7 @@ Dependencies:
 [Ranger-DTL 2.0](https://compbio.engr.uconn.edu/software/RANGER-DTL/),
 [Usearch](https://www.drive5.com/usearch/)
 
+
 How to install:
 ---
 1. Download MetaCHIP scripts and decompress.
@@ -45,6 +46,9 @@ Notes:
 which holds the taxonomic classification of input genomes. An example of the taxonomic classification results can be found 
 at [example_dataset/taxon_classification.tsv](https://github.com/songweizhi/MetaCHIP/blob/master/example_dataset/taxon_classification.tsv)
 1. [GTDB-Tk](https://github.com/Ecogenomics/GTDBTk) is recommended for taxonomic classification of input genomes.
+1. Output format for all-vs-all blastn in the approach: 
+        
+        -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen"
 
 
 How to run:

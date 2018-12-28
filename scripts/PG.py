@@ -797,6 +797,9 @@ def PG(args, config_dict):
 
     #################################### find matched grouping file if not provided  ###################################
 
+    if grouping_level is None:
+        grouping_level = 'x'
+
     MetaCHIP_wd =   '%s_MetaCHIP_wd'              % output_prefix
     pwd_log_file =  '%s/%s_%s_PG_%s.log'  % (MetaCHIP_wd, output_prefix, grouping_level, datetime.now().strftime('%Y-%m-%d_%Hh-%Mm-%Ss_%f'))
 
@@ -1277,14 +1280,16 @@ def PG(args, config_dict):
 
     # read group_2_taxon into dict
     group_2_taxon_dict = {}
-    for each_group_2_taxon in open(pwd_grouping_id_to_taxon_file):
-        each_group_2_taxon_split = each_group_2_taxon.strip().split(',')
-        group_2_taxon_dict[each_group_2_taxon_split[0]] = each_group_2_taxon_split[1]
-
     group_id_with_taxon = []
-    for each_group in group_list_uniq:
-        each_group_new = '(%s) %s' % (each_group, group_2_taxon_dict[each_group])
-        group_id_with_taxon.append(each_group_new)
+    if grouping_level != 'x':
+
+        for each_group_2_taxon in open(pwd_grouping_id_to_taxon_file):
+            each_group_2_taxon_split = each_group_2_taxon.strip().split(',')
+            group_2_taxon_dict[each_group_2_taxon_split[0]] = each_group_2_taxon_split[1]
+
+        for each_group in group_list_uniq:
+            each_group_new = '(%s) %s' % (each_group, group_2_taxon_dict[each_group])
+            group_id_with_taxon.append(each_group_new)
 
     # get group_id_list
     group_id_list = []
@@ -1332,9 +1337,19 @@ def PG(args, config_dict):
     # write stats to file
     HGT_PG_STAT_handle = open(pwd_candidates_file_ET_validated_STAT_group_txt, 'w')
     n = 0
-    HGT_PG_STAT_handle.write('Group\tSize(Mbp)\tHGT\tHGT/Mbp\tTaxon\n')
+
+    if grouping_level == 'x':
+        HGT_PG_STAT_handle.write('Group\tSize(Mbp)\tHGT\tHGT/Mbp\n')
+    else:
+        HGT_PG_STAT_handle.write('Group\tSize(Mbp)\tHGT\tHGT/Mbp\tTaxon\n')
+
     for each_g in group_list_uniq:
-        for_out = '%s\t%s\t%s\t%s\t%s\n' % (each_g, float("{0:.3f}".format(group_to_length_dict[each_g])), group_list_uniq_count[n], group_list_uniq_count_normalized[n], group_2_taxon_dict[each_g])
+
+        if grouping_level == 'x':
+            for_out = '%s\t%s\t%s\t%s\n' % (each_g, float("{0:.3f}".format(group_to_length_dict[each_g])), group_list_uniq_count[n], group_list_uniq_count_normalized[n])
+        else:
+            for_out = '%s\t%s\t%s\t%s\t%s\n' % (each_g, float("{0:.3f}".format(group_to_length_dict[each_g])), group_list_uniq_count[n], group_list_uniq_count_normalized[n], group_2_taxon_dict[each_g])
+
         HGT_PG_STAT_handle.write(for_out)
         n += 1
     HGT_PG_STAT_handle.close()
@@ -1382,8 +1397,12 @@ def PG(args, config_dict):
 
     # subplot 2
     plt.subplot(222)
-    plt.bar(x_range_group, group_list_uniq_count, tick_label=group_id_with_taxon, align='center', alpha=0.5, linewidth=0, color=color_list_according_group_uniq)
-    plt.xticks(x_range_group, group_id_with_taxon, rotation=315, fontsize=xticks_fontsize_group,horizontalalignment='left')
+    if grouping_level == 'x':
+        plt.bar(x_range_group, group_list_uniq_count, tick_label=group_list_uniq, align='center', alpha=0.5, linewidth=0, color=color_list_according_group_uniq)
+        plt.xticks(x_range_group, group_list_uniq, rotation=315, fontsize=xticks_fontsize_group,horizontalalignment='left')
+    else:
+        plt.bar(x_range_group, group_list_uniq_count, tick_label=group_id_with_taxon, align='center', alpha=0.5, linewidth=0, color=color_list_according_group_uniq)
+        plt.xticks(x_range_group, group_id_with_taxon, rotation=315, fontsize=xticks_fontsize_group,horizontalalignment='left')
 
     # subplot 3
     plt.subplot(223)
@@ -1394,9 +1413,13 @@ def PG(args, config_dict):
 
     # subplot 4
     plt.subplot(224)
-    plt.bar(x_range_group, group_list_uniq_count_normalized, tick_label=group_id_with_taxon, align='center', alpha=0.5, linewidth=0, color=color_list_according_group_uniq)
+    if grouping_level == 'x':
+        plt.bar(x_range_group, group_list_uniq_count_normalized, tick_label=group_list_uniq, align='center', alpha=0.5, linewidth=0, color=color_list_according_group_uniq)
+        plt.xticks(x_range_group, group_list_uniq, rotation=315, fontsize=xticks_fontsize_group,horizontalalignment='left')
+    else:
+        plt.bar(x_range_group, group_list_uniq_count_normalized, tick_label=group_id_with_taxon, align='center', alpha=0.5, linewidth=0, color=color_list_according_group_uniq)
+        plt.xticks(x_range_group, group_id_with_taxon, rotation=315, fontsize=xticks_fontsize_group,horizontalalignment='left')
     plt.xlabel('Group')
-    plt.xticks(x_range_group, group_id_with_taxon, rotation=315, fontsize=xticks_fontsize_group,horizontalalignment='left')
 
     # plot layout
     plt.subplots_adjust(wspace=0.2, top=0.95)

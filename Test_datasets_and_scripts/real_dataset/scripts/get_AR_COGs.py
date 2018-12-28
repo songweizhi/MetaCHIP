@@ -1,7 +1,7 @@
 
 usage = '''
 
-python /Users/songweizhi/PycharmProjects/MetaCHIP/get_AR_COGs.py
+python /Users/songweizhi/PycharmProjects/MetaCHIP/Test_datasets_and_scripts/real_dataset/scripts/get_AR_COGs.py
 
 '''
 

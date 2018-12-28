@@ -31,6 +31,8 @@ add option -force
 report progress for every 100 processes (if n/100 is int)
 replace all-vs-all blastn with usearch
 
+-r option only accept p c o f g s
+
 PI:
 if there is a Usearch error, break the pipeline
 provide qsub option for running blast  
@@ -105,9 +107,10 @@ if __name__ == '__main__':
     # arguments for PI
     PI_parser = subparsers.add_parser('PI',  description='Prepare input files', epilog='Example: MetaCHIP PI -h')
     PI_parser.add_argument('-i',             required=True,  help='input genome folder')
-    PI_parser.add_argument('-taxon',         required=True,  help='taxonomic classification')
+    PI_parser.add_argument('-taxon',         required=False,  help='taxonomic classification')
     PI_parser.add_argument('-p',             required=True,  help='output prefix')
-    PI_parser.add_argument('-r',             required=True,  help='grouping rank')
+    PI_parser.add_argument('-r',             required=False, default=None, help='grouping rank')
+    PI_parser.add_argument('-g',             required=False, default=None, help='grouping file')
     PI_parser.add_argument('-x',             required=False, default='fasta', help='file extension')
     PI_parser.add_argument('-grouping_only', required=False, action="store_true", help='run grouping only, deactivate gene calling and phylogenetic tree building')
     PI_parser.add_argument('-nonmeta',       required=False, action="store_true", help='annotate Non-metagenome-assembled genomes (Non-MAGs)')
@@ -120,13 +123,13 @@ if __name__ == '__main__':
     # arguments for BM approach
     BM_parser = subparsers.add_parser('BM',  description='Best-match approach', epilog='Example: MetaCHIP BM -h')
     BM_parser.add_argument('-p',             required=True,  help='output prefix')
-    BM_parser.add_argument('-r',             required=True,  help='grouping rank')
+    BM_parser.add_argument('-r',             required=False, default=None, help='grouping rank')
     BM_parser.add_argument('-g',             required=False, default=None, help='grouping file')
     BM_parser.add_argument('-cov',           required=False, type=int, default=75, help='coverage cutoff, deafult: 75')
     BM_parser.add_argument('-al',            required=False, type=int, default=200, help='alignment length cutoff, deafult: 200')
     BM_parser.add_argument('-flk',           required=False, type=int, default=10, help='the length of flanking sequences to plot (Kbp), deafult: 10')
     BM_parser.add_argument('-ip',            required=False, type=int, default=90, help='identity percentile cutoff, deafult: 90')
-    BM_parser.add_argument('-ei',            required=False, type=float, default=95, help='end match identity cutoff, deafult: 95')
+    BM_parser.add_argument('-ei',            required=False, type=float, default=90, help='end match identity cutoff, deafult: 95')
     BM_parser.add_argument('-t',             required=False, type=int, default=1, help='number of threads, deafult: 1')
     BM_parser.add_argument('-plot_iden',     required=False, action="store_true", help='plot identity distribution')
     BM_parser.add_argument('-NoEbCheck',     required=False, action="store_true", help='disable end break and contig match check for fast processing, not recommend for metagenome-assembled genomes (MAGs))')
@@ -137,13 +140,13 @@ if __name__ == '__main__':
     # arguments for PG approach
     PG_parser = subparsers.add_parser('PG',  description='Phylogenetic approach', epilog='Example: MetaCHIP PG -h')
     PG_parser.add_argument('-p',             required=True,  help='output prefix')
-    PG_parser.add_argument('-r',             required=True,  help='grouping rank')
+    PG_parser.add_argument('-r',             required=False, default=None, help='grouping rank')
     PG_parser.add_argument('-g',             required=False, help='grouping file')
     PG_parser.add_argument('-cov',           required=False, type=int, default=75, help='coverage cutoff, deafult: 75')
     PG_parser.add_argument('-al',            required=False, type=int, default=200, help='alignment length cutoff, deafult: 200')
     PG_parser.add_argument('-flk',           required=False, type=int, default=10, help='the length of flanking sequences to plot (Kbp), deafult: 10')
     PG_parser.add_argument('-ip',            required=False, type=int, default=90, help='identity percentile, deafult: 90')
-    PG_parser.add_argument('-ei',            required=False, type=float, default=95, help='end match identity cutoff, deafult: 95')
+    PG_parser.add_argument('-ei',            required=False, type=float, default=90, help='end match identity cutoff, deafult: 95')
     PG_parser.add_argument('-t',             required=False, type=int, default=1, help='number of threads, deafult: 1')
     PG_parser.add_argument('-force',         required=False, action="store_true", help='overwrite previous results')
     PG_parser.add_argument('-quiet',         required=False, action="store_true", help='Do not report progress')

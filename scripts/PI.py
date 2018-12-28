@@ -652,6 +652,7 @@ def PI(args, config_dict):
     GTDB_output_file =      args['taxon']
     output_prefix =         args['p']
     grouping_level =        args['r']
+    grouping_file =         args['g']
     file_extension =        args['x']
     grouping_only =         args['grouping_only']
     num_threads =           args['t']
@@ -659,8 +660,6 @@ def PI(args, config_dict):
     nonmeta_mode =          args['nonmeta']
     qsub_on =               args['qsub']
     noblast =               args['noblast']
-
-
 
     # read in config file
     path_to_hmm =           config_dict['path_to_hmm']
@@ -678,6 +677,7 @@ def PI(args, config_dict):
     minimal_cov_in_msa = 50
     min_consensus_in_msa = 25
     blast_parameters = '-evalue 1e-5 -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen" -task blastn'
+    rank_abbre_dict = {'d': 'domain', 'p': 'phylum', 'c': 'class', 'o': 'order', 'f': 'family', 'g': 'genus', 's': 'species'}
 
     wd_on_katana = os.getcwd()
     node_num = 1
@@ -689,6 +689,9 @@ def PI(args, config_dict):
 
 
     #################################################### check input ###################################################
+
+    if grouping_level is None:
+        grouping_level = 'x'
 
     MetaCHIP_wd =   '%s_MetaCHIP_wd'                   % (output_prefix)
     pwd_log_file =  '%s/%s_%s_PI_%s.log'  % (MetaCHIP_wd, output_prefix, grouping_level, datetime.now().strftime('%Y-%m-%d_%Hh-%Mm-%Ss_%f'))
@@ -713,93 +716,108 @@ def PI(args, config_dict):
 
     ############################################ read GTDB output into dict  ###########################################
 
-    # read GTDB output into dict
-    taxon_assignment_dict = {}
-    for each_genome in open(GTDB_output_file):
-        if not each_genome.startswith('user_genome'):
-            each_split = each_genome.strip().split('\t')
-            bin_name = each_split[0]
-
-            if bin_name in input_genome_basename_list:
-
-                assignment_full = []
-                if len(each_split) == 1:
-                    assignment_full = ['d__', 'p__', 'c__', 'o__', 'f__', 'g__', 's__']
-                elif (len(each_split) > 1) and (';' in each_split[1]):
-                    assignment = each_split[1].split(';')
-                    if len(assignment) == 7:
-                        assignment_full = assignment
-                    if len(assignment) == 6:
-                        assignment_full = assignment + ['s__']
-                    if len(assignment) == 5:
-                        assignment_full = assignment + ['g__', 's__']
-                    if len(assignment) == 4:
-                        assignment_full = assignment + ['f__', 'g__', 's__']
-                    if len(assignment) == 3:
-                        assignment_full = assignment + ['o__', 'f__', 'g__', 's__']
-                    if len(assignment) == 2:
-                        assignment_full = assignment + ['c__', 'o__', 'f__', 'g__', 's__']
-
-                elif (len(each_split) > 1) and (';' not in each_split[1]):
-                    assignment_full = [each_split[1]] + ['p__', 'c__', 'o__', 'f__', 'g__', 's__']
-
-                # store in dict
-                taxon_assignment_dict[bin_name] = assignment_full
-
-
-    # get all identified taxon at defined ranks
-    rank_to_position_dict = {'d': 0, 'p': 1, 'c': 2, 'o': 3, 'f': 4, 'g': 5, 's': 6}
-    specified_rank_pos = rank_to_position_dict[grouping_level]
-    identified_taxon_list = []
-    for each_TaxonAssign in taxon_assignment_dict:
-        specified_rank_id = taxon_assignment_dict[each_TaxonAssign][specified_rank_pos]
-        if specified_rank_id not in identified_taxon_list:
-            identified_taxon_list.append(specified_rank_id)
-
-
-    # get the id of genomes assigned to each taxon at specified level
-    taxon_2_genome_dict = {}
-    for each_taxon in identified_taxon_list:
-
-        genome_list = []
-        for genome in taxon_assignment_dict:
-            if taxon_assignment_dict[genome][specified_rank_pos] == each_taxon:
-                genome_list.append(genome)
-        taxon_2_genome_dict[each_taxon] = genome_list
-
-
-    # get the number of ignored genome
-    unclassified_symbol = '%s__' % grouping_level
-    ignored_genome_num = 0
-    if unclassified_symbol in taxon_2_genome_dict:
-        ignored_genome_num = len(taxon_2_genome_dict[unclassified_symbol])
-
-
-    rank_abbre_dict = {'d': 'domain', 'p': 'phylum', 'c': 'class', 'o': 'order', 'f': 'family', 'g': 'genus', 's': 'species'}
-
-
-    ####################################################### report #####################################################
-
-    # report group number
     group_num = 0
-    if unclassified_symbol in taxon_2_genome_dict:
-        group_num = len(taxon_2_genome_dict) - 1
+    genomes_with_grouping = set()
+    taxon_2_genome_dict = {}
+    ignored_genome_num = 0
+    if grouping_level == 'x':
+
+        # read in grouping file
+        group_id_2_genome_dict = {}
+        for each_genome in open(grouping_file):
+            each_genome_split = each_genome.strip().split(',')
+            group_id = each_genome_split[0]
+            genome_name = each_genome_split[1]
+
+            genomes_with_grouping.add(genome_name)
+
+            if group_id not in group_id_2_genome_dict:
+                group_id_2_genome_dict[group_id] = [genome_name]
+            else:
+                group_id_2_genome_dict[group_id].append(genome_name)
+
+        group_num = len(group_id_2_genome_dict)
+
     else:
-        group_num = len(taxon_2_genome_dict)
-    sleep(0.5)
+        # read GTDB output into dict
+        taxon_assignment_dict = {}
+        for each_genome in open(GTDB_output_file):
+            if not each_genome.startswith('user_genome'):
+                each_split = each_genome.strip().split('\t')
+                bin_name = each_split[0]
 
-    # for report and log
-    report_and_log(('Input genomes clustered into %s groups' % group_num), pwd_log_file, keep_quiet)
+                if bin_name in input_genome_basename_list:
 
-    if group_num == 1:
-        sleep(0.5)
-        report_and_log('Group number is too low for HGT analysis, please provide a lower rank level', pwd_log_file, keep_quiet)
-        exit()
+                    assignment_full = []
+                    if len(each_split) == 1:
+                        assignment_full = ['d__', 'p__', 'c__', 'o__', 'f__', 'g__', 's__']
+                    elif (len(each_split) > 1) and (';' in each_split[1]):
+                        assignment = each_split[1].split(';')
+                        if len(assignment) == 7:
+                            assignment_full = assignment
+                        if len(assignment) == 6:
+                            assignment_full = assignment + ['s__']
+                        if len(assignment) == 5:
+                            assignment_full = assignment + ['g__', 's__']
+                        if len(assignment) == 4:
+                            assignment_full = assignment + ['f__', 'g__', 's__']
+                        if len(assignment) == 3:
+                            assignment_full = assignment + ['o__', 'f__', 'g__', 's__']
+                        if len(assignment) == 2:
+                            assignment_full = assignment + ['c__', 'o__', 'f__', 'g__', 's__']
 
-    # report ignored genomes
-    sleep(0.5)
-    if ignored_genome_num > 0:
-        report_and_log(('Ignored %s genome(s) with unknown classification at specified level' % ignored_genome_num), pwd_log_file, keep_quiet)
+                    elif (len(each_split) > 1) and (';' not in each_split[1]):
+                        assignment_full = [each_split[1]] + ['p__', 'c__', 'o__', 'f__', 'g__', 's__']
+
+                    # store in dict
+                    taxon_assignment_dict[bin_name] = assignment_full
+
+
+        # get all identified taxon at defined ranks
+        rank_to_position_dict = {'d': 0, 'p': 1, 'c': 2, 'o': 3, 'f': 4, 'g': 5, 's': 6}
+        specified_rank_pos = rank_to_position_dict[grouping_level]
+        identified_taxon_list = []
+        for each_TaxonAssign in taxon_assignment_dict:
+            specified_rank_id = taxon_assignment_dict[each_TaxonAssign][specified_rank_pos]
+            if specified_rank_id not in identified_taxon_list:
+                identified_taxon_list.append(specified_rank_id)
+
+
+        # get the id of genomes assigned to each taxon at specified level
+
+        for each_taxon in identified_taxon_list:
+
+            genome_list = []
+            for genome in taxon_assignment_dict:
+                if taxon_assignment_dict[genome][specified_rank_pos] == each_taxon:
+                    genome_list.append(genome)
+            taxon_2_genome_dict[each_taxon] = genome_list
+
+
+        # get the number of ignored genome
+        unclassified_symbol = '%s__' % grouping_level
+        if unclassified_symbol in taxon_2_genome_dict:
+            ignored_genome_num = len(taxon_2_genome_dict[unclassified_symbol])
+
+
+        ####################################################### report #####################################################
+
+        # report group number
+        if unclassified_symbol in taxon_2_genome_dict:
+            group_num = len(taxon_2_genome_dict) - 1
+        else:
+            group_num = len(taxon_2_genome_dict)
+
+        # for report and log
+        report_and_log(('Input genomes clustered into %s groups' % group_num), pwd_log_file, keep_quiet)
+
+        if group_num == 1:
+            report_and_log('Group number is too low for HGT analysis, please provide a lower rank level', pwd_log_file, keep_quiet)
+            exit()
+
+        # report ignored genomes
+        if ignored_genome_num > 0:
+            report_and_log(('Ignored %s genome(s) with unknown classification at specified level' % ignored_genome_num), pwd_log_file, keep_quiet)
 
 
     ############################################# define file/folder names #############################################
@@ -860,41 +878,45 @@ def PI(args, config_dict):
 
     ################################################### get grouping ###################################################
 
-    group_index_list = get_group_index_list()
-    grouping_file_handle = open(pwd_grouping_file, 'w')
-    grouping_id_to_taxon_tmp_file_handle = open(pwd_grouping_id_to_taxon_tmp_file, 'w')
-    excluded_genome_file_handle = open(pwd_excluded_genome_file, 'w')
-    genomes_with_clear_taxon = set()
-    n = 0
-    for each_taxon in taxon_2_genome_dict:
-        if each_taxon != unclassified_symbol:
-            group_id = group_index_list[n]
-            for genome in taxon_2_genome_dict[each_taxon]:
-                genomes_with_clear_taxon.add(genome)
-                for_write_1 = '%s,%s\n' % (group_id, genome)
-                for_write_2 = '%s,%s\n' % (group_id, each_taxon)
-                grouping_file_handle.write(for_write_1)
-                grouping_id_to_taxon_tmp_file_handle.write(for_write_2)
-            n += 1
+    if grouping_level == 'x':
+        pwd_grouping_file = grouping_file
 
-        # export excluded genomes
-        else:
-            for un_classfided_genome in taxon_2_genome_dict[each_taxon]:
-                excluded_genome_file_handle.write('%s\n' % un_classfided_genome)
+    else:
+        group_index_list = get_group_index_list()
+        grouping_file_handle = open(pwd_grouping_file, 'w')
+        grouping_id_to_taxon_tmp_file_handle = open(pwd_grouping_id_to_taxon_tmp_file, 'w')
+        excluded_genome_file_handle = open(pwd_excluded_genome_file, 'w')
 
-    grouping_file_handle.close()
-    grouping_id_to_taxon_tmp_file_handle.close()
-    excluded_genome_file_handle.close()
+        n = 0
+        for each_taxon in taxon_2_genome_dict:
+            if each_taxon != unclassified_symbol:
+                group_id = group_index_list[n]
+                for genome in taxon_2_genome_dict[each_taxon]:
+                    genomes_with_grouping.add(genome)
+                    for_write_1 = '%s,%s\n' % (group_id, genome)
+                    for_write_2 = '%s,%s\n' % (group_id, each_taxon)
+                    grouping_file_handle.write(for_write_1)
+                    grouping_id_to_taxon_tmp_file_handle.write(for_write_2)
+                n += 1
 
-    os.system('cat %s | sort | uniq > %s' % (pwd_grouping_id_to_taxon_tmp_file, pwd_grouping_id_to_taxon_file))
-    os.system('rm %s' % pwd_grouping_id_to_taxon_tmp_file)
+            # export excluded genomes
+            else:
+                for un_classfided_genome in taxon_2_genome_dict[each_taxon]:
+                    excluded_genome_file_handle.write('%s\n' % un_classfided_genome)
 
-    if ignored_genome_num == 0:
-        os.system('rm %s' % pwd_excluded_genome_file)
+        grouping_file_handle.close()
+        grouping_id_to_taxon_tmp_file_handle.close()
+        excluded_genome_file_handle.close()
 
-    sleep(0.5)
-    # for report and log
-    report_and_log(('Grouping file exported to: %s' % grouping_file_name), pwd_log_file, keep_quiet)
+        os.system('cat %s | sort | uniq > %s' % (pwd_grouping_id_to_taxon_tmp_file, pwd_grouping_id_to_taxon_file))
+        os.system('rm %s' % pwd_grouping_id_to_taxon_tmp_file)
+
+        if ignored_genome_num == 0:
+            os.system('rm %s' % pwd_excluded_genome_file)
+
+        sleep(0.5)
+        # for report and log
+        report_and_log(('Grouping file exported to: %s' % grouping_file_name), pwd_log_file, keep_quiet)
 
 
     ################################################## plot grouping stats #################################################
@@ -911,21 +933,26 @@ def PI(args, config_dict):
 
     # read group_2_taxon into dict
     group_2_taxon_dict = {}
-    for each_group_2_taxon in open(pwd_grouping_id_to_taxon_file):
-        each_group_2_taxon_split = each_group_2_taxon.strip().split(',')
-        group_2_taxon_dict[each_group_2_taxon_split[0]] = each_group_2_taxon_split[1]
-
     group_id_with_taxon = []
-    for each_group in group_id_uniq_sorted:
-        each_group_new = '(%s) %s' % (each_group, group_2_taxon_dict[each_group])
-        group_id_with_taxon.append(each_group_new)
+    if grouping_level != 'x':
+
+        for each_group_2_taxon in open(pwd_grouping_id_to_taxon_file):
+            each_group_2_taxon_split = each_group_2_taxon.strip().split(',')
+            group_2_taxon_dict[each_group_2_taxon_split[0]] = each_group_2_taxon_split[1]
+
+        for each_group in group_id_uniq_sorted:
+            each_group_new = '(%s) %s' % (each_group, group_2_taxon_dict[each_group])
+            group_id_with_taxon.append(each_group_new)
 
     group_id_uniq_count = []
     for each_id in group_id_uniq_sorted:
         group_id_uniq_count.append(group_id_all.count(each_id))
 
     x_range = range(len(group_id_uniq_sorted))
-    plt.bar(x_range, group_id_uniq_count, tick_label=group_id_with_taxon, align='center', alpha=0.2, linewidth=0)
+    if grouping_level == 'x':
+        plt.bar(x_range, group_id_uniq_count, tick_label=group_id_uniq_sorted, align='center', alpha=0.2, linewidth=0)
+    else:
+        plt.bar(x_range, group_id_uniq_count, tick_label=group_id_with_taxon, align='center', alpha=0.2, linewidth=0)
 
     # for a,b in zip(x_range, group_id_uniq_count):
     #     plt.text(a, b, str(b), fontsize=12, horizontalalignment='center',)
@@ -936,9 +963,13 @@ def PI(args, config_dict):
     elif len(group_id_uniq_sorted) > 50:
         xticks_fontsize = 5
 
-    plt.xticks(x_range, group_id_with_taxon, rotation=315, fontsize=xticks_fontsize,horizontalalignment='left')
+    if grouping_level == 'x':
+        plt.xticks(x_range, group_id_uniq_sorted, rotation=315, fontsize=xticks_fontsize,horizontalalignment='left')
+        plt.title('The number of input genome in each group')
+    else:
+        plt.xticks(x_range, group_id_with_taxon, rotation=315, fontsize=xticks_fontsize,horizontalalignment='left')
+        plt.title('The number of input genome in each %s' % rank_abbre_dict[grouping_level])
 
-    plt.title('The number of input genome in each %s' % rank_abbre_dict[grouping_level])
     plt.ylabel('The number of genome')
     plt.tight_layout()
     plt.savefig(pwd_grouping_plot, dpi=300)
@@ -1017,7 +1048,7 @@ def PI(args, config_dict):
 
     # prepare arguments for copy_annotaion_worker
     list_for_multiple_arguments_copy_annotaion = []
-    for genome in genomes_with_clear_taxon:
+    for genome in genomes_with_grouping:
         list_for_multiple_arguments_copy_annotaion.append([genome,
                                                            pwd_prodigal_output_folder,
                                                            pwd_ffn_folder,
