@@ -90,13 +90,9 @@ Output files:
 1. Examples of contig end match.
 
     ![end_match_1](images/end_match_1.jpg)
-    
+        
     ![end_match_2](images/end_match_2.jpg)
-    
-    ![end_match_3](images/end_match_3.jpg)
-    
-    ![end_match_4](images/end_match_4.jpg)
-    
+        
 1. Examples of contig full length match
 
     ![full_length_match_1](images/full_length_match_1.jpg)
