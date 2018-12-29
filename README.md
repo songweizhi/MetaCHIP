@@ -37,11 +37,11 @@ to their executables in the config file if they are not on the system path.
 How to install:
 ---
 
-1. Once dependencies are installed, MetaCHIP can be installed using pip:
+1. After you have MetaCHIP's 3rd party dependencies and R packages on your system, MetaCHIP can be installed with:
 
-        pip install metachip
+        pip install MetaCHIP
         
-1. Add the 3rd party dependencies to your system path. otherwise, specify full path to their executables in the config file.
+1. You can either add MetaCHIP's dependencies to your system path or specify full path to their executables in MetaCHIP_config.py, which can be found in folder lib/site-packages/MetaCHIP.
 
 
 Notes:
@@ -59,20 +59,32 @@ How to run:
 ---
 + A detailed manual can be found at [manual/MetaCHIP_User_Manual.pdf](https://github.com/songweizhi/MetaCHIP/blob/master/manual/MetaCHIP_User_Manual.pdf).
 
-        $ MetaCHIP -h
-     
-             ...::: MetaCHIP :::...
-            
-        HGT detection modules:
-           PI          -> Prepare Input files 
-           BM          -> Best-Match approach 
-           PG          -> PhyloGenetic approach
+        # show help information
+        MetaCHIP -h
+        MetaCHIP PI -h
+        MetaCHIP BM -h
+        MetaCHIP PG -h
         
-        # for command specific help
-        MetaCHIP <command> -h
-    
+        # run MetaCHIP by grouping input genomes at Class level according to their taxonomic classifications
+        MetaCHIP PI -i bin_folder -x fasta -taxon NorthSea_GTDB_output.tsv -r c -p NorthSea -t 6
+        MetaCHIP BM -p NorthSea -r c -t 6
+        MetaCHIP PG -p NorthSea -r c -t 6
 
-
+        # run MetaCHIP with customized grouping profile
+        MetaCHIP PI -i bin_folder -x fasta -g customized_grouping.txt -p NorthSea -t 6
+        MetaCHIP BM -p NorthSea -g customized_grouping.txt -t 6
+        MetaCHIP PG -p NorthSea -g customized_grouping.txt -t 6
+        
+        # Detect HGT with MetaCHIP at multiple levels
+        MetaCHIP PI -i bin_folder -x fasta -taxon NorthSea_GTDB_output.tsv -r c -p NorthSea -t 6
+        MetaCHIP PI -i bin_folder -x fasta -taxon NorthSea_GTDB_output.tsv -r o -p NorthSea -t 6 -grouping_only
+        MetaCHIP PI -i bin_folder -x fasta -taxon NorthSea_GTDB_output.tsv -r f -p NorthSea -t 6 -grouping_only
+        MetaCHIP BM -p NorthSea -r c -t 6
+        MetaCHIP BM -p NorthSea -r o -t 6
+        MetaCHIP BM -p NorthSea -r f -t 6
+        MetaCHIP PG -p NorthSea -r c -t 6
+        MetaCHIP PG -p NorthSea -r o -t 6
+        MetaCHIP PG -p NorthSea -r f -t 6
 
 
 Output files:
