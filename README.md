@@ -17,7 +17,7 @@ Dependencies:
 * [Numpy](http://www.numpy.org): fundamental package for scientific computing with Python.
 * [SciPy](https://www.scipy.org): Python-based ecosystem for mathematics, science, and engineering.
 * [Matplotlib](http://matplotlib.org): Python plotting library.
-* [ETE3](http://etetoolkit.org): environment for tree exploration in Python.
+* [ETE3](http://etetoolkit.org): Python environment for tree exploration.
 
 ### R packages
 * [optparse](https://cran.r-project.org/web/packages/optparse/index.html): command line option parser in R.
