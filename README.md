@@ -79,9 +79,9 @@ How to run:
 
 Notes:
 ---
-1. The input files for MetaCHIP include a folder holds the sequence file of all query genome bins, as well as a text file, 
-which holds the taxonomic classification of input genomes. An example of the taxonomic classification results can be found 
-at [example_dataset/taxon_classification.tsv](https://github.com/songweizhi/MetaCHIP/blob/master/example_dataset/taxon_classification.tsv)
+1. The input files for MetaCHIP include a folder holds the sequence file of all query genome bins ([example](https://github.com/songweizhi/MetaCHIP/blob/master/example_dataset/human_gut_bins)), as well as a text file, 
+which holds the taxonomic classification of input genomes ([example](https://github.com/songweizhi/MetaCHIP/blob/master/example_dataset/human_gut_bins_GTDB.tsv)).
+
 1. [GTDB-Tk](https://github.com/Ecogenomics/GTDBTk) is recommended for taxonomic classification of input genomes. An example:
 
 1. Output format for all-vs-all blastn in the best-match approach: 
