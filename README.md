@@ -38,7 +38,7 @@ to their executables in the config file if they are not on the system path.
 How to install:
 ---
 
-1. After you have MetaCHIP's 3rd party dependencies and R packages on your system, MetaCHIP can be installed with:
+1. After you have MetaCHIP's 3rd party dependencies and R packages installed on your system, MetaCHIP can be installed with:
 
         pip install MetaCHIP
         
