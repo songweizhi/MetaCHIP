@@ -1,0 +1,15 @@
+setup.py
+MetaCHIP/BM.py
+MetaCHIP/MetaCHIP_add_group_to_tree.R
+MetaCHIP/MetaCHIP_circos_HGT.R
+MetaCHIP/MetaCHIP_config.py
+MetaCHIP/MetaCHIP_phylo.hmm
+MetaCHIP/PG.py
+MetaCHIP/PI.py
+MetaCHIP/__init__.py
+MetaCHIP.egg-info/PKG-INFO
+MetaCHIP.egg-info/SOURCES.txt
+MetaCHIP.egg-info/dependency_links.txt
+MetaCHIP.egg-info/requires.txt
+MetaCHIP.egg-info/top_level.txt
+bin/MetaCHIP

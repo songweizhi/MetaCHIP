@@ -1,0 +1,6 @@
+biopython
+matplotlib
+numpy
+scipy
+reportlab
+ete3

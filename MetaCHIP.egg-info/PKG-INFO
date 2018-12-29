@@ -1,0 +1,20 @@
+Metadata-Version: 1.0
+Name: MetaCHIP
+Version: 1.0.1
+Summary: HGT detection pipeline
+Home-page: https://github.com/songweizhi/MetaCHIP
+Author: Weizhi Song, Torsten Thomas
+Author-email: songwz03@gmail.com
+License: GPL3+
+Description: 
+        
+        MetaCHIP: community-level HGT identification pipeline
+        
+        Weizhi Song (songwz03@gmail.com)
+        
+        The Centre for Marine Bio-Innovation (CMB), 
+        University of New South Wales, Sydney, Australia
+        
+        
+Keywords: Bioinformatics Metagenomics HGT_detection
+Platform: UNKNOWN

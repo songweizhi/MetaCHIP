@@ -28,22 +28,20 @@ Dependencies:
 MetaCHIP makes use of the following 3rd party dependencies and assumes these are on your system path. Specify full path 
 to their executables in the config file if they are not on the system path.  
 * [Prodigal](https://github.com/hyattpd/Prodigal): protein-coding gene prediction tool for prokaryotic genomes.
-* [Hmmer](http://hmmer.org): tool for biosequence analysis using profile hidden Markov models.
-* [Mafft](https://mafft.cbrc.jp/alignment/software/): multiple sequences alignment program.
+* [HMMER](http://hmmer.org): tool for biosequence analysis using profile hidden Markov models.
+* [MAFFT](https://mafft.cbrc.jp/alignment/software/): multiple sequences alignment program.
 * [FastTree](http://www.microbesonline.org/fasttree/): tool for inferring phylogenies from alignments .
 * [BLAST+](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download): you know what it is!
 * [Ranger-DTL 2.0](https://compbio.engr.uconn.edu/software/RANGER-DTL/): software for inferring gene family evolution.
-* [Usearch](https://www.drive5.com/usearch/): Tools for High-throughput search and clustering.
 
 How to install:
 ---
-1. Install the 
 
+1. Once dependencies are installed, MetaCHIP can be installed using pip:
 
-1. Download MetaCHIP scripts and decompress.
-1. Isntall required softwares and Python modules.
-1. Modify the config file according to the location of required softwares.
-1. MetaCHIP is ready to run now.
+        pip install metachip
+        
+1. Add the 3rd party dependencies to your system path. otherwise, specify full path to their executables in the config file.
 
 
 Notes:
@@ -61,11 +59,26 @@ How to run:
 ---
 + A detailed manual can be found at [manual/MetaCHIP_User_Manual.pdf](https://github.com/songweizhi/MetaCHIP/blob/master/manual/MetaCHIP_User_Manual.pdf).
 
+        $ MetaCHIP -h
+     
+             ...::: MetaCHIP :::...
+            
+        HGT detection modules:
+           PI          -> Prepare Input files 
+           BM          -> Best-Match approach 
+           PG          -> PhyloGenetic approach
+        
+        # for command specific help
+        MetaCHIP <command> -h
+    
+
+
+
 
 Output files:
 ---
 
-1. Identified HGT candidates. See some example of contig end_match and full_length_match below. 
+1. Identified HGT candidates and their sequences. See some example of contig end_match and full_length_match below. 
 
     |Gene_1|Gene_2|Gene_1_group|Gene_2_group|Identity|end_match|full_length_match|Direction|
     |---|---|---|---|---|---|---|---|
@@ -85,10 +98,10 @@ Output files:
 1. Gene flow between groups.
     ![Gene_flow](images/Gene_flow.jpg)
     
-1. Identity distribution of identified HGT candidates.
+1. Identity distribution of identified HGTs.
     ![HGT_identity_distribution](images/HGT_identity_distribution.png)
 
-1. The number of identified HGT candidates in each genome/group.
+1. The number of identified HGT in each genome/group.
     ![HGT_per_genome_group](images/HGT_per_genome_group.png)
  
 1. Examples of contig end match.
