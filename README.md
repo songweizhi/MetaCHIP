@@ -47,7 +47,18 @@ How to install:
 
 How to run:
 ---
-+ A detailed manual can be found at [manual/MetaCHIP_User_Manual.pdf](https://github.com/songweizhi/MetaCHIP/blob/master/manual/MetaCHIP_User_Manual.pdf).
++ A detailed manual can be found at [manual/MetaCHIP_User_Manual_v1.0.1.pdf](https://github.com/songweizhi/MetaCHIP/blob/master/manual/MetaCHIP_User_Manual_v1.0.1.pdf).
+
++ The input files for MetaCHIP include a folder holds the sequence file of all query genome bins ([example](https://github.com/songweizhi/MetaCHIP/blob/master/example_dataset/human_gut_bins)), as well as a text file, 
+which holds the taxonomic classification of input genomes ([example](https://github.com/songweizhi/MetaCHIP/blob/master/example_dataset/human_gut_bins_GTDB.tsv)).
+
++ [GTDB-Tk](https://github.com/Ecogenomics/GTDBTk) is recommended for taxonomic classification of input genomes. An example:
+
++ Output format for BLASTN in the best-match approach: 
+        
+        -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen"
+
++ some examples: 
 
         # show help information
         MetaCHIP -h
@@ -65,28 +76,13 @@ How to run:
         MetaCHIP BM -p NorthSea -g customized_grouping.txt -t 6
         MetaCHIP PG -p NorthSea -g customized_grouping.txt -t 6
         
-        # Detect HGT with MetaCHIP at multiple levels (e.g. Class, Order and Family)
+        # Detect HGT with MetaCHIP at multiple levels (e.g. class and order)
         MetaCHIP PI -i bin_folder -x fasta -taxon NorthSea_GTDB_output.tsv -r c -p NorthSea -t 6
         MetaCHIP PI -i bin_folder -x fasta -taxon NorthSea_GTDB_output.tsv -r o -p NorthSea -t 6 -grouping_only
-        MetaCHIP PI -i bin_folder -x fasta -taxon NorthSea_GTDB_output.tsv -r f -p NorthSea -t 6 -grouping_only
         MetaCHIP BM -p NorthSea -r c -t 6
         MetaCHIP BM -p NorthSea -r o -t 6
-        MetaCHIP BM -p NorthSea -r f -t 6
         MetaCHIP PG -p NorthSea -r c -t 6
         MetaCHIP PG -p NorthSea -r o -t 6
-        MetaCHIP PG -p NorthSea -r f -t 6
-
-
-Notes:
----
-1. The input files for MetaCHIP include a folder holds the sequence file of all query genome bins ([example](https://github.com/songweizhi/MetaCHIP/blob/master/example_dataset/human_gut_bins)), as well as a text file, 
-which holds the taxonomic classification of input genomes ([example](https://github.com/songweizhi/MetaCHIP/blob/master/example_dataset/human_gut_bins_GTDB.tsv)).
-
-1. [GTDB-Tk](https://github.com/Ecogenomics/GTDBTk) is recommended for taxonomic classification of input genomes. An example:
-
-1. Output format for all-vs-all blastn in the best-match approach: 
-        
-        -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen"
 
 
 Output files:
