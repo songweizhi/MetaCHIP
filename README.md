@@ -75,7 +75,7 @@ How to run:
         MetaCHIP BM -p NorthSea -g customized_grouping.txt -t 6
         MetaCHIP PG -p NorthSea -g customized_grouping.txt -t 6
         
-        # Detect HGT with MetaCHIP at multiple levels
+        # Detect HGT with MetaCHIP at multiple levels (e.g. Class, Order and Family)
         MetaCHIP PI -i bin_folder -x fasta -taxon NorthSea_GTDB_output.tsv -r c -p NorthSea -t 6
         MetaCHIP PI -i bin_folder -x fasta -taxon NorthSea_GTDB_output.tsv -r o -p NorthSea -t 6 -grouping_only
         MetaCHIP PI -i bin_folder -x fasta -taxon NorthSea_GTDB_output.tsv -r f -p NorthSea -t 6 -grouping_only
