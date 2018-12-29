@@ -34,6 +34,7 @@ to their executables in the config file if they are not on the system path.
 * [BLAST+](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download): you know what it is!
 * [Ranger-DTL 2.0](https://compbio.engr.uconn.edu/software/RANGER-DTL/): software for inferring gene family evolution.
 
+
 How to install:
 ---
 
@@ -41,18 +42,7 @@ How to install:
 
         pip install MetaCHIP
         
-1. You can either add MetaCHIP's dependencies to your system path or specify full path to their executables in MetaCHIP_config.py, which can be found in folder lib/site-packages/MetaCHIP.
-
-
-Notes:
----
-1. The input files for MetaCHIP include a folder holds the sequence file of all query genome bins, as well as a text file, 
-which holds the taxonomic classification of input genomes. An example of the taxonomic classification results can be found 
-at [example_dataset/taxon_classification.tsv](https://github.com/songweizhi/MetaCHIP/blob/master/example_dataset/taxon_classification.tsv)
-1. [GTDB-Tk](https://github.com/Ecogenomics/GTDBTk) is recommended for taxonomic classification of input genomes.
-1. Output format for all-vs-all blastn in the approach: 
-        
-        -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen"
+1. You can either add MetaCHIP's dependencies to your system path or specify full path to their executables in MetaCHIP_config.py, which is in folder lib/site-packages/MetaCHIP.
 
 
 How to run:
@@ -85,6 +75,18 @@ How to run:
         MetaCHIP PG -p NorthSea -r c -t 6
         MetaCHIP PG -p NorthSea -r o -t 6
         MetaCHIP PG -p NorthSea -r f -t 6
+
+
+Notes:
+---
+1. The input files for MetaCHIP include a folder holds the sequence file of all query genome bins, as well as a text file, 
+which holds the taxonomic classification of input genomes. An example of the taxonomic classification results can be found 
+at [example_dataset/taxon_classification.tsv](https://github.com/songweizhi/MetaCHIP/blob/master/example_dataset/taxon_classification.tsv)
+1. [GTDB-Tk](https://github.com/Ecogenomics/GTDBTk) is recommended for taxonomic classification of input genomes. An example:
+
+1. Output format for all-vs-all blastn in the best-match approach: 
+        
+        -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen"
 
 
 Output files:

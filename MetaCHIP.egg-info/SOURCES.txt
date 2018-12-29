@@ -6,6 +6,8 @@ MetaCHIP/MetaCHIP_config.py
 MetaCHIP/MetaCHIP_phylo.hmm
 MetaCHIP/PG.py
 MetaCHIP/PI.py
+MetaCHIP/Ranger-DTL-Dated.linux
+MetaCHIP/Ranger-DTL-Dated.mac
 MetaCHIP/__init__.py
 MetaCHIP.egg-info/PKG-INFO
 MetaCHIP.egg-info/SOURCES.txt

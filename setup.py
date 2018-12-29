@@ -24,7 +24,7 @@ setup(name="MetaCHIP",
       description="HGT detection pipeline",
       url="https://github.com/songweizhi/MetaCHIP",
       packages=find_packages(exclude=['contrib','docs']),
-      package_data={'': ['*.r', '*.R', '*.py', '*.hmm']},
+      package_data={'': ['*.r', '*.R', '*.py', '*.hmm', '*.linux', '*.mac']},
       include_package_data=True,
       install_requires=['biopython', 'matplotlib', 'numpy', 'scipy', 'reportlab', 'ete3'],
 
@@ -36,4 +36,3 @@ setup(name="MetaCHIP",
                'MetaCHIP/MetaCHIP_phylo.hmm',
                'MetaCHIP/MetaCHIP_circos_HGT.R',
                'MetaCHIP/MetaCHIP_add_group_to_tree.R'])
-
