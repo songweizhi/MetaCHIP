@@ -90,7 +90,7 @@ as well as a text file which holds taxonomic classification results of all input
 Output files:
 ---
 
-1. Identified HGT candidates and their sequences. See some example of contig end_match and full_length_match below. 
+1. Identified HGT candidates and their sequences. See some examples of contig end_match and full_length_match below. 
 
     |Gene_1|Gene_2|Gene_1_group|Gene_2_group|Identity|end_match|full_length_match|Direction|
     |---|---|---|---|---|---|---|---|
@@ -120,7 +120,7 @@ Output files:
     ![end_match_1](images/end_match_1.jpg)   
     ![end_match_2](images/end_match_2.jpg)
         
-1. Examples of contig full length match
+1. Examples of full-length contig match
     ![full_length_match_1](images/full_length_match_1.jpg)
     ![full_length_match_2](images/full_length_match_2.jpg)
     
