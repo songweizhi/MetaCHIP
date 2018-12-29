@@ -63,28 +63,28 @@ as well as a text file which holds taxonomic classification results of all input
 1. Some examples: 
 
         # show help information
-        MetaCHIP -h
-        MetaCHIP PI -h
-        MetaCHIP BM -h
-        MetaCHIP PG -h
+        $ MetaCHIP -h
+        $ MetaCHIP PI -h
+        $ MetaCHIP BM -h
+        $ MetaCHIP PG -h
         
         # run MetaCHIP by grouping input genomes at Class level according to their taxonomic classifications
-        MetaCHIP PI -i bin_folder -x fasta -taxon NorthSea_GTDB_output.tsv -r c -p NorthSea -t 6
-        MetaCHIP BM -p NorthSea -r c -t 6
-        MetaCHIP PG -p NorthSea -r c -t 6
+        $ MetaCHIP PI -i bin_folder -x fasta -taxon NorthSea_GTDB_output.tsv -r c -p NorthSea -t 6
+        $ MetaCHIP BM -p NorthSea -r c -t 6
+        $ MetaCHIP PG -p NorthSea -r c -t 6
 
         # run MetaCHIP with customized grouping profile
-        MetaCHIP PI -i bin_folder -x fasta -g customized_grouping.txt -p NorthSea -t 6
-        MetaCHIP BM -p NorthSea -g customized_grouping.txt -t 6
-        MetaCHIP PG -p NorthSea -g customized_grouping.txt -t 6
+        $ MetaCHIP PI -i bin_folder -x fasta -g customized_grouping.txt -p NorthSea -t 6
+        $ MetaCHIP BM -p NorthSea -g customized_grouping.txt -t 6
+        $ MetaCHIP PG -p NorthSea -g customized_grouping.txt -t 6
         
         # Detect HGT with MetaCHIP at multiple levels (e.g. class and order)
-        MetaCHIP PI -i bin_folder -x fasta -taxon NorthSea_GTDB_output.tsv -r c -p NorthSea -t 6
-        MetaCHIP PI -i bin_folder -x fasta -taxon NorthSea_GTDB_output.tsv -r o -p NorthSea -t 6 -grouping_only
-        MetaCHIP BM -p NorthSea -r c -t 6
-        MetaCHIP BM -p NorthSea -r o -t 6
-        MetaCHIP PG -p NorthSea -r c -t 6
-        MetaCHIP PG -p NorthSea -r o -t 6
+        $ MetaCHIP PI -i bin_folder -x fasta -taxon NorthSea_GTDB_output.tsv -r c -p NorthSea -t 6
+        $ MetaCHIP PI -i bin_folder -x fasta -taxon NorthSea_GTDB_output.tsv -r o -p NorthSea -t 6 -grouping_only
+        $ MetaCHIP BM -p NorthSea -r c -t 6
+        $ MetaCHIP BM -p NorthSea -r o -t 6
+        $ MetaCHIP PG -p NorthSea -r c -t 6
+        $ MetaCHIP PG -p NorthSea -r o -t 6
 
 
 Output files:
