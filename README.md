@@ -51,8 +51,8 @@ How to run:
 
 1. A detailed manual can be found at [manual/MetaCHIP_User_Manual_v1.0.1.pdf](https://github.com/songweizhi/MetaCHIP/blob/master/manual/MetaCHIP_User_Manual_v1.0.1.pdf).
 
-1. The input files for MetaCHIP include a folder holds the sequence file of all query genome bins [[example](https://github.com/songweizhi/MetaCHIP/blob/master/example_dataset/human_gut_bins)], 
-as well as a text file which holds taxonomic classification results of all input genomes [[example](https://github.com/songweizhi/MetaCHIP/blob/master/example_dataset/human_gut_bins_GTDB.tsv)].
+1. The input files for MetaCHIP include a folder holds the sequence file of all query genome bins [[example](https://github.com/songweizhi/MetaCHIP/blob/master/input_file_examples/human_gut_bins)], 
+as well as a text file which holds taxonomic classification results of all input genomes [[example](https://github.com/songweizhi/MetaCHIP/blob/master/input_file_examples/human_gut_bins_GTDB.tsv)].
 
 1. [GTDB-Tk](https://github.com/Ecogenomics/GTDBTk) is recommended for taxonomic classification of input genomes.
 
