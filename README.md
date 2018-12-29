@@ -47,18 +47,19 @@ How to install:
 
 How to run:
 ---
-+ A detailed manual can be found at [manual/MetaCHIP_User_Manual_v1.0.1.pdf](https://github.com/songweizhi/MetaCHIP/blob/master/manual/MetaCHIP_User_Manual_v1.0.1.pdf).
 
-+ The input files for MetaCHIP include a folder holds the sequence file of all query genome bins ([example](https://github.com/songweizhi/MetaCHIP/blob/master/example_dataset/human_gut_bins)), as well as a text file, 
-which holds the taxonomic classification of input genomes ([example](https://github.com/songweizhi/MetaCHIP/blob/master/example_dataset/human_gut_bins_GTDB.tsv)).
+1. A detailed manual can be found at [manual/MetaCHIP_User_Manual_v1.0.1.pdf](https://github.com/songweizhi/MetaCHIP/blob/master/manual/MetaCHIP_User_Manual_v1.0.1.pdf).
 
-+ [GTDB-Tk](https://github.com/Ecogenomics/GTDBTk) is recommended for taxonomic classification of input genomes. An example:
+1. The input files for MetaCHIP include a folder holds the sequence file of all query genome bins ([example](https://github.com/songweizhi/MetaCHIP/blob/master/example_dataset/human_gut_bins)), 
+as well as a text file which holds taxonomic classification results of all input genomes ([example](https://github.com/songweizhi/MetaCHIP/blob/master/example_dataset/human_gut_bins_GTDB.tsv)).
 
-+ Output format for BLASTN in the best-match approach: 
+1. [GTDB-Tk](https://github.com/Ecogenomics/GTDBTk) is recommended for taxonomic classification of input genomes.
+
+1. Output format for BLASTN in the PI and BM steps: 
         
         -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen"
 
-+ some examples: 
+1. Some examples: 
 
         # show help information
         MetaCHIP -h
