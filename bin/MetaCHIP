@@ -29,15 +29,13 @@ to_do = '''
 
 All:
 add option -force
-report progress for every 100 processes (if n/100 is int)
 replace all-vs-all blastn with usearch
--r option only accept p c o f g s
 if sh: FastTree: command not found exit
+add hgt_wf: PI, BM and PG
 
 
 PI:
 if there is a Usearch error, break the pipeline
-provide qsub option for running blast  
 combine grouping and group_to_taxon file
 
 
@@ -47,26 +45,11 @@ not print if disabled: [2018-12-09 21:54:32] Plotting flanking regions with 16 c
 
 PG:
 change text direction for circos plot
-report the number of low cov and low css columns in alignment
-run mafft in fast mode if sequence number higher than 200 
-error ocurred during plot if no HGT validated by PG
 steps move to PG.py: uclust, get species tree
-faa subset file to PG_wd
 removed %s columns from the concatenated msa with low coverage 
 removed %s columns from the concatenated msa with consensus
 make a tmp folder
 if no PG validated, skip plot, but not report error
-
-
-modules to add:
-
-    Plot modules:
-       plot_tree        -> Plot newick tree
-       plot_taxon       -> show taxon correlations with sankey plot
-      
-    Other modules:
-       parallel_blastn  -> run all-vs-all blastn in parallel
-       get_gene_cluster -> get gene clusters with Usearch
 
 '''
 
@@ -77,10 +60,26 @@ def print_main_help():
              ...::: MetaCHIP :::...
         
     HGT detection modules:
-       PI               -> Prepare Input files 
-       BM               -> Best-Match approach 
-       PG               -> PhyloGenetic approach
+       PI               ->   Prepare Input files 
+       BM               ->   Best-Match approach 
+       PG               ->   PhyloGenetic approach
+          
+    Tree manipulation (to be added):
+       plot_tree        ->   Plot tree in newick format
+       subset_gtdb_tree ->   Subset GTDB tree for provided taxons
        
+    Annotation modules (to be added):
+       run_prodigal     ->   Run Prodigal
+       cog_annotation   ->   Perform COG annotation
+       run_barrnap      ->   Run barrnap
+       get_SCG_tree     ->   Get SCG protein tree
+       
+    Plot modules (to be added):
+       plot_circos      ->   Plot circos
+       plot_identity    ->   Plot identity distribution
+       get_gene_cluster ->   Get gene clusters with Usearch
+       plot_taxon       ->   Show taxon correlations with sankey plot
+
     # for command specific help
     MetaCHIP <command> -h
     '''
