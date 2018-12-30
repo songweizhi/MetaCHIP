@@ -492,8 +492,7 @@ def get_ctg_match_cate_and_identity_distribution_plot(pwd_candidates_file_ET, pw
     plt.hist(combined_list_BM, num_bins, alpha=0.6, normed=0, stacked=1, linewidth=0, color=color_list, label=label_list, rwidth=0.85)
     lgd = plt.legend(prop={'size': 10}, ncol=1, bbox_to_anchor=(1.27, 1))
 
-    total_HGT_num_BM = len(identity_list_BM_normal) + len(identity_list_BM_end_match) + len(
-        identity_list_BM_full_length_match)
+    total_HGT_num_BM = len(identity_list_BM_normal) + len(identity_list_BM_end_match) + len(identity_list_BM_full_length_match)
     plt.title('Identity distribution of identified %s HGTs' % total_HGT_num_BM)
     plt.xlabel('Identity (%)')
     plt.ylabel('Number of identified HGT')
@@ -504,7 +503,8 @@ def get_ctg_match_cate_and_identity_distribution_plot(pwd_candidates_file_ET, pw
     plt.close()
     plt.clf()
 
-    ########## for BM approach ##########
+
+    ########## for PG approach ##########
     num_bins = 50
     combined_list_PG = (identity_list_PG_normal, identity_list_PG_end_match, identity_list_PG_full_length_match)
     color_list = ['g', 'orange', 'r']
@@ -512,8 +512,7 @@ def get_ctg_match_cate_and_identity_distribution_plot(pwd_candidates_file_ET, pw
     plt.hist(combined_list_PG, num_bins, alpha=0.6, normed=0, stacked=1, linewidth=0, color=color_list, label=label_list, rwidth=0.85)
     lgd = plt.legend(prop={'size': 10}, ncol=1, bbox_to_anchor=(1.27, 1))
 
-    total_HGT_num_PG = len(identity_list_PG_normal) + len(identity_list_PG_end_match) + len(
-        identity_list_PG_full_length_match)
+    total_HGT_num_PG = len(identity_list_PG_normal) + len(identity_list_PG_end_match) + len(identity_list_PG_full_length_match)
     plt.title('Identity distribution of identified %s HGTs' % total_HGT_num_PG)
     plt.xlabel('Identity (%)')
     plt.ylabel('Number of identified HGT')

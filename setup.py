@@ -24,7 +24,7 @@ setup(name="MetaCHIP",
       description="HGT detection pipeline",
       url="https://github.com/songweizhi/MetaCHIP",
       packages=find_packages(exclude=['contrib','docs']),
-      package_data={'': ['*.r', '*.R', '*.py', '*.hmm', '*.linux', '*.mac']},
+      package_data={'': ['*.r', '*.R', '*.py', '*.hmm']},
       include_package_data=True,
       install_requires=['biopython', 'matplotlib', 'numpy', 'scipy', 'reportlab', 'ete3'],
 
