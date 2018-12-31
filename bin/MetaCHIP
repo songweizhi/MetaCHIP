@@ -96,7 +96,7 @@ if __name__ == '__main__':
     # arguments for PI
     PI_parser = subparsers.add_parser('PI',  description='Prepare input files', epilog='Example: MetaCHIP PI -h')
     PI_parser.add_argument('-i',             required=True,  help='input genome folder')
-    PI_parser.add_argument('-taxon',         required=False,  help='taxonomic classification')
+    PI_parser.add_argument('-taxon',         required=False, help='taxonomic classification')
     PI_parser.add_argument('-p',             required=True,  help='output prefix')
     PI_parser.add_argument('-r',             required=False, default=None, help='grouping rank')
     PI_parser.add_argument('-g',             required=False, default=None, help='grouping file')
