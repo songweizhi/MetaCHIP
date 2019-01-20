@@ -22,12 +22,15 @@ import argparse
 from MetaCHIP.PI import PI
 from MetaCHIP.BM import BM
 from MetaCHIP.PG import PG
+#from MetaCHIP.PG_MultiRanks import PG_MultiRanks
+from MetaCHIP import MetaCHIP_config
 from MetaCHIP.MetaCHIP_config import config_dict
 
 
 to_do = '''
 
 All:
+!!!!!! predict HGT at levels from phylum to genus
 add option -force
 replace all-vs-all blastn with usearch
 if sh: FastTree: command not found exit
@@ -54,37 +57,48 @@ if no PG validated, skip plot, but not report error
 '''
 
 
+def version():
+    version_file = open('%s/VERSION' % MetaCHIP_config.config_file_path)
+    return version_file.readline().strip()
+
+
 def print_main_help():
 
     help_message = ''' 
-             ...::: MetaCHIP :::...
+        ...::: MetaCHIP v%s :::...
         
     HGT detection modules:
-       PI               ->   Prepare Input files 
-       BM               ->   Best-Match approach 
-       PG               ->   PhyloGenetic approach
-          
-    Tree manipulation (to be added):
-       plot_tree        ->   Plot tree in newick format
-       subset_gtdb_tree ->   Subset GTDB tree for provided taxons
-       
-    Annotation modules (to be added):
-       run_prodigal     ->   Run Prodigal
-       cog_annotation   ->   Perform COG annotation
-       run_barrnap      ->   Run barrnap
-       get_SCG_tree     ->   Get SCG protein tree
-       
-    Plot modules (to be added):
-       plot_circos      ->   Plot circos
-       plot_identity    ->   Plot identity distribution
-       get_gene_cluster ->   Get gene clusters with Usearch
-       plot_taxon       ->   Show taxon correlations with sankey plot
+       PI      ->      Prepare Input files 
+       BM      ->      Best-Match approach 
+       PG      ->      PhyloGenetic approach
 
     # for command specific help
-    MetaCHIP <command> -h
-    '''
+    MetaCHIP PI -h
+    MetaCHIP BM -h
+    MetaCHIP PG -h
+
+    ''' % version()
 
     print(help_message)
+
+'''
+    Tree manipulation:
+       plot_tree        ->   [to be added] Plot tree in newick format
+       subset_gtdb_tree ->   [to be added] Subset GTDB tree for provided taxons
+       
+    Annotation modules (to be added):
+       run_prodigal     ->   [to be added] Run Prodigal
+       cog_annotation   ->   [to be added] Perform COG annotation
+       run_barrnap      ->   [to be added] Run barrnap
+       get_SCG_tree     ->   [to be added] Get SCG protein tree
+       
+    Plot modules (to be added):
+       plot_circos      ->   [to be added] Plot circos
+       plot_identity    ->   [to be added] Plot identity distribution
+       get_gene_cluster ->   [to be added] Get gene clusters with Usearch
+       plot_taxon       ->   [to be added] Show taxon correlations with sankey plot
+'''
+
 
 
 if __name__ == '__main__':
@@ -143,7 +157,7 @@ if __name__ == '__main__':
 
     # get and check options
     args = None
-    if (len(sys.argv) == 1) or (sys.argv[1] == '-h') or (sys.argv == '--help'):
+    if (len(sys.argv) == 1) or (sys.argv[1] == '-h') or (sys.argv[1] == '-help') or (sys.argv[1] == '--help'):
         print_main_help()
         sys.exit(0)
     else:
@@ -152,7 +166,9 @@ if __name__ == '__main__':
     # run corresponding module
     if args['subparser_name'] == 'PI':
         PI(args, config_dict)
+
     if args['subparser_name'] == 'BM':
         BM(args, config_dict)
+
     if args['subparser_name'] == 'PG':
         PG(args, config_dict)

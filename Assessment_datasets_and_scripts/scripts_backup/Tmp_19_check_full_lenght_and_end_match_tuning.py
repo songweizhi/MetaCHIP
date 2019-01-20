@@ -79,7 +79,7 @@ def check_full_lenght_and_end_match(qualified_ctg_match_list, identity_cutoff):
 
     # get match category
     match_category = 'normal'
-    best_hit_end_gap_len = 200
+    best_hit_end_gap_len = 1000
     gap_cutoff_for_concatenating = 300
     # full length match: coverage cutoff 95%
     if (query_cov_total >= 0.95) or (subject_cov_total >= 0.95):
@@ -139,15 +139,12 @@ def check_full_lenght_and_end_match(qualified_ctg_match_list, identity_cutoff):
                             matched_block_subject_start = current_subject_start
 
                     if best_hit_same_direction is False:
-                        #print(matched_block)
                         # situation 1
                         if ((current_query_start >= matched_block_query_start) and (current_query_end <= matched_block_query_end)) and ((current_subject_start <= matched_block_subject_start) and (current_subject_end >= matched_block_subject_end)):
-                            #print(matched_block)
                             pass  # do nothing
 
                         # situation 2
                         if ((current_query_start > matched_block_query_start) and (current_query_end > matched_block_query_end)) and ((current_subject_start < matched_block_subject_start) and (current_subject_end < matched_block_subject_end)) and (-gap_cutoff_for_concatenating <= (current_query_start - matched_block_query_end) <= gap_cutoff_for_concatenating) and (-gap_cutoff_for_concatenating <= (matched_block_subject_end - current_subject_start) <= gap_cutoff_for_concatenating):
-                            #print(matched_block)
                             matched_block_query_end = current_query_end
                             matched_block_subject_end = current_subject_end
 
@@ -184,10 +181,13 @@ def check_full_lenght_and_end_match(qualified_ctg_match_list, identity_cutoff):
 # output_c_full_len = '/Users/songweizhi/Desktop/222/ca_lh_Refined_12_00791___ca_ze_Refined_7_01309_full_length.txt'
 # output_c_full_len = '/Users/songweizhi/Desktop/222/rh_lh_Refined_31_00841___rh_hl_Refined_23_02142_full_length.txt'
 # output_c_full_len = '/Users/songweizhi/Desktop/222/rh_ll_Refined_21_01667___rh_ze_Refined_14_00087_full_length.txt'
+# output_c_full_len = '/Users/songweizhi/Desktop/222/rh_hh_Refined_7_00083___rh_hl_Refined_23_01479_full_length.txt'
+# output_c_full_len = '/Users/songweizhi/Desktop/222/rh_lh_Refined_31_00829___rh_hl_Refined_23_01359_full_length.txt'
 
-output_c_full_len = '/Users/songweizhi/Desktop/222/rh_hh_Refined_7_00083___rh_hl_Refined_23_01479_full_length.txt'
-#output_c_full_len = '/Users/songweizhi/Desktop/222/rh_lh_Refined_31_00829___rh_hl_Refined_23_01359_full_length.txt'
-
+# output_c_full_len = '/Users/songweizhi/Desktop/sss/BH_ER_140616_Refined_19_00129___CB_ER_070716_Refined_28_01087/BH_ER_140616_Refined_19_00129___CB_ER_070716_Refined_28_01087_full_length.txt'
+# output_c_full_len = '/Users/songweizhi/Desktop/sss/BI_ER_050716_Refined_36_00500___CB_ER_070716_Refined_28_00900/BI_ER_050716_Refined_36_00500___CB_ER_070716_Refined_28_00900_full_length.txt'
+# output_c_full_len = '/Users/songweizhi/Desktop/sss/BI_ER_161216_Refined_6_01793___CB_ER_070716_Refined_28_00979/BI_ER_161216_Refined_6_01793___CB_ER_070716_Refined_28_00979_full_length.txt'
+output_c_full_len = '/Users/songweizhi/Desktop/sss/CB_ER_130617_Refined_10_01271___CB_ER_070716_Refined_28_00974/CB_ER_130617_Refined_10_01271___CB_ER_070716_Refined_28_00974_full_length.txt'
 
 
 end_match_iden_cutoff = 90

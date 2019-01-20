@@ -20,6 +20,7 @@ import os
 import re
 import glob
 import shutil
+import argparse
 import warnings
 import platform
 import numpy as np
@@ -33,6 +34,7 @@ import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
 import multiprocessing as mp
+from MetaCHIP.MetaCHIP_config import config_dict
 
 
 def report_and_log(message_for_report, log_file, keep_quiet):
@@ -492,8 +494,7 @@ def get_ctg_match_cate_and_identity_distribution_plot(pwd_candidates_file_ET, pw
     plt.hist(combined_list_BM, num_bins, alpha=0.6, normed=0, stacked=1, linewidth=0, color=color_list, label=label_list, rwidth=0.85)
     lgd = plt.legend(prop={'size': 10}, ncol=1, bbox_to_anchor=(1.27, 1))
 
-    total_HGT_num_BM = len(identity_list_BM_normal) + len(identity_list_BM_end_match) + len(
-        identity_list_BM_full_length_match)
+    total_HGT_num_BM = len(identity_list_BM_normal) + len(identity_list_BM_end_match) + len(identity_list_BM_full_length_match)
     plt.title('Identity distribution of identified %s HGTs' % total_HGT_num_BM)
     plt.xlabel('Identity (%)')
     plt.ylabel('Number of identified HGT')
@@ -504,7 +505,8 @@ def get_ctg_match_cate_and_identity_distribution_plot(pwd_candidates_file_ET, pw
     plt.close()
     plt.clf()
 
-    ########## for BM approach ##########
+
+    ########## for PG approach ##########
     num_bins = 50
     combined_list_PG = (identity_list_PG_normal, identity_list_PG_end_match, identity_list_PG_full_length_match)
     color_list = ['g', 'orange', 'r']
@@ -512,8 +514,7 @@ def get_ctg_match_cate_and_identity_distribution_plot(pwd_candidates_file_ET, pw
     plt.hist(combined_list_PG, num_bins, alpha=0.6, normed=0, stacked=1, linewidth=0, color=color_list, label=label_list, rwidth=0.85)
     lgd = plt.legend(prop={'size': 10}, ncol=1, bbox_to_anchor=(1.27, 1))
 
-    total_HGT_num_PG = len(identity_list_PG_normal) + len(identity_list_PG_end_match) + len(
-        identity_list_PG_full_length_match)
+    total_HGT_num_PG = len(identity_list_PG_normal) + len(identity_list_PG_end_match) + len(identity_list_PG_full_length_match)
     plt.title('Identity distribution of identified %s HGTs' % total_HGT_num_PG)
     plt.xlabel('Identity (%)')
     plt.ylabel('Number of identified HGT')
@@ -695,14 +696,26 @@ def Ranger_worker(argument_list):
         pwd_ranger_inputs_folder = argument_list[1]
         pwd_tree_folder = argument_list[2]
         pwd_ranger_exe = argument_list[3]
-        pwd_ranger_outputs_folder = argument_list[4]
+        pwd_AggregateRanger_exe = argument_list[4]
+        pwd_ranger_outputs_folder = argument_list[5]
 
         # define Ranger-DTL input file name
         each_paired_tree_concate = '___'.join(each_paired_tree)
+
+        each_paired_tree_concate_short = '%s___%s' % (each_paired_tree[0].split('_')[-1], each_paired_tree[1].split('_')[-1])
+
+
         ranger_inputs_file_name = each_paired_tree_concate + '.txt'
+
         ranger_outputs_file_name = each_paired_tree_concate + '_ranger_output.txt'
+        ranger_outputs_file_name_bootstrap = each_paired_tree_concate + '_ranger_bootstrap.txt'
+
         pwd_ranger_inputs = '%s/%s' % (pwd_ranger_inputs_folder, ranger_inputs_file_name)
         pwd_ranger_outputs = '%s/%s' % (pwd_ranger_outputs_folder, ranger_outputs_file_name)
+        pwd_ranger_outputs_bootstrap = '%s/%s' % (pwd_ranger_outputs_folder, ranger_outputs_file_name_bootstrap)
+
+        pwd_current_ranger_outputs_folder = '%s/%s' % (pwd_ranger_outputs_folder, each_paired_tree_concate_short)
+
 
         # read in species tree
         pwd_species_tree_newick = '%s/%s_species_tree.newick' % (pwd_tree_folder, each_paired_tree_concate)
@@ -767,10 +780,30 @@ def Ranger_worker(argument_list):
         ranger_inputs_file.write('%s\n%s\n' % (species_tree.write(format=5), gene_tree.write(format=5)))
         ranger_inputs_file.close()
 
+        # create ranger_outputs_folder
+        force_create_folder(pwd_current_ranger_outputs_folder)
+
         # run Ranger-DTL
         ranger_parameters = '-q -D 2 -T 3 -L 1'
         ranger_cmd = '%s %s -i %s -o %s' % (pwd_ranger_exe, ranger_parameters, pwd_ranger_inputs, pwd_ranger_outputs)
         os.system(ranger_cmd)
+
+        # run ranger with 100 bootstrap
+        ranger_bootstrap = 1
+        while ranger_bootstrap <= 100:
+            ranger_outputs_bootstrap = '%s/%s_bootstrap%s' % (pwd_current_ranger_outputs_folder, each_paired_tree_concate, ranger_bootstrap)
+            ranger_cmd_bootstrap = '%s %s -i %s -o %s' % (pwd_ranger_exe, ranger_parameters, pwd_ranger_inputs, ranger_outputs_bootstrap)
+            os.system(ranger_cmd_bootstrap)
+            ranger_bootstrap += 1
+
+        # AggregateRanger_cmd
+        current_wd = os.getcwd()
+        os.chdir(pwd_ranger_outputs_folder)
+
+        AggregateRanger_cmd = '%s %s/%s_bootstrap > %s' % (pwd_AggregateRanger_exe, each_paired_tree_concate_short, each_paired_tree_concate, ranger_outputs_file_name_bootstrap)
+        os.system(AggregateRanger_cmd)
+        os.system('rm -r %s' % each_paired_tree_concate_short)
+        os.chdir(current_wd)
 
 
 def PG(args, config_dict):
@@ -788,8 +821,10 @@ def PG(args, config_dict):
 
     # read in config file
     pwd_ranger_exe = config_dict['ranger_linux']
+    pwd_AggregateRanger_exe = config_dict['AggregateRanger_linux']
     if platform.system() == 'Darwin':
         pwd_ranger_exe = config_dict['ranger_mac']
+        pwd_AggregateRanger_exe = config_dict['AggregateRanger_mac']
 
     pwd_mafft_exe =     config_dict['mafft']
     pwd_fasttree_exe =  config_dict['fasttree']
@@ -1019,7 +1054,7 @@ def PG(args, config_dict):
     # put multiple arguments in list
     list_for_multiple_arguments_Ranger = []
     for each_paired_tree in candidates_list:
-        list_for_multiple_arguments_Ranger.append([each_paired_tree, pwd_ranger_inputs_folder, pwd_tree_folder, pwd_ranger_exe, pwd_ranger_outputs_folder])
+        list_for_multiple_arguments_Ranger.append([each_paired_tree, pwd_ranger_inputs_folder, pwd_tree_folder, pwd_ranger_exe, pwd_AggregateRanger_exe, pwd_ranger_outputs_folder])
 
     pool = mp.Pool(processes=num_threads)
     pool.map(Ranger_worker, list_for_multiple_arguments_Ranger)
@@ -1037,27 +1072,52 @@ def PG(args, config_dict):
     for each_ranger_prediction in candidates_list:
         each_ranger_prediction_concate = '___'.join(each_ranger_prediction)
         ranger_out_file_name = each_ranger_prediction_concate + '_ranger_output.txt'
+        ranger_out_file_name_bootstrap = each_ranger_prediction_concate + '_ranger_bootstrap.txt'
         pwd_ranger_result = '%s/%s' % (pwd_ranger_outputs_folder, ranger_out_file_name)
+        pwd_ranger_result_bootstrap = '%s/%s' % (pwd_ranger_outputs_folder, ranger_out_file_name_bootstrap)
+
+        # parse prediction result with bootstrap
+        predicted_transfers_bootstrap = []
+
+        for each_line_bootstrap in open(pwd_ranger_result_bootstrap):
+
+            if ('Transfers = ' in each_line_bootstrap) and ('Transfers = 0' not in each_line_bootstrap):
+                mapping = each_line_bootstrap.strip().split('Most Frequent mapping --> ')[1].split(',')[0]
+                gene_pair = each_line_bootstrap.strip().split(']: [Speciations')[0].split('LCA[')[1].split(', ')
+
+                donor_p_bootstrap = mapping
+                recipient_p_bootstrap = ''
+                for i in gene_pair:
+                    if i != donor_p_bootstrap:
+                        recipient_p_bootstrap = i
+
+                donor_p_bootstrap = '_'.join(donor_p_bootstrap.split('XXXXX'))
+                donor_p_bootstrap = '.'.join(donor_p_bootstrap.split('SSSSS'))
+
+                recipient_p_bootstrap = '_'.join(recipient_p_bootstrap.split('XXXXX'))
+                recipient_p_bootstrap = '.'.join(recipient_p_bootstrap.split('SSSSS'))
+
+                predicted_transfer_bootstrap = '%s-->%s' % (donor_p_bootstrap, recipient_p_bootstrap)
+                predicted_transfers_bootstrap.append(predicted_transfer_bootstrap)
 
         # parse prediction result
-        ranger_result = open(pwd_ranger_result)
         predicted_transfers = []
-        for each_line in ranger_result:
+        for each_line in open(pwd_ranger_result):
             if 'Transfer' in each_line:
                 if not each_line.startswith('The minimum reconciliation cost'):
                     mapping = each_line.strip().split(':')[1].split(',')[1]
                     recipient = each_line.strip().split(':')[1].split(',')[2]
-
                     donor_p = mapping.split('-->')[1][1:]
                     donor_p = '_'.join(donor_p.split('XXXXX'))
                     donor_p = '.'.join(donor_p.split('SSSSS'))
-
                     recipient_p = recipient.split('-->')[1][1:]
                     recipient_p = '_'.join(recipient_p.split('XXXXX'))
                     recipient_p = '.'.join(recipient_p.split('SSSSS'))
-
                     predicted_transfer = donor_p + '-->' + recipient_p
                     predicted_transfers.append(predicted_transfer)
+
+        # use results from bootstrap mode
+        predicted_transfers = predicted_transfers_bootstrap
         candidate_2_predictions_dict[each_ranger_prediction_concate] = predicted_transfers
 
         # get two possible transfer situation
@@ -1537,8 +1597,31 @@ def PG(args, config_dict):
     os.remove(pwd_cir_plot_t1)
     os.remove(pwd_cir_plot_t1_sorted)
     os.remove(pwd_cir_plot_t1_sorted_count)
-    os.remove(pwd_cir_plot_matrix_filename)
+    #os.remove(pwd_cir_plot_matrix_filename)
     os.remove(pwd_combined_faa_file_subset)
 
     # for report and log
     report_and_log(('All done!'), pwd_log_file, keep_quiet)
+
+
+if __name__ == '__main__':
+
+    # initialize the options parser
+    parser = argparse.ArgumentParser()
+
+    # arguments for PG approach
+    parser.add_argument('-p',             required=True,  help='output prefix')
+    parser.add_argument('-r',             required=False, default=None, help='grouping rank')
+    parser.add_argument('-g',             required=False, help='grouping file')
+    parser.add_argument('-cov',           required=False, type=int, default=75, help='coverage cutoff, default: 75')
+    parser.add_argument('-al',            required=False, type=int, default=200, help='alignment length cutoff, default: 200')
+    parser.add_argument('-flk',           required=False, type=int, default=10, help='the length of flanking sequences to plot (Kbp), default: 10')
+    parser.add_argument('-ip',            required=False, type=int, default=90, help='identity percentile, default: 90')
+    parser.add_argument('-ei',            required=False, type=float, default=90, help='end match identity cutoff, default: 95')
+    parser.add_argument('-t',             required=False, type=int, default=1, help='number of threads, default: 1')
+    parser.add_argument('-force',         required=False, action="store_true", help='overwrite previous results')
+    parser.add_argument('-quiet',         required=False, action="store_true", help='Do not report progress')
+
+    args = vars(parser.parse_args())
+
+    PG(args, config_dict)

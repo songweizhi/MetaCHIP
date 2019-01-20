@@ -48,7 +48,7 @@ for each_bin in file_list:
 
     pwd_bin_good_handle.close()
 
-    if bin_total_len < 204800:
+    if bin_total_len < 524288:
         os.system('rm %s' % pwd_bin_good)
 
 

@@ -39,6 +39,6 @@ png(filename=opt$plot, units="in", width=10, height=10, pointsize=12, res=300)
 grid.col = c(A = 'brown1', B = 'lawngreen', C = 'mediumorchid', D = 'mediumslateblue', E = 'royalblue', F = 'sandybrown')
 par(mar = rep(0,4), cex = 1.2)
 chordDiagram(t(mat), grid.col = grid.col)
-
+#circos.track(circos.text, facing = "clockwise")
 invisible(dev.off())
 

@@ -1,0 +1,5 @@
+include README.md
+include MetaCHIP/MetaCHIP_add_group_to_tree.R
+include MetaCHIP/MetaCHIP_circos_HGT.R
+include MetaCHIP/MetaCHIP_phylo.hmm
+include MetaCHIP/VERSION

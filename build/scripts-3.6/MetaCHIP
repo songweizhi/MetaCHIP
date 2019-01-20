@@ -22,22 +22,23 @@ import argparse
 from MetaCHIP.PI import PI
 from MetaCHIP.BM import BM
 from MetaCHIP.PG import PG
+#from MetaCHIP.PG_MultiRanks import PG_MultiRanks
+from MetaCHIP import MetaCHIP_config
 from MetaCHIP.MetaCHIP_config import config_dict
 
 
 to_do = '''
 
 All:
+!!!!!! predict HGT at levels from phylum to genus
 add option -force
-report progress for every 100 processes (if n/100 is int)
 replace all-vs-all blastn with usearch
--r option only accept p c o f g s
 if sh: FastTree: command not found exit
+add hgt_wf: PI, BM and PG
 
 
 PI:
 if there is a Usearch error, break the pipeline
-provide qsub option for running blast  
 combine grouping and group_to_taxon file
 
 
@@ -47,45 +48,54 @@ not print if disabled: [2018-12-09 21:54:32] Plotting flanking regions with 16 c
 
 PG:
 change text direction for circos plot
-report the number of low cov and low css columns in alignment
-run mafft in fast mode if sequence number higher than 200 
-error ocurred during plot if no HGT validated by PG
 steps move to PG.py: uclust, get species tree
-faa subset file to PG_wd
 removed %s columns from the concatenated msa with low coverage 
 removed %s columns from the concatenated msa with consensus
 make a tmp folder
 if no PG validated, skip plot, but not report error
 
-
-modules to add:
-
-    Plot modules:
-       plot_tree        -> Plot newick tree
-       plot_taxon       -> show taxon correlations with sankey plot
-      
-    Other modules:
-       parallel_blastn  -> run all-vs-all blastn in parallel
-       get_gene_cluster -> get gene clusters with Usearch
-
 '''
+
+
+def version():
+    version_file = open('%s/VERSION' % MetaCHIP_config.config_file_path)
+    return version_file.readline().strip()
 
 
 def print_main_help():
 
     help_message = ''' 
-             ...::: MetaCHIP :::...
+             ...::: MetaCHIP v%s :::...
         
     HGT detection modules:
-       PI               -> Prepare Input files 
-       BM               -> Best-Match approach 
-       PG               -> PhyloGenetic approach
-       
+       PI               ->   Prepare Input files 
+       BM               ->   Best-Match approach 
+       PG               ->   PhyloGenetic approach
+
     # for command specific help
     MetaCHIP <command> -h
-    '''
+    ''' % version()
 
     print(help_message)
+
+'''
+    Tree manipulation:
+       plot_tree        ->   [to be added] Plot tree in newick format
+       subset_gtdb_tree ->   [to be added] Subset GTDB tree for provided taxons
+       
+    Annotation modules (to be added):
+       run_prodigal     ->   [to be added] Run Prodigal
+       cog_annotation   ->   [to be added] Perform COG annotation
+       run_barrnap      ->   [to be added] Run barrnap
+       get_SCG_tree     ->   [to be added] Get SCG protein tree
+       
+    Plot modules (to be added):
+       plot_circos      ->   [to be added] Plot circos
+       plot_identity    ->   [to be added] Plot identity distribution
+       get_gene_cluster ->   [to be added] Get gene clusters with Usearch
+       plot_taxon       ->   [to be added] Show taxon correlations with sankey plot
+'''
+
 
 
 if __name__ == '__main__':
@@ -97,15 +107,15 @@ if __name__ == '__main__':
     # arguments for PI
     PI_parser = subparsers.add_parser('PI',  description='Prepare input files', epilog='Example: MetaCHIP PI -h')
     PI_parser.add_argument('-i',             required=True,  help='input genome folder')
-    PI_parser.add_argument('-taxon',         required=False,  help='taxonomic classification')
+    PI_parser.add_argument('-taxon',         required=False, help='taxonomic classification')
     PI_parser.add_argument('-p',             required=True,  help='output prefix')
     PI_parser.add_argument('-r',             required=False, default=None, help='grouping rank')
     PI_parser.add_argument('-g',             required=False, default=None, help='grouping file')
     PI_parser.add_argument('-x',             required=False, default='fasta', help='file extension')
-    PI_parser.add_argument('-grouping_only', required=False, action="store_true", help='run grouping only, deactivate gene calling and phylogenetic tree building')
+    PI_parser.add_argument('-grouping_only', required=False, action="store_true", help='run grouping only, deactivate Prodigal and Blastn')
     PI_parser.add_argument('-nonmeta',       required=False, action="store_true", help='annotate Non-metagenome-assembled genomes (Non-MAGs)')
     PI_parser.add_argument('-noblast',       required=False, action="store_true", help='not run all-vs-all blastn')
-    PI_parser.add_argument('-t',             required=False, type=int, default=1, help='number of threads')
+    PI_parser.add_argument('-t',             required=False, type=int, default=1, help='number of threads, default: 1')
     PI_parser.add_argument('-qsub',          required=False, action="store_true", help='run blastn with job scripts, only for HPC users')
     PI_parser.add_argument('-force',         required=False, action="store_true", help='overwrite previous results')
     PI_parser.add_argument('-quiet',         required=False, action="store_true", help='not report progress')
@@ -115,14 +125,14 @@ if __name__ == '__main__':
     BM_parser.add_argument('-p',             required=True,  help='output prefix')
     BM_parser.add_argument('-r',             required=False, default=None, help='grouping rank')
     BM_parser.add_argument('-g',             required=False, default=None, help='grouping file')
-    BM_parser.add_argument('-cov',           required=False, type=int, default=75, help='coverage cutoff, deafult: 75')
-    BM_parser.add_argument('-al',            required=False, type=int, default=200, help='alignment length cutoff, deafult: 200')
-    BM_parser.add_argument('-flk',           required=False, type=int, default=10, help='the length of flanking sequences to plot (Kbp), deafult: 10')
-    BM_parser.add_argument('-ip',            required=False, type=int, default=90, help='identity percentile cutoff, deafult: 90')
-    BM_parser.add_argument('-ei',            required=False, type=float, default=90, help='end match identity cutoff, deafult: 95')
-    BM_parser.add_argument('-t',             required=False, type=int, default=1, help='number of threads, deafult: 1')
+    BM_parser.add_argument('-cov',           required=False, type=int, default=75, help='coverage cutoff, default: 75')
+    BM_parser.add_argument('-al',            required=False, type=int, default=200, help='alignment length cutoff, default: 200')
+    BM_parser.add_argument('-flk',           required=False, type=int, default=10, help='the length of flanking sequences to plot (Kbp), default: 10')
+    BM_parser.add_argument('-ip',            required=False, type=int, default=90, help='identity percentile cutoff, default: 90')
+    BM_parser.add_argument('-ei',            required=False, type=float, default=90, help='end match identity cutoff, default: 95')
+    BM_parser.add_argument('-t',             required=False, type=int, default=1, help='number of threads, default: 1')
     BM_parser.add_argument('-plot_iden',     required=False, action="store_true", help='plot identity distribution')
-    BM_parser.add_argument('-NoEbCheck',     required=False, action="store_true", help='disable end break and contig match check for fast processing, not recommend for metagenome-assembled genomes (MAGs))')
+    BM_parser.add_argument('-NoEbCheck',     required=False, action="store_true", help='disable end break and contig match check for fast processing, not recommend for metagenome-assembled genomes (MAGs)')
     BM_parser.add_argument('-force',         required=False, action="store_true", help='overwrite previous results')
     BM_parser.add_argument('-quiet',         required=False, action="store_true", help='Do not report progress')
     BM_parser.add_argument('-tmp',           required=False, action="store_true", help='keep temporary files')
@@ -132,19 +142,19 @@ if __name__ == '__main__':
     PG_parser.add_argument('-p',             required=True,  help='output prefix')
     PG_parser.add_argument('-r',             required=False, default=None, help='grouping rank')
     PG_parser.add_argument('-g',             required=False, help='grouping file')
-    PG_parser.add_argument('-cov',           required=False, type=int, default=75, help='coverage cutoff, deafult: 75')
-    PG_parser.add_argument('-al',            required=False, type=int, default=200, help='alignment length cutoff, deafult: 200')
-    PG_parser.add_argument('-flk',           required=False, type=int, default=10, help='the length of flanking sequences to plot (Kbp), deafult: 10')
-    PG_parser.add_argument('-ip',            required=False, type=int, default=90, help='identity percentile, deafult: 90')
-    PG_parser.add_argument('-ei',            required=False, type=float, default=90, help='end match identity cutoff, deafult: 95')
-    PG_parser.add_argument('-t',             required=False, type=int, default=1, help='number of threads, deafult: 1')
+    PG_parser.add_argument('-cov',           required=False, type=int, default=75, help='coverage cutoff, default: 75')
+    PG_parser.add_argument('-al',            required=False, type=int, default=200, help='alignment length cutoff, default: 200')
+    PG_parser.add_argument('-flk',           required=False, type=int, default=10, help='the length of flanking sequences to plot (Kbp), default: 10')
+    PG_parser.add_argument('-ip',            required=False, type=int, default=90, help='identity percentile, default: 90')
+    PG_parser.add_argument('-ei',            required=False, type=float, default=90, help='end match identity cutoff, default: 95')
+    PG_parser.add_argument('-t',             required=False, type=int, default=1, help='number of threads, default: 1')
     PG_parser.add_argument('-force',         required=False, action="store_true", help='overwrite previous results')
     PG_parser.add_argument('-quiet',         required=False, action="store_true", help='Do not report progress')
 
 
     # get and check options
     args = None
-    if (len(sys.argv) == 1) or (sys.argv[1] == '-h') or (sys.argv == '--help'):
+    if (len(sys.argv) == 1) or (sys.argv[1] == '-h') or (sys.argv[1] == '-help') or (sys.argv[1] == '--help'):
         print_main_help()
         sys.exit(0)
     else:
@@ -153,7 +163,9 @@ if __name__ == '__main__':
     # run corresponding module
     if args['subparser_name'] == 'PI':
         PI(args, config_dict)
+
     if args['subparser_name'] == 'BM':
         BM(args, config_dict)
+
     if args['subparser_name'] == 'PG':
         PG(args, config_dict)

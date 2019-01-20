@@ -23,6 +23,7 @@ import os
 import re
 import glob
 import shutil
+import argparse
 import warnings
 import itertools
 from time import sleep
@@ -38,6 +39,7 @@ import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
 import multiprocessing as mp
+from MetaCHIP.MetaCHIP_config import config_dict
 
 
 def report_and_log(message_for_report, log_file, keep_quiet):
@@ -672,7 +674,6 @@ def PI(args, config_dict):
     pwd_hmmfetch_exe =      config_dict['hmmfetch']
     pwd_hmmalign_exe =      config_dict['hmmalign']
     pwd_hmmstat_exe =       config_dict['hmmstat']
-    #pwd_usearch_exe =       config_dict['usearch']
     pwd_fasttree_exe =      config_dict['fasttree']
 
     warnings.filterwarnings("ignore")
@@ -1257,3 +1258,30 @@ def PI(args, config_dict):
 
     report_and_log('PrepIn done!', pwd_log_file, keep_quiet)
 
+
+
+if __name__ == '__main__':
+
+    # initialize the options parser
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(help="--", dest='subparser_name')
+
+    # arguments for PI
+    PI_parser = subparsers.add_parser('PI',  description='Prepare input files', epilog='Example: MetaCHIP PI -h')
+    PI_parser.add_argument('-i',             required=True,  help='input genome folder')
+    PI_parser.add_argument('-taxon',         required=False, help='taxonomic classification')
+    PI_parser.add_argument('-p',             required=True,  help='output prefix')
+    PI_parser.add_argument('-r',             required=False, default=None, help='grouping rank')
+    PI_parser.add_argument('-g',             required=False, default=None, help='grouping file')
+    PI_parser.add_argument('-x',             required=False, default='fasta', help='file extension')
+    PI_parser.add_argument('-grouping_only', required=False, action="store_true", help='run grouping only, deactivate Prodigal and Blastn')
+    PI_parser.add_argument('-nonmeta',       required=False, action="store_true", help='annotate Non-metagenome-assembled genomes (Non-MAGs)')
+    PI_parser.add_argument('-noblast',       required=False, action="store_true", help='not run all-vs-all blastn')
+    PI_parser.add_argument('-t',             required=False, type=int, default=1, help='number of threads, default: 1')
+    PI_parser.add_argument('-qsub',          required=False, action="store_true", help='run blastn with job scripts, only for HPC users')
+    PI_parser.add_argument('-force',         required=False, action="store_true", help='overwrite previous results')
+    PI_parser.add_argument('-quiet',         required=False, action="store_true", help='not report progress')
+
+    args = vars(parser.parse_args())
+
+    PI(args, config_dict)

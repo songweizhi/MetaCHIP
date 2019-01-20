@@ -22,6 +22,7 @@ import sys
 import glob
 import shutil
 import warnings
+import argparse
 import itertools
 import numpy as np
 import multiprocessing as mp
@@ -41,6 +42,8 @@ from scipy.stats import gaussian_kde
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
+from MetaCHIP.MetaCHIP_config import config_dict
+# from PIL import Image
 
 
 def report_and_log(message_for_report, log_file, keep_quiet):
@@ -691,7 +694,7 @@ def set_contig_track_features(gene_contig, name_group_dict, candidate_list, HGT_
             # change gene name
             bin_name_gbk_split = feature.qualifiers['locus_tag'][0].split('_')
             bin_name_gbk = '_'.join(bin_name_gbk_split[:-1])
-            feature.qualifiers['locus_tag'][0] = name_group_dict[bin_name_gbk] + '_' + bin_name_gbk_split[-1]
+            feature.qualifiers['locus_tag'][0] = '%s_%s' % (name_group_dict[bin_name_gbk], bin_name_gbk_split[-1])
 
             # strands
             color = None
@@ -857,7 +860,7 @@ def get_gbk_blast_act2(arguments_list):
     candidates_2_contig_match_category_dict = arguments_list[11]
     end_match_iden_cutoff = arguments_list[12]
     No_Eb_Check = arguments_list[13]
-
+    flk_plot_fmt = 'SVG'
 
     genes = match.strip().split('\t')[:-1]
     current_HGT_iden = float("{0:.1f}".format(float(match.strip().split('\t')[-1])))
@@ -1050,21 +1053,22 @@ def get_gbk_blast_act2(arguments_list):
 
         diagram.draw(format="linear",
                      orientation="landscape",
-                     pagesize=(75 * cm, 25 * cm),
+                     pagesize=(50 * cm, 25 * cm),
                      fragments=1,
                      start=0,
                      end=max_len)
 
-        diagram.write('%s/%s.eps' % (path_to_output_act_folder, folder_name), "EPS")
+
+        diagram.write('%s/%s.%s' % (path_to_output_act_folder, folder_name, flk_plot_fmt), flk_plot_fmt)
 
 
     # move plot to corresponding folder
     if match_category == 'end_match':
-        os.system('mv %s/%s.eps %s/' % (path_to_output_act_folder, folder_name, pwd_at_ends_plot_folder))
+        os.system('mv %s/%s.%s %s/' % (path_to_output_act_folder, folder_name, flk_plot_fmt, pwd_at_ends_plot_folder))
     elif match_category == 'full_length_match':
-        os.system('mv %s/%s.eps %s/' % (path_to_output_act_folder, folder_name, pwd_full_contig_match_plot_folder))
+        os.system('mv %s/%s.%s %s/' % (path_to_output_act_folder, folder_name, flk_plot_fmt, pwd_full_contig_match_plot_folder))
     else:
-        os.system('mv %s/%s.eps %s/' % (path_to_output_act_folder, folder_name, pwd_normal_plot_folder))
+        os.system('mv %s/%s.%s %s/' % (path_to_output_act_folder, folder_name, flk_plot_fmt, pwd_normal_plot_folder))
 
 
     # remove temporary folder
@@ -1674,4 +1678,28 @@ def BM(args, config_dict):
     report_and_log(('Done for Best-match approach!'), pwd_log_file, keep_quiet)
 
 
+if __name__ == '__main__':
+
+    # initialize the options parser
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('-p',             required=True,  help='output prefix')
+    parser.add_argument('-r',             required=False, default=None, help='grouping rank')
+    parser.add_argument('-g',             required=False, default=None, help='grouping file')
+    parser.add_argument('-cov',           required=False, type=int, default=75, help='coverage cutoff, default: 75')
+    parser.add_argument('-al',            required=False, type=int, default=200, help='alignment length cutoff, default: 200')
+    parser.add_argument('-flk',           required=False, type=int, default=10, help='the length of flanking sequences to plot (Kbp), default: 10')
+    parser.add_argument('-ip',            required=False, type=int, default=90, help='identity percentile cutoff, default: 90')
+    parser.add_argument('-ei',            required=False, type=float, default=90, help='end match identity cutoff, default: 95')
+    parser.add_argument('-t',             required=False, type=int, default=1, help='number of threads, default: 1')
+    parser.add_argument('-plot_iden',     required=False, action="store_true", help='plot identity distribution')
+    parser.add_argument('-NoEbCheck',     required=False, action="store_true", help='disable end break and contig match check for fast processing, not recommend for metagenome-assembled genomes (MAGs)')
+    parser.add_argument('-force',         required=False, action="store_true", help='overwrite previous results')
+    parser.add_argument('-quiet',         required=False, action="store_true", help='Do not report progress')
+    parser.add_argument('-tmp',           required=False, action="store_true", help='keep temporary files')
+
+    args = vars(parser.parse_args())
+
+
+    BM(args, config_dict)
 

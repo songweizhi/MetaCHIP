@@ -1,3 +1,5 @@
+MANIFEST.in
+README.md
 setup.py
 MetaCHIP/BM.py
 MetaCHIP/MetaCHIP_add_group_to_tree.R
@@ -6,8 +8,7 @@ MetaCHIP/MetaCHIP_config.py
 MetaCHIP/MetaCHIP_phylo.hmm
 MetaCHIP/PG.py
 MetaCHIP/PI.py
-MetaCHIP/Ranger-DTL-Dated.linux
-MetaCHIP/Ranger-DTL-Dated.mac
+MetaCHIP/VERSION
 MetaCHIP/__init__.py
 MetaCHIP.egg-info/PKG-INFO
 MetaCHIP.egg-info/SOURCES.txt
