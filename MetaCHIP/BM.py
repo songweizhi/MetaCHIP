@@ -339,11 +339,11 @@ def get_hits_group(input_file_name, output_file_name):
 
 
 def get_candidates(targets_group_file, gene_with_g_file_name, gene_only_name_file_name, group_pair_iden_cutoff_dict):
-    targets_group = open(targets_group_file)
+
     output_1 = open(gene_with_g_file_name, 'w')
     output_2 = open(gene_only_name_file_name, 'w')
 
-    for group in targets_group:
+    for group in open(targets_group_file):
         group_split = group.strip().split('\t')
         query = group_split[0]
         query_split = query.split('|')

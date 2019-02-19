@@ -65,15 +65,18 @@ def version():
 def print_main_help():
 
     help_message = ''' 
-             ...::: MetaCHIP v%s :::...
+        ...::: MetaCHIP v%s :::...
         
     HGT detection modules:
-       PI               ->   Prepare Input files 
-       BM               ->   Best-Match approach 
-       PG               ->   PhyloGenetic approach
+       PI      ->      Prepare Input files 
+       BM      ->      Best-Match approach 
+       PG      ->      PhyloGenetic approach
 
     # for command specific help
-    MetaCHIP <command> -h
+    MetaCHIP PI -h
+    MetaCHIP BM -h
+    MetaCHIP PG -h
+
     ''' % version()
 
     print(help_message)

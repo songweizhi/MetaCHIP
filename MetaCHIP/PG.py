@@ -781,29 +781,29 @@ def Ranger_worker(argument_list):
         ranger_inputs_file.close()
 
         # create ranger_outputs_folder
-        force_create_folder(pwd_current_ranger_outputs_folder)
+        #force_create_folder(pwd_current_ranger_outputs_folder)
 
         # run Ranger-DTL
         ranger_parameters = '-q -D 2 -T 3 -L 1'
         ranger_cmd = '%s %s -i %s -o %s' % (pwd_ranger_exe, ranger_parameters, pwd_ranger_inputs, pwd_ranger_outputs)
         os.system(ranger_cmd)
 
-        # run ranger with 100 bootstrap
-        ranger_bootstrap = 1
-        while ranger_bootstrap <= 100:
-            ranger_outputs_bootstrap = '%s/%s_bootstrap%s' % (pwd_current_ranger_outputs_folder, each_paired_tree_concate, ranger_bootstrap)
-            ranger_cmd_bootstrap = '%s %s -i %s -o %s' % (pwd_ranger_exe, ranger_parameters, pwd_ranger_inputs, ranger_outputs_bootstrap)
-            os.system(ranger_cmd_bootstrap)
-            ranger_bootstrap += 1
-
-        # AggregateRanger_cmd
-        current_wd = os.getcwd()
-        os.chdir(pwd_ranger_outputs_folder)
-
-        AggregateRanger_cmd = '%s %s/%s_bootstrap > %s' % (pwd_AggregateRanger_exe, each_paired_tree_concate_short, each_paired_tree_concate, ranger_outputs_file_name_bootstrap)
-        os.system(AggregateRanger_cmd)
-        os.system('rm -r %s' % each_paired_tree_concate_short)
-        os.chdir(current_wd)
+        # # run ranger with 100 bootstrap
+        # ranger_bootstrap = 1
+        # while ranger_bootstrap <= 100:
+        #     ranger_outputs_bootstrap = '%s/%s_bootstrap%s' % (pwd_current_ranger_outputs_folder, each_paired_tree_concate, ranger_bootstrap)
+        #     ranger_cmd_bootstrap = '%s %s -i %s -o %s' % (pwd_ranger_exe, ranger_parameters, pwd_ranger_inputs, ranger_outputs_bootstrap)
+        #     os.system(ranger_cmd_bootstrap)
+        #     ranger_bootstrap += 1
+        #
+        # # AggregateRanger_cmd
+        # current_wd = os.getcwd()
+        # os.chdir(pwd_ranger_outputs_folder)
+        #
+        # AggregateRanger_cmd = '%s %s/%s_bootstrap > %s' % (pwd_AggregateRanger_exe, each_paired_tree_concate_short, each_paired_tree_concate, ranger_outputs_file_name_bootstrap)
+        # os.system(AggregateRanger_cmd)
+        # os.system('rm -r %s' % each_paired_tree_concate_short)
+        # os.chdir(current_wd)
 
 
 def PG(args, config_dict):
@@ -1072,33 +1072,32 @@ def PG(args, config_dict):
     for each_ranger_prediction in candidates_list:
         each_ranger_prediction_concate = '___'.join(each_ranger_prediction)
         ranger_out_file_name = each_ranger_prediction_concate + '_ranger_output.txt'
-        ranger_out_file_name_bootstrap = each_ranger_prediction_concate + '_ranger_bootstrap.txt'
+        #ranger_out_file_name_bootstrap = each_ranger_prediction_concate + '_ranger_bootstrap.txt'
         pwd_ranger_result = '%s/%s' % (pwd_ranger_outputs_folder, ranger_out_file_name)
-        pwd_ranger_result_bootstrap = '%s/%s' % (pwd_ranger_outputs_folder, ranger_out_file_name_bootstrap)
+        # pwd_ranger_result_bootstrap = '%s/%s' % (pwd_ranger_outputs_folder, ranger_out_file_name_bootstrap)
 
-        # parse prediction result with bootstrap
-        predicted_transfers_bootstrap = []
-
-        for each_line_bootstrap in open(pwd_ranger_result_bootstrap):
-
-            if ('Transfers = ' in each_line_bootstrap) and ('Transfers = 0' not in each_line_bootstrap):
-                mapping = each_line_bootstrap.strip().split('Most Frequent mapping --> ')[1].split(',')[0]
-                gene_pair = each_line_bootstrap.strip().split(']: [Speciations')[0].split('LCA[')[1].split(', ')
-
-                donor_p_bootstrap = mapping
-                recipient_p_bootstrap = ''
-                for i in gene_pair:
-                    if i != donor_p_bootstrap:
-                        recipient_p_bootstrap = i
-
-                donor_p_bootstrap = '_'.join(donor_p_bootstrap.split('XXXXX'))
-                donor_p_bootstrap = '.'.join(donor_p_bootstrap.split('SSSSS'))
-
-                recipient_p_bootstrap = '_'.join(recipient_p_bootstrap.split('XXXXX'))
-                recipient_p_bootstrap = '.'.join(recipient_p_bootstrap.split('SSSSS'))
-
-                predicted_transfer_bootstrap = '%s-->%s' % (donor_p_bootstrap, recipient_p_bootstrap)
-                predicted_transfers_bootstrap.append(predicted_transfer_bootstrap)
+        # # parse prediction result with bootstrap
+        # predicted_transfers_bootstrap = []
+        # for each_line_bootstrap in open(pwd_ranger_result_bootstrap):
+        #
+        #     if ('Transfers = ' in each_line_bootstrap) and ('Transfers = 0' not in each_line_bootstrap):
+        #         mapping = each_line_bootstrap.strip().split('Most Frequent mapping --> ')[1].split(',')[0]
+        #         gene_pair = each_line_bootstrap.strip().split(']: [Speciations')[0].split('LCA[')[1].split(', ')
+        #
+        #         donor_p_bootstrap = mapping
+        #         recipient_p_bootstrap = ''
+        #         for i in gene_pair:
+        #             if i != donor_p_bootstrap:
+        #                 recipient_p_bootstrap = i
+        #
+        #         donor_p_bootstrap = '_'.join(donor_p_bootstrap.split('XXXXX'))
+        #         donor_p_bootstrap = '.'.join(donor_p_bootstrap.split('SSSSS'))
+        #
+        #         recipient_p_bootstrap = '_'.join(recipient_p_bootstrap.split('XXXXX'))
+        #         recipient_p_bootstrap = '.'.join(recipient_p_bootstrap.split('SSSSS'))
+        #
+        #         predicted_transfer_bootstrap = '%s-->%s' % (donor_p_bootstrap, recipient_p_bootstrap)
+        #         predicted_transfers_bootstrap.append(predicted_transfer_bootstrap)
 
         # parse prediction result
         predicted_transfers = []
@@ -1117,7 +1116,8 @@ def PG(args, config_dict):
                     predicted_transfers.append(predicted_transfer)
 
         # use results from bootstrap mode
-        predicted_transfers = predicted_transfers_bootstrap
+        #predicted_transfers = predicted_transfers_bootstrap
+
         candidate_2_predictions_dict[each_ranger_prediction_concate] = predicted_transfers
 
         # get two possible transfer situation
@@ -1209,8 +1209,8 @@ def PG(args, config_dict):
             At_ends = PG_HGT_split[5]
             Ctg_align = PG_HGT_split[6]
             Direction = PG_HGT_split[7]
-            possible_file_name_1 = '%s___%s.eps' % (gene_1, gene_2)
-            possible_file_name_2 = '%s___%s.eps' % (gene_2, gene_1)
+            possible_file_name_1 = '%s___%s.SVG' % (gene_1, gene_2)
+            possible_file_name_2 = '%s___%s.SVG' % (gene_2, gene_1)
 
             # normal
             action = 'cp'
