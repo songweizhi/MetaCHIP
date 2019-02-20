@@ -107,10 +107,10 @@ Output files:
     |BNM_02445|AMS_01681|B|A|77.961|no|yes|BNM<-AMS|
     |BNM_02717|AAM_02737|B|A|74.47|no|no|BNM<-AAM|
 
-1. Flanking regions of identified HGT candidates.
+1. Flanking regions of identified HGT candidates. Genes encoded on the forward strand are displayed in light blue, and genes coded on the reverse strand are displayed in light green. The name of genes predicted to be HGT are highlighted in blue, large font with pairwise identity given in parentheses. Contig names are provided at the left bottom of the sequence tracks and numbers following the contig name refer to the distances between the gene subject to HGT and either the left or right end of the contig. Red bars show similarities of the matched regions between the contigs based on BLASTN results.
     ![flanking_regions](images/flanking_regions.png)
         
-1. Gene flow between groups.
+1. Gene flow between groups. Bands connect donors and recipients, with the width of the band correlating to the number of HGTs and the colour corresponding to the donors.
     ![Gene_flow](images/Gene_flow.jpg)
     
 1. Identity distribution of identified HGTs.
