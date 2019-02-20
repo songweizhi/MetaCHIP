@@ -108,7 +108,7 @@ Output files:
     |BNM_02717|AAM_02737|B|A|74.47|no|no|BNM<-AAM|
 
 1. Flanking regions of identified HGT candidates.
-    ![flanking_regions](images/flanking_regions.jpg)
+    ![flanking_regions](images/flanking_regions.png)
         
 1. Gene flow between groups.
     ![Gene_flow](images/Gene_flow.jpg)
