@@ -32,7 +32,7 @@ to their executables in the config file if they are not on the system path.
 * [MAFFT](https://mafft.cbrc.jp/alignment/software/): multiple sequences alignment program.
 * [FastTree](http://www.microbesonline.org/fasttree/): tool for inferring phylogenies from alignments .
 * [BLAST+](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download): you know what it is!
-* [Ranger-DTL 2.0](https://compbio.engr.uconn.edu/software/RANGER-DTL/): software for inferring gene family evolution.
+* [Ranger-DTL 2.0](https://compbio.engr.uconn.edu/software/RANGER-DTL/): software for inferring gene family evolution. [[Installation Instructions]](https://github.com/songweizhi/MetaCHIP/blob/master/manual/Instruction_for_installing_Ranger-DTL2.txt)
 
 
 How to install:
