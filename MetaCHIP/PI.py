@@ -1264,24 +1264,23 @@ if __name__ == '__main__':
 
     # initialize the options parser
     parser = argparse.ArgumentParser()
-    subparsers = parser.add_subparsers(help="--", dest='subparser_name')
 
     # arguments for PI
-    PI_parser = subparsers.add_parser('PI',  description='Prepare input files', epilog='Example: MetaCHIP PI -h')
-    PI_parser.add_argument('-i',             required=True,  help='input genome folder')
-    PI_parser.add_argument('-taxon',         required=False, help='taxonomic classification')
-    PI_parser.add_argument('-p',             required=True,  help='output prefix')
-    PI_parser.add_argument('-r',             required=False, default=None, help='grouping rank')
-    PI_parser.add_argument('-g',             required=False, default=None, help='grouping file')
-    PI_parser.add_argument('-x',             required=False, default='fasta', help='file extension')
-    PI_parser.add_argument('-grouping_only', required=False, action="store_true", help='run grouping only, deactivate Prodigal and Blastn')
-    PI_parser.add_argument('-nonmeta',       required=False, action="store_true", help='annotate Non-metagenome-assembled genomes (Non-MAGs)')
-    PI_parser.add_argument('-noblast',       required=False, action="store_true", help='not run all-vs-all blastn')
-    PI_parser.add_argument('-t',             required=False, type=int, default=1, help='number of threads, default: 1')
-    PI_parser.add_argument('-qsub',          required=False, action="store_true", help='run blastn with job scripts, only for HPC users')
-    PI_parser.add_argument('-force',         required=False, action="store_true", help='overwrite previous results')
-    PI_parser.add_argument('-quiet',         required=False, action="store_true", help='not report progress')
+    parser.add_argument('-i',             required=True,  help='input genome folder')
+    parser.add_argument('-taxon',         required=False, help='taxonomic classification')
+    parser.add_argument('-p',             required=True,  help='output prefix')
+    parser.add_argument('-r',             required=False, default=None,        help='grouping rank')
+    parser.add_argument('-g',             required=False, default=None,        help='grouping file')
+    parser.add_argument('-x',             required=False, default='fasta',     help='file extension')
+    parser.add_argument('-grouping_only', required=False, action="store_true", help='run grouping only, deactivate Prodigal and Blastn')
+    parser.add_argument('-nonmeta',       required=False, action="store_true", help='annotate Non-metagenome-assembled genomes (Non-MAGs)')
+    parser.add_argument('-noblast',       required=False, action="store_true", help='not run all-vs-all blastn')
+    parser.add_argument('-t',             required=False, type=int, default=1, help='number of threads, default: 1')
+    parser.add_argument('-qsub',          required=False, action="store_true", help='run blastn with job scripts, only for HPC users')
+    parser.add_argument('-force',         required=False, action="store_true", help='overwrite previous results')
+    parser.add_argument('-quiet',         required=False, action="store_true", help='not report progress')
 
     args = vars(parser.parse_args())
 
     PI(args, config_dict)
+

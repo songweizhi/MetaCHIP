@@ -592,103 +592,105 @@ def extract_gene_tree_seq_worker(argument_list):
 
     # get sequences of othorlog group to build gene tree
     output_handle = open(gene_tree_seq, "w")
+    extracted_gene_set = set()
     for seq_record in SeqIO.parse(pwd_combined_faa_file_subset, 'fasta'):
         # if seq_record.id in current_gene_member:
         if seq_record.id in genes_to_extract_list:
             output_handle.write('>%s\n' % seq_record.id)
             output_handle.write('%s\n' % str(seq_record.seq))
+            extracted_gene_set.add(seq_record.id)
     output_handle.close()
 
+    if (gene_1 in extracted_gene_set) and (gene_2 in extracted_gene_set):
+        self_seq_handle = open(self_seq, 'w')
+        non_self_seq_handle = open(non_self_seq, 'w')
+        non_self_seq_num = 0
+        for each_seq in SeqIO.parse(gene_tree_seq, 'fasta'):
+            each_seq_genome_id = '_'.join(each_seq.id.split('_')[:-1])
+            if each_seq.id in each_to_process:
+                SeqIO.write(each_seq, self_seq_handle, 'fasta')
+            elif each_seq_genome_id not in [HGT_genome_1, HGT_genome_2]:
+                SeqIO.write(each_seq, non_self_seq_handle, 'fasta')
+                non_self_seq_num += 1
+        self_seq_handle.close()
+        non_self_seq_handle.close()
 
-    self_seq_handle = open(self_seq, 'w')
-    non_self_seq_handle = open(non_self_seq, 'w')
-    non_self_seq_num = 0
-    for each_seq in SeqIO.parse(gene_tree_seq, 'fasta'):
-        each_seq_genome_id = '_'.join(each_seq.id.split('_')[:-1])
-        if each_seq.id in each_to_process:
-            SeqIO.write(each_seq, self_seq_handle, 'fasta')
-        elif each_seq_genome_id not in [HGT_genome_1, HGT_genome_2]:
-            SeqIO.write(each_seq, non_self_seq_handle, 'fasta')
-            non_self_seq_num += 1
-    self_seq_handle.close()
-    non_self_seq_handle.close()
 
+        # run blast
+        genome_subset = set()
+        if non_self_seq_num > 0:
+            os.system('%s -query %s -subject %s -outfmt 6 -out %s' % (pwd_blastp_exe, self_seq, non_self_seq, blast_output))
+            os.system('cat %s | sort > %s' % (blast_output, blast_output_sorted))
 
-    # run blast
-    genome_subset = set()
-    if non_self_seq_num > 0:
-        os.system('%s -query %s -subject %s -outfmt 6 -out %s' % (pwd_blastp_exe, self_seq, non_self_seq, blast_output))
-        os.system('cat %s | sort > %s' % (blast_output, blast_output_sorted))
-
-        # get best match from each genome
-        current_query_subject_genome = ''
-        current_bit_score = 0
-        current_best_match = ''
-        best_match_list = []
-        for each_hit in open(blast_output_sorted):
-            each_hit_split = each_hit.strip().split('\t')
-            query = each_hit_split[0]
-            subject = each_hit_split[1]
-            subject_genome = '_'.join(subject.split('_')[:-1])
-            query_subject_genome = '%s___%s' % (query, subject_genome)
-            bit_score = float(each_hit_split[11])
-            if current_query_subject_genome == '':
-                current_query_subject_genome = query_subject_genome
-                current_bit_score = bit_score
-                current_best_match = subject
-            elif current_query_subject_genome == query_subject_genome:
-                if bit_score > current_bit_score:
+            # get best match from each genome
+            current_query_subject_genome = ''
+            current_bit_score = 0
+            current_best_match = ''
+            best_match_list = []
+            for each_hit in open(blast_output_sorted):
+                each_hit_split = each_hit.strip().split('\t')
+                query = each_hit_split[0]
+                subject = each_hit_split[1]
+                subject_genome = '_'.join(subject.split('_')[:-1])
+                query_subject_genome = '%s___%s' % (query, subject_genome)
+                bit_score = float(each_hit_split[11])
+                if current_query_subject_genome == '':
+                    current_query_subject_genome = query_subject_genome
                     current_bit_score = bit_score
                     current_best_match = subject
-            elif current_query_subject_genome != query_subject_genome:
-                best_match_list.append(current_best_match)
-                current_query_subject_genome = query_subject_genome
-                current_bit_score = bit_score
-                current_best_match = subject
-        best_match_list.append(current_best_match)
+                elif current_query_subject_genome == query_subject_genome:
+                    if bit_score > current_bit_score:
+                        current_bit_score = bit_score
+                        current_best_match = subject
+                elif current_query_subject_genome != query_subject_genome:
+                    best_match_list.append(current_best_match)
+                    current_query_subject_genome = query_subject_genome
+                    current_bit_score = bit_score
+                    current_best_match = subject
+            best_match_list.append(current_best_match)
 
-        # export sequences
-        gene_tree_seq_all = best_match_list + each_to_process
-        gene_tree_seq_uniq_handle = open(gene_tree_seq_uniq, 'w')
-        for each_seq2 in SeqIO.parse(gene_tree_seq, 'fasta'):
-            if each_seq2.id in gene_tree_seq_all:
-                gene_tree_seq_uniq_handle.write('>%s\n' % each_seq2.id)
-                gene_tree_seq_uniq_handle.write('%s\n' % str(each_seq2.seq))
-        gene_tree_seq_uniq_handle.close()
+            # export sequences
+            gene_tree_seq_all = best_match_list + each_to_process
+            gene_tree_seq_uniq_handle = open(gene_tree_seq_uniq, 'w')
+            for each_seq2 in SeqIO.parse(gene_tree_seq, 'fasta'):
+                if each_seq2.id in gene_tree_seq_all:
+                    gene_tree_seq_uniq_handle.write('>%s\n' % each_seq2.id)
+                    gene_tree_seq_uniq_handle.write('%s\n' % str(each_seq2.seq))
+            gene_tree_seq_uniq_handle.close()
 
-        cmd_mafft = '%s --quiet %s > %s' % (pwd_mafft_exe, gene_tree_seq_uniq, pwd_seq_file_1st_aln)
-        for each_gene in SeqIO.parse(gene_tree_seq_uniq, 'fasta'):
-            each_gene_genome = '_'.join(str(each_gene.id).split('_')[:-1])
-            genome_subset.add(each_gene_genome)
-    else:
-        cmd_mafft = '%s --quiet %s > %s' % (pwd_mafft_exe, gene_tree_seq, pwd_seq_file_1st_aln)
-        for each_gene in SeqIO.parse(gene_tree_seq, 'fasta'):
-            each_gene_genome = '_'.join(str(each_gene.id).split('_')[:-1])
-            genome_subset.add(each_gene_genome)
+            cmd_mafft = '%s --quiet %s > %s' % (pwd_mafft_exe, gene_tree_seq_uniq, pwd_seq_file_1st_aln)
+            for each_gene in SeqIO.parse(gene_tree_seq_uniq, 'fasta'):
+                each_gene_genome = '_'.join(str(each_gene.id).split('_')[:-1])
+                genome_subset.add(each_gene_genome)
+        else:
+            cmd_mafft = '%s --quiet %s > %s' % (pwd_mafft_exe, gene_tree_seq, pwd_seq_file_1st_aln)
+            for each_gene in SeqIO.parse(gene_tree_seq, 'fasta'):
+                each_gene_genome = '_'.join(str(each_gene.id).split('_')[:-1])
+                genome_subset.add(each_gene_genome)
 
-    # run mafft
-    os.system(cmd_mafft)
+        # run mafft
+        os.system(cmd_mafft)
 
-    # remove columns in alignment
-    remove_low_cov_and_consensus_columns(pwd_seq_file_1st_aln, 50, 50, pwd_seq_file_2nd_aln)
+        # remove columns in alignment
+        remove_low_cov_and_consensus_columns(pwd_seq_file_1st_aln, 50, 50, pwd_seq_file_2nd_aln)
 
-    # run fasttree
-    cmd_fasttree = '%s -quiet -wag %s > %s' % (pwd_fasttree_exe, pwd_seq_file_2nd_aln, pwd_gene_tree_newick)
-    os.system(cmd_fasttree)
+        # run fasttree
+        cmd_fasttree = '%s -quiet -wag %s > %s' % (pwd_fasttree_exe, pwd_seq_file_2nd_aln, pwd_gene_tree_newick)
+        os.system(cmd_fasttree)
 
-    # Get species tree
-    subset_tree(pwd_SCG_tree_all, genome_subset, pwd_species_tree_newick)
+        # Get species tree
+        subset_tree(pwd_SCG_tree_all, genome_subset, pwd_species_tree_newick)
 
-    # remove temp files
-    os.remove(self_seq)
-    os.remove(gene_tree_seq)
-    os.remove(pwd_seq_file_1st_aln)
-    os.remove(pwd_seq_file_2nd_aln)
-    if non_self_seq_num > 0:
-        os.remove(non_self_seq)
-        os.remove(blast_output)
-        os.remove(blast_output_sorted)
-        os.remove(gene_tree_seq_uniq)
+        # remove temp files
+        os.remove(self_seq)
+        os.remove(gene_tree_seq)
+        os.remove(pwd_seq_file_1st_aln)
+        os.remove(pwd_seq_file_2nd_aln)
+        if non_self_seq_num > 0:
+            os.remove(non_self_seq)
+            os.remove(blast_output)
+            os.remove(blast_output_sorted)
+            os.remove(gene_tree_seq_uniq)
 
 
 def Ranger_worker(argument_list):
@@ -696,97 +698,96 @@ def Ranger_worker(argument_list):
         pwd_ranger_inputs_folder = argument_list[1]
         pwd_tree_folder = argument_list[2]
         pwd_ranger_exe = argument_list[3]
-        pwd_AggregateRanger_exe = argument_list[4]
+        # pwd_AggregateRanger_exe = argument_list[4]
         pwd_ranger_outputs_folder = argument_list[5]
 
         # define Ranger-DTL input file name
         each_paired_tree_concate = '___'.join(each_paired_tree)
-
-        each_paired_tree_concate_short = '%s___%s' % (each_paired_tree[0].split('_')[-1], each_paired_tree[1].split('_')[-1])
-
-
-        ranger_inputs_file_name = each_paired_tree_concate + '.txt'
-
-        ranger_outputs_file_name = each_paired_tree_concate + '_ranger_output.txt'
-        ranger_outputs_file_name_bootstrap = each_paired_tree_concate + '_ranger_bootstrap.txt'
-
-        pwd_ranger_inputs = '%s/%s' % (pwd_ranger_inputs_folder, ranger_inputs_file_name)
-        pwd_ranger_outputs = '%s/%s' % (pwd_ranger_outputs_folder, ranger_outputs_file_name)
-        pwd_ranger_outputs_bootstrap = '%s/%s' % (pwd_ranger_outputs_folder, ranger_outputs_file_name_bootstrap)
-
-        pwd_current_ranger_outputs_folder = '%s/%s' % (pwd_ranger_outputs_folder, each_paired_tree_concate_short)
-
-
-        # read in species tree
         pwd_species_tree_newick = '%s/%s_species_tree.newick' % (pwd_tree_folder, each_paired_tree_concate)
-        species_tree = Tree(pwd_species_tree_newick, format=0)
-        species_tree.resolve_polytomy(recursive=True)  # solving multifurcations
-        species_tree.convert_to_ultrametric() # for dated mode
+        pwd_gene_tree_newick =    '%s/%s_gene_tree.newick'    % (pwd_tree_folder, each_paired_tree_concate)
+        #each_paired_tree_concate_short = '%s___%s' % (each_paired_tree[0].split('_')[-1], each_paired_tree[1].split('_')[-1])
 
-        # read in gene tree
-        pwd_gene_tree_newick = '%s/%s_gene_tree.newick' % (pwd_tree_folder, each_paired_tree_concate)
-        gene_tree = Tree(pwd_gene_tree_newick, format=0)
-        gene_tree.resolve_polytomy(recursive=True)  # solving multifurcations
+        if (os.path.isfile(pwd_species_tree_newick) == True) and (os.path.isfile(pwd_gene_tree_newick) == True):
 
+            ranger_inputs_file_name = each_paired_tree_concate + '.txt'
+            ranger_outputs_file_name = each_paired_tree_concate + '_ranger_output.txt'
+            # ranger_outputs_file_name_bootstrap = each_paired_tree_concate + '_ranger_bootstrap.txt'
 
-        ################################################################################################################
+            pwd_ranger_inputs = '%s/%s' % (pwd_ranger_inputs_folder, ranger_inputs_file_name)
+            pwd_ranger_outputs = '%s/%s' % (pwd_ranger_outputs_folder, ranger_outputs_file_name)
+            # pwd_ranger_outputs_bootstrap = '%s/%s' % (pwd_ranger_outputs_folder, ranger_outputs_file_name_bootstrap)
 
-        # change species tree leaf name for Ranger-DTL2, replace "_" with "XXXXX", then, replace "." with "SSSSS"
-        for each_st_leaf in species_tree:
-            each_st_leaf_name = each_st_leaf.name
-
-            # replace '-' with 'XXXXX'
-            if '_' in each_st_leaf_name:
-                each_st_leaf_name_no_Underline = 'XXXXX'.join(each_st_leaf_name.split('_'))
-            else:
-                each_st_leaf_name_no_Underline = each_st_leaf_name
-
-            # replace '.' with 'SSSSS'
-            if '.' in each_st_leaf_name_no_Underline:
-                each_st_leaf_name_no_Underline_no_dot = 'SSSSS'.join(each_st_leaf_name_no_Underline.split('.'))
-            else:
-                each_st_leaf_name_no_Underline_no_dot= each_st_leaf_name_no_Underline
-
-            # rename species tree leaf name
-            each_st_leaf.name = each_st_leaf_name_no_Underline_no_dot
+            # pwd_current_ranger_outputs_folder = '%s/%s' % (pwd_ranger_outputs_folder, each_paired_tree_concate_short)
 
 
-        # change gene tree leaf name for Ranger-DTL2, replace "_" with "XXXXX", then, replace "." with "SSSSS"
-        for each_gt_leaf in gene_tree:
-            each_gt_leaf_name = each_gt_leaf.name
+            # read in species tree
+            species_tree = Tree(pwd_species_tree_newick, format=0)
+            species_tree.resolve_polytomy(recursive=True)  # solving multifurcations
+            species_tree.convert_to_ultrametric() # for dated mode
 
-            # replace '-' with 'XXXXX'
-            if '_' in each_gt_leaf_name:
-                each_gt_leaf_name_no_Underline = 'XXXXX'.join(each_gt_leaf_name.split('_')[:-1])
-            else:
-                each_gt_leaf_name_no_Underline = each_gt_leaf_name
-
-            # replace '.' with 'SSSSS'
-            if '.' in each_gt_leaf_name_no_Underline:
-                each_gt_leaf_name_no_Underline_no_dot = 'SSSSS'.join(each_gt_leaf_name_no_Underline.split('.'))
-            else:
-                each_gt_leaf_name_no_Underline_no_dot = each_gt_leaf_name_no_Underline
-
-            # rename gene tree leaf name
-            each_gt_leaf.name = each_gt_leaf_name_no_Underline_no_dot
+            # read in gene tree
+            gene_tree = Tree(pwd_gene_tree_newick, format=0)
+            gene_tree.resolve_polytomy(recursive=True)  # solving multifurcations
 
 
-        ################################################################################################################
+            ################################################################################################################
 
-        # write species tree and gene tree to Ranger-DTL input file
-        ranger_inputs_file = open(pwd_ranger_inputs, 'w')
+            # change species tree leaf name for Ranger-DTL2, replace "_" with "XXXXX", then, replace "." with "SSSSS"
+            for each_st_leaf in species_tree:
+                each_st_leaf_name = each_st_leaf.name
 
-        # dated mode
-        ranger_inputs_file.write('%s\n%s\n' % (species_tree.write(format=5), gene_tree.write(format=5)))
-        ranger_inputs_file.close()
+                # replace '-' with 'XXXXX'
+                if '_' in each_st_leaf_name:
+                    each_st_leaf_name_no_Underline = 'XXXXX'.join(each_st_leaf_name.split('_'))
+                else:
+                    each_st_leaf_name_no_Underline = each_st_leaf_name
 
-        # create ranger_outputs_folder
-        #force_create_folder(pwd_current_ranger_outputs_folder)
+                # replace '.' with 'SSSSS'
+                if '.' in each_st_leaf_name_no_Underline:
+                    each_st_leaf_name_no_Underline_no_dot = 'SSSSS'.join(each_st_leaf_name_no_Underline.split('.'))
+                else:
+                    each_st_leaf_name_no_Underline_no_dot= each_st_leaf_name_no_Underline
 
-        # run Ranger-DTL
-        ranger_parameters = '-q -D 2 -T 3 -L 1'
-        ranger_cmd = '%s %s -i %s -o %s' % (pwd_ranger_exe, ranger_parameters, pwd_ranger_inputs, pwd_ranger_outputs)
-        os.system(ranger_cmd)
+                # rename species tree leaf name
+                each_st_leaf.name = each_st_leaf_name_no_Underline_no_dot
+
+
+            # change gene tree leaf name for Ranger-DTL2, replace "_" with "XXXXX", then, replace "." with "SSSSS"
+            for each_gt_leaf in gene_tree:
+                each_gt_leaf_name = each_gt_leaf.name
+
+                # replace '-' with 'XXXXX'
+                if '_' in each_gt_leaf_name:
+                    each_gt_leaf_name_no_Underline = 'XXXXX'.join(each_gt_leaf_name.split('_')[:-1])
+                else:
+                    each_gt_leaf_name_no_Underline = each_gt_leaf_name
+
+                # replace '.' with 'SSSSS'
+                if '.' in each_gt_leaf_name_no_Underline:
+                    each_gt_leaf_name_no_Underline_no_dot = 'SSSSS'.join(each_gt_leaf_name_no_Underline.split('.'))
+                else:
+                    each_gt_leaf_name_no_Underline_no_dot = each_gt_leaf_name_no_Underline
+
+                # rename gene tree leaf name
+                each_gt_leaf.name = each_gt_leaf_name_no_Underline_no_dot
+
+
+            ################################################################################################################
+
+            # write species tree and gene tree to Ranger-DTL input file
+            ranger_inputs_file = open(pwd_ranger_inputs, 'w')
+
+            # dated mode
+            ranger_inputs_file.write('%s\n%s\n' % (species_tree.write(format=5), gene_tree.write(format=5)))
+            ranger_inputs_file.close()
+
+            # create ranger_outputs_folder
+            #force_create_folder(pwd_current_ranger_outputs_folder)
+
+            # run Ranger-DTL
+            ranger_parameters = '-q -D 2 -T 3 -L 1'
+            ranger_cmd = '%s %s -i %s -o %s' % (pwd_ranger_exe, ranger_parameters, pwd_ranger_inputs, pwd_ranger_outputs)
+            os.system(ranger_cmd)
 
         # # run ranger with 100 bootstrap
         # ranger_bootstrap = 1
@@ -1072,65 +1073,40 @@ def PG(args, config_dict):
     for each_ranger_prediction in candidates_list:
         each_ranger_prediction_concate = '___'.join(each_ranger_prediction)
         ranger_out_file_name = each_ranger_prediction_concate + '_ranger_output.txt'
-        #ranger_out_file_name_bootstrap = each_ranger_prediction_concate + '_ranger_bootstrap.txt'
         pwd_ranger_result = '%s/%s' % (pwd_ranger_outputs_folder, ranger_out_file_name)
-        # pwd_ranger_result_bootstrap = '%s/%s' % (pwd_ranger_outputs_folder, ranger_out_file_name_bootstrap)
 
-        # # parse prediction result with bootstrap
-        # predicted_transfers_bootstrap = []
-        # for each_line_bootstrap in open(pwd_ranger_result_bootstrap):
-        #
-        #     if ('Transfers = ' in each_line_bootstrap) and ('Transfers = 0' not in each_line_bootstrap):
-        #         mapping = each_line_bootstrap.strip().split('Most Frequent mapping --> ')[1].split(',')[0]
-        #         gene_pair = each_line_bootstrap.strip().split(']: [Speciations')[0].split('LCA[')[1].split(', ')
-        #
-        #         donor_p_bootstrap = mapping
-        #         recipient_p_bootstrap = ''
-        #         for i in gene_pair:
-        #             if i != donor_p_bootstrap:
-        #                 recipient_p_bootstrap = i
-        #
-        #         donor_p_bootstrap = '_'.join(donor_p_bootstrap.split('XXXXX'))
-        #         donor_p_bootstrap = '.'.join(donor_p_bootstrap.split('SSSSS'))
-        #
-        #         recipient_p_bootstrap = '_'.join(recipient_p_bootstrap.split('XXXXX'))
-        #         recipient_p_bootstrap = '.'.join(recipient_p_bootstrap.split('SSSSS'))
-        #
-        #         predicted_transfer_bootstrap = '%s-->%s' % (donor_p_bootstrap, recipient_p_bootstrap)
-        #         predicted_transfers_bootstrap.append(predicted_transfer_bootstrap)
+        if os.path.isfile(pwd_ranger_result) == True:
 
-        # parse prediction result
-        predicted_transfers = []
-        for each_line in open(pwd_ranger_result):
-            if 'Transfer' in each_line:
-                if not each_line.startswith('The minimum reconciliation cost'):
-                    mapping = each_line.strip().split(':')[1].split(',')[1]
-                    recipient = each_line.strip().split(':')[1].split(',')[2]
-                    donor_p = mapping.split('-->')[1][1:]
-                    donor_p = '_'.join(donor_p.split('XXXXX'))
-                    donor_p = '.'.join(donor_p.split('SSSSS'))
-                    recipient_p = recipient.split('-->')[1][1:]
-                    recipient_p = '_'.join(recipient_p.split('XXXXX'))
-                    recipient_p = '.'.join(recipient_p.split('SSSSS'))
-                    predicted_transfer = donor_p + '-->' + recipient_p
-                    predicted_transfers.append(predicted_transfer)
+            # parse prediction result
+            predicted_transfers = []
+            for each_line in open(pwd_ranger_result):
+                if 'Transfer' in each_line:
+                    if not each_line.startswith('The minimum reconciliation cost'):
+                        mapping = each_line.strip().split(':')[1].split(',')[1]
+                        recipient = each_line.strip().split(':')[1].split(',')[2]
+                        donor_p = mapping.split('-->')[1][1:]
+                        donor_p = '_'.join(donor_p.split('XXXXX'))
+                        donor_p = '.'.join(donor_p.split('SSSSS'))
+                        recipient_p = recipient.split('-->')[1][1:]
+                        recipient_p = '_'.join(recipient_p.split('XXXXX'))
+                        recipient_p = '.'.join(recipient_p.split('SSSSS'))
+                        predicted_transfer = donor_p + '-->' + recipient_p
+                        predicted_transfers.append(predicted_transfer)
 
-        # use results from bootstrap mode
-        #predicted_transfers = predicted_transfers_bootstrap
 
-        candidate_2_predictions_dict[each_ranger_prediction_concate] = predicted_transfers
+            candidate_2_predictions_dict[each_ranger_prediction_concate] = predicted_transfers
 
-        # get two possible transfer situation
-        candidate_split_gene = each_ranger_prediction_concate.split('___')
-        candidate_split_gene_only_genome = []
-        for each_candidate in candidate_split_gene:
-            each_candidate_genome = '_'.join(each_candidate.split('_')[:-1])
-            candidate_split_gene_only_genome.append(each_candidate_genome)
+            # get two possible transfer situation
+            candidate_split_gene = each_ranger_prediction_concate.split('___')
+            candidate_split_gene_only_genome = []
+            for each_candidate in candidate_split_gene:
+                each_candidate_genome = '_'.join(each_candidate.split('_')[:-1])
+                candidate_split_gene_only_genome.append(each_candidate_genome)
 
-        possible_hgt_1 = '%s-->%s' % (candidate_split_gene_only_genome[0], candidate_split_gene_only_genome[1])
-        possible_hgt_2 = '%s-->%s' % (candidate_split_gene_only_genome[1], candidate_split_gene_only_genome[0])
-        possible_hgts = [possible_hgt_1, possible_hgt_2]
-        candidate_2_possible_direction_dict[each_ranger_prediction_concate] = possible_hgts
+            possible_hgt_1 = '%s-->%s' % (candidate_split_gene_only_genome[0], candidate_split_gene_only_genome[1])
+            possible_hgt_2 = '%s-->%s' % (candidate_split_gene_only_genome[1], candidate_split_gene_only_genome[0])
+            possible_hgts = [possible_hgt_1, possible_hgt_2]
+            candidate_2_possible_direction_dict[each_ranger_prediction_concate] = possible_hgts
 
 
     #################################################### combine results ###################################################
@@ -1161,9 +1137,10 @@ def PG(args, config_dict):
                 possible_direction = candidate_2_possible_direction_dict[concatenated]
 
             validated_prediction = 'NA'
-            for each_prediction in candidate_2_predictions_dict[concatenated]:
-                if each_prediction in possible_direction:
-                    validated_prediction = each_prediction
+            if concatenated in candidate_2_predictions_dict:
+                for each_prediction in candidate_2_predictions_dict[concatenated]:
+                    if each_prediction in possible_direction:
+                        validated_prediction = each_prediction
 
             if (Ctg_align == 'no') and (end_break == 'no') and (validated_prediction != 'NA'):
                 if recipient_gene not in validated_candidate_list:
@@ -1598,7 +1575,13 @@ def PG(args, config_dict):
     os.remove(pwd_cir_plot_t1_sorted)
     os.remove(pwd_cir_plot_t1_sorted_count)
     #os.remove(pwd_cir_plot_matrix_filename)
+    #os.remove(pwd_combined_faa_file)
     os.remove(pwd_combined_faa_file_subset)
+
+    os.system('rm -r %s' % pwd_ranger_inputs_folder)
+    os.system('rm -r %s' % pwd_ranger_outputs_folder)
+    os.system('rm -r %s' % pwd_tree_folder)
+
 
     # for report and log
     report_and_log(('All done!'), pwd_log_file, keep_quiet)

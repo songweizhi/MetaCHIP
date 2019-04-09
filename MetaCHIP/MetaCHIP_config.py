@@ -15,10 +15,11 @@ config_dict = {'prodigal'               :  'prodigal',
                'blastp'                 :  'blastp',
                'blastn'                 :  'blastn',
                'makeblastdb'            :  'makeblastdb',
-               'ranger_mac'             :  'Ranger-DTL-Dated.mac',
-               'ranger_linux'           :  'Ranger-DTL-Dated.linux',
-               'AggregateRanger_mac'    :  'AggregateRanger.mac',
-               'AggregateRanger_linux'  :  'AggregateRanger.linux',
-               'path_to_hmm'            :  '%s/MetaCHIP_phylo.hmm'    % config_file_path,  # do not edit this line
-               'circos_HGT_R'           :  '%s/MetaCHIP_circos_HGT.R' % config_file_path   # do not edit this line
+               'ranger_mac'             :  'Ranger-DTL-Dated.mac',  # do not edit this line
+               'ranger_linux'           :  'Ranger-DTL-Dated.linux',  # do not edit this line
+               'path_to_hmm'            :  '%s/MetaCHIP_phylo.hmm'     % config_file_path,  # do not edit this line
+               'circos_HGT_R'           :  '%s/MetaCHIP_circos_HGT.R'  % config_file_path   # do not edit this line
                }
+
+# 'ranger_mac': '%s/3rd_party_software/Ranger_DTL/Mac/SupplementaryPrograms/Ranger-DTL-Dated.mac' % config_file_path,  # do not edit this line
+# 'ranger_linux': '%s/3rd_party_software/Ranger_DTL/Linux/SupplementaryPrograms/Ranger-DTL-Dated.linux' % config_file_path,  # do not edit this line

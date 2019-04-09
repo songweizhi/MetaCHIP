@@ -1,7 +1,7 @@
 ![logo](images/MetaCHIP_logo.jpg)
 
 
-Publication
+Publication:
 ---
 
 + **Song WZ**, Wemheuer B, Zhang S, Steensen K, Thomas T* (2019) MetaCHIP: community-level horizontal gene transfer identification through the combination of best-match and phylogenetic approaches. Microbiome. 7:36 https://doi.org/10.1186/s40168-019-0649-y
@@ -126,5 +126,4 @@ Output files:
 1. Examples of full-length contig match
     ![full_length_match_1](images/full_length_match_1.jpg)
     ![full_length_match_2](images/full_length_match_2.jpg)
-    
-    
+

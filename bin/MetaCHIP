@@ -33,9 +33,9 @@ All:
 !!!!!! predict HGT at levels from phylum to genus
 add option -force
 replace all-vs-all blastn with usearch
-if sh: FastTree: command not found exit
+if sh: FastTree: command not found exit, as well as for all other programs
 add hgt_wf: PI, BM and PG
-
+combine NorthSea_c5_grouping.txt and NorthSea_c5_group_to_taxon.txt into one file
 
 PI:
 if there is a Usearch error, break the pipeline
@@ -81,7 +81,11 @@ def print_main_help():
 
     print(help_message)
 
+
 '''
+
+To be added:
+
     Tree manipulation:
        plot_tree        ->   [to be added] Plot tree in newick format
        subset_gtdb_tree ->   [to be added] Subset GTDB tree for provided taxons
@@ -100,7 +104,6 @@ def print_main_help():
 '''
 
 
-
 if __name__ == '__main__':
 
     # initialize the options parser
@@ -112,7 +115,7 @@ if __name__ == '__main__':
     PI_parser.add_argument('-i',             required=True,  help='input genome folder')
     PI_parser.add_argument('-taxon',         required=False, help='taxonomic classification')
     PI_parser.add_argument('-p',             required=True,  help='output prefix')
-    PI_parser.add_argument('-r',             required=False, default=None, help='grouping rank')
+    PI_parser.add_argument('-r',             required=False, default=None, help='grouping rank, choose from p (phylum), c (class), o (order), f (family) or g (genus)')
     PI_parser.add_argument('-g',             required=False, default=None, help='grouping file')
     PI_parser.add_argument('-x',             required=False, default='fasta', help='file extension')
     PI_parser.add_argument('-grouping_only', required=False, action="store_true", help='run grouping only, deactivate Prodigal and Blastn')
@@ -126,7 +129,7 @@ if __name__ == '__main__':
     # arguments for BM approach
     BM_parser = subparsers.add_parser('BM',  description='Best-match approach', epilog='Example: MetaCHIP BM -h')
     BM_parser.add_argument('-p',             required=True,  help='output prefix')
-    BM_parser.add_argument('-r',             required=False, default=None, help='grouping rank')
+    BM_parser.add_argument('-r',             required=False, default=None, help='grouping rank, choose from p (phylum), c (class), o (order), f (family) or g (genus)')
     BM_parser.add_argument('-g',             required=False, default=None, help='grouping file')
     BM_parser.add_argument('-cov',           required=False, type=int, default=75, help='coverage cutoff, default: 75')
     BM_parser.add_argument('-al',            required=False, type=int, default=200, help='alignment length cutoff, default: 200')
@@ -143,7 +146,7 @@ if __name__ == '__main__':
     # arguments for PG approach
     PG_parser = subparsers.add_parser('PG',  description='Phylogenetic approach', epilog='Example: MetaCHIP PG -h')
     PG_parser.add_argument('-p',             required=True,  help='output prefix')
-    PG_parser.add_argument('-r',             required=False, default=None, help='grouping rank')
+    PG_parser.add_argument('-r',             required=False, default=None, help='grouping rank, choose from p (phylum), c (class), o (order), f (family) or g (genus)')
     PG_parser.add_argument('-g',             required=False, help='grouping file')
     PG_parser.add_argument('-cov',           required=False, type=int, default=75, help='coverage cutoff, default: 75')
     PG_parser.add_argument('-al',            required=False, type=int, default=200, help='alignment length cutoff, default: 200')

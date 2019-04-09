@@ -81,7 +81,11 @@ def print_main_help():
 
     print(help_message)
 
+
 '''
+
+To be added:
+
     Tree manipulation:
        plot_tree        ->   [to be added] Plot tree in newick format
        subset_gtdb_tree ->   [to be added] Subset GTDB tree for provided taxons
@@ -98,7 +102,6 @@ def print_main_help():
        get_gene_cluster ->   [to be added] Get gene clusters with Usearch
        plot_taxon       ->   [to be added] Show taxon correlations with sankey plot
 '''
-
 
 
 if __name__ == '__main__':
