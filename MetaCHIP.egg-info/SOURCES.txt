@@ -10,6 +10,7 @@ MetaCHIP/PG.py
 MetaCHIP/PI.py
 MetaCHIP/VERSION
 MetaCHIP/__init__.py
+MetaCHIP/s2_combine_PG_outputs.py
 MetaCHIP.egg-info/PKG-INFO
 MetaCHIP.egg-info/SOURCES.txt
 MetaCHIP.egg-info/dependency_links.txt

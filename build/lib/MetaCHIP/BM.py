@@ -1331,7 +1331,6 @@ def BM(args, config_dict):
     op_candidates_only_gene_file_name_uniq =            '%s_%s%s_HGTs_uniq.txt'                           % (output_prefix, grouping_level, group_num)
     op_candidates_BM =                                  '%s_%s%s_HGTs_BM.txt'                             % (output_prefix, grouping_level, group_num)
     op_candidates_seq_nc =                              '%s_%s%s_HGTs_BM_nc.fasta'                        % (output_prefix, grouping_level, group_num)
-    op_candidates_seq_aa =                              '%s_%s%s_HGTs_BM_aa.fasta'                        % (output_prefix, grouping_level, group_num)
     op_act_folder_name =                                '%s_%s%s_Flanking_region_plots'                   % (output_prefix, grouping_level, group_num)
     grouping_file_with_id_filename =                    '%s_%s%s_grouping_with_id.txt'                    % (output_prefix, grouping_level, group_num)
     unploted_groups_file =                              '0_unploted_groups.txt'
@@ -1363,7 +1362,6 @@ def BM(args, config_dict):
     pwd_op_candidates_only_gene_file_uniq =        '%s/%s/%s'    % (MetaCHIP_wd, MetaCHIP_op_folder, op_candidates_only_gene_file_name_uniq)
     pwd_op_candidates_BM =                         '%s/%s/%s'    % (MetaCHIP_wd, MetaCHIP_op_folder, op_candidates_BM)
     pwd_op_candidates_seq_nc =                     '%s/%s/%s'    % (MetaCHIP_wd, MetaCHIP_op_folder, op_candidates_seq_nc)
-    pwd_op_candidates_seq_aa =                     '%s/%s/%s'    % (MetaCHIP_wd, MetaCHIP_op_folder, op_candidates_seq_aa)
     pwd_op_act_folder =                            '%s/%s/%s'    % (MetaCHIP_wd, MetaCHIP_op_folder, op_act_folder_name)
     pwd_grouping_file_with_id =                    '%s/%s/%s'    % (MetaCHIP_wd, MetaCHIP_op_folder, grouping_file_with_id_filename)
     pwd_normal_folder =                            '%s/%s/%s/%s' % (MetaCHIP_wd, MetaCHIP_op_folder, op_act_folder_name, normal_folder_name)
@@ -1636,7 +1634,7 @@ def BM(args, config_dict):
 
     ################################### export nc and aa sequence of predicted HGTs ####################################
 
-    report_and_log(('Extracting nc and aa sequences for predicted HGTs'), pwd_log_file, keep_quiet)
+    report_and_log(('Extracting nc sequences for BM predicted HGTs'), pwd_log_file, keep_quiet)
 
     # get qualified HGT candidates
     HGT_candidates_qualified = set()
@@ -1650,15 +1648,10 @@ def BM(args, config_dict):
                 HGT_candidates_qualified.add(each_candidate_2_split[1])
 
     candidates_seq_nc_handle = open(pwd_op_candidates_seq_nc, 'w')
-    candidates_seq_aa_handle = open(pwd_op_candidates_seq_aa, 'w')
     for each_seq in SeqIO.parse(pwd_combined_ffn_file, 'fasta'):
         if each_seq.id in HGT_candidates_qualified:
             SeqIO.write(each_seq, candidates_seq_nc_handle, 'fasta')
-            each_seq_aa = each_seq
-            each_seq_aa.seq = each_seq.seq.translate()
-            SeqIO.write(each_seq_aa, candidates_seq_aa_handle, 'fasta')
     candidates_seq_nc_handle.close()
-    candidates_seq_aa_handle.close()
 
 
     ############################################## remove temporary files ##############################################
@@ -1672,7 +1665,12 @@ def BM(args, config_dict):
         os.remove(pwd_op_candidates_only_gene_file_uniq)
         os.remove(pwd_op_candidates_with_group_file)
         os.remove(pwd_op_candidates_only_gene_file)
-
+        # os.remove(pwd_HGT_query_to_subjects_file) need this file in the PG approach
+        os.system('rm -r %s' % pwd_blast_result_filtered_folder_g2g)
+        os.system('rm -r %s' % pwd_blast_result_filtered_folder_with_group)
+        os.system('rm -r %s' % pwd_blast_result_filtered_folder_in_one_line)
+        os.system('rm -r %s' % pwd_op_candidates_only_gene_folder)
+        os.system('rm -r %s' % pwd_op_candidates_with_group_folder)
 
     # report
     report_and_log(('Done for Best-match approach!'), pwd_log_file, keep_quiet)
