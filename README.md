@@ -68,40 +68,38 @@ if you have both bacterial and archaeal genomes included in your queries. You ne
 1. Some examples: 
 
         # show help information
-        $ MetaCHIP -h
-        $ MetaCHIP PI -h
-        $ MetaCHIP BM -h
-        $ MetaCHIP PG -h
+        MetaCHIP -h
+        MetaCHIP PI -h
+        MetaCHIP BM -h
+        MetaCHIP PG -h
         
         
-        # run MetaCHIP by grouping input genomes at Class level according to their taxonomic classifications
-        $ MetaCHIP PI -i bin_folder -x fasta -taxon NorthSea_GTDB_output_bac120_ar122_combined.tsv -r c -p NorthSea -t 6
-        $ MetaCHIP BM -p NorthSea -r c -t 6
-        $ MetaCHIP PG -p NorthSea -r c -t 6
+        # run MetaCHIP at class level
+        MetaCHIP PI -i bin_folder -x fasta -taxon NorthSea_GTDB_output_bac120_ar122_combined.tsv -r c -p NorthSea -t 6
+        MetaCHIP BM -p NorthSea -r c -t 6
+        MetaCHIP PG -p NorthSea -r c -t 6
+
+
+        # run MetaCHIP at multiple levels (e.g. class, order and family)
+        # In this case, you only need to run gene prediction and blastn for the first PI run (no matter which taxonomic level it is at).
+        # Gene prediction and blastn can (and should) be skipped for the rest taxonomic level predictions by providing the "-grouping_only" option.
+        MetaCHIP PI -i bin_folder -x fasta -taxon NorthSea_GTDB_output_bac120_ar122_combined.tsv -r c -p NorthSea -t 6
+        MetaCHIP PI -i bin_folder -x fasta -taxon NorthSea_GTDB_output_bac120_ar122_combined.tsv -r o -p NorthSea -t 6 -grouping_only
+        MetaCHIP PI -i bin_folder -x fasta -taxon NorthSea_GTDB_output_bac120_ar122_combined.tsv -r f -p NorthSea -t 6 -grouping_only
+        MetaCHIP BM -p NorthSea -r c -t 6
+        MetaCHIP BM -p NorthSea -r o -t 6
+        MetaCHIP BM -p NorthSea -r f -t 6
+        MetaCHIP PG -p NorthSea -r c -t 6
+        MetaCHIP PG -p NorthSea -r o -t 6
+        MetaCHIP PG -p NorthSea -r f -t 6
 
 
         # run MetaCHIP with customized grouping profile
-        $ MetaCHIP PI -i bin_folder -x fasta -g customized_grouping.txt -p NorthSea -t 6
-        $ MetaCHIP BM -p NorthSea -g customized_grouping.txt -t 6
-        $ MetaCHIP PG -p NorthSea -g customized_grouping.txt -t 6
+        MetaCHIP PI -i bin_folder -x fasta -g customized_grouping.txt -p NorthSea -t 6
+        MetaCHIP BM -p NorthSea -g customized_grouping.txt -t 6
+        MetaCHIP PG -p NorthSea -g customized_grouping.txt -t 6
         
         
-        # Detect HGT with MetaCHIP at multiple levels (e.g. class, order and family). 
-        # In this case, you only need to run gene prediction and blastn for the first PI run (no matter which taxonomic level it is at).
-        # Gene prediction and blastn can (and should) be skipped for the rest taxonomic level predictions by providing the "-grouping_only" option.
-        $
-        $ MetaCHIP PI -i bin_folder -x fasta -taxon NorthSea_GTDB_output_bac120_ar122_combined.tsv -r c -p NorthSea -t 6
-        $ MetaCHIP PI -i bin_folder -x fasta -taxon NorthSea_GTDB_output_bac120_ar122_combined.tsv -r o -p NorthSea -t 6 -grouping_only
-        $ MetaCHIP PI -i bin_folder -x fasta -taxon NorthSea_GTDB_output_bac120_ar122_combined.tsv -r f -p NorthSea -t 6 -grouping_only
-        $
-        $ MetaCHIP BM -p NorthSea -r c -t 6
-        $ MetaCHIP BM -p NorthSea -r o -t 6
-        $ MetaCHIP BM -p NorthSea -r f -t 6
-        $
-        $ MetaCHIP PG -p NorthSea -r c -t 6
-        $ MetaCHIP PG -p NorthSea -r o -t 6
-        $ MetaCHIP PG -p NorthSea -r f -t 6
-
 
 Output files:
 ---
