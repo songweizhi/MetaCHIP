@@ -698,8 +698,7 @@ def Ranger_worker(argument_list):
         pwd_ranger_inputs_folder = argument_list[1]
         pwd_tree_folder = argument_list[2]
         pwd_ranger_exe = argument_list[3]
-        # pwd_AggregateRanger_exe = argument_list[4]
-        pwd_ranger_outputs_folder = argument_list[5]
+        pwd_ranger_outputs_folder = argument_list[4]
 
         # define Ranger-DTL input file name
         each_paired_tree_concate = '___'.join(each_paired_tree)
@@ -822,10 +821,8 @@ def PG(args, config_dict):
 
     # read in config file
     pwd_ranger_exe = config_dict['ranger_linux']
-    pwd_AggregateRanger_exe = config_dict['AggregateRanger_linux']
     if platform.system() == 'Darwin':
         pwd_ranger_exe = config_dict['ranger_mac']
-        pwd_AggregateRanger_exe = config_dict['AggregateRanger_mac']
 
     pwd_mafft_exe =     config_dict['mafft']
     pwd_fasttree_exe =  config_dict['fasttree']
@@ -1055,7 +1052,7 @@ def PG(args, config_dict):
     # put multiple arguments in list
     list_for_multiple_arguments_Ranger = []
     for each_paired_tree in candidates_list:
-        list_for_multiple_arguments_Ranger.append([each_paired_tree, pwd_ranger_inputs_folder, pwd_tree_folder, pwd_ranger_exe, pwd_AggregateRanger_exe, pwd_ranger_outputs_folder])
+        list_for_multiple_arguments_Ranger.append([each_paired_tree, pwd_ranger_inputs_folder, pwd_tree_folder, pwd_ranger_exe, pwd_ranger_outputs_folder])
 
     pool = mp.Pool(processes=num_threads)
     pool.map(Ranger_worker, list_for_multiple_arguments_Ranger)
@@ -1608,3 +1605,4 @@ if __name__ == '__main__':
     args = vars(parser.parse_args())
 
     PG(args, config_dict)
+

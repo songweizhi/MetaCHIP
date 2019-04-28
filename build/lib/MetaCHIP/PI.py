@@ -454,9 +454,9 @@ def copy_annotaion_worker(argument_list):
     pwd_faa_folder = argument_list[3]
     pwd_gbk_folder = argument_list[4]
 
-    os.system('cp %s/%s.ffn %s' % (pwd_prodigal_output_folder, genome, pwd_ffn_folder))  # may not need
+    #os.system('cp %s/%s.ffn %s' % (pwd_prodigal_output_folder, genome, pwd_ffn_folder))  # may not need
     os.system('cp %s/%s.faa %s' % (pwd_prodigal_output_folder, genome, pwd_faa_folder))  # for usearch
-    os.system('cp %s/%s.gbk %s' % (pwd_prodigal_output_folder, genome, pwd_gbk_folder))  # may not need
+    #os.system('cp %s/%s.gbk %s' % (pwd_prodigal_output_folder, genome, pwd_gbk_folder))  # may not need
 
 
 def hmmsearch_worker(argument_list):
@@ -696,8 +696,10 @@ def PI(args, config_dict):
     if grouping_level is None:
         grouping_level = 'x'
 
-    MetaCHIP_wd =   '%s_MetaCHIP_wd'                   % (output_prefix)
-    pwd_log_file =  '%s/%s_%s_PI_%s.log'  % (MetaCHIP_wd, output_prefix, grouping_level, datetime.now().strftime('%Y-%m-%d_%Hh-%Mm-%Ss_%f'))
+
+    MetaCHIP_wd =    '%s_MetaCHIP_wd'        % (output_prefix)
+    pwd_log_folder = '%s/%s_log_files'       % (MetaCHIP_wd, output_prefix)
+    pwd_log_file =   '%s/%s_%s_PI_%s.log'    % (pwd_log_folder, output_prefix, grouping_level, datetime.now().strftime('%Y-%m-%d_%Hh-%Mm-%Ss_%f'))
 
 
     # check whether input genome exist
@@ -706,7 +708,7 @@ def PI(args, config_dict):
     input_genome_basename_list = ['.'.join(i.split('.')[:-1]) for i in input_genome_file_name_list]
 
     if input_genome_file_name_list == []:
-        report_and_log('No input genome detected, program exited!', pwd_log_file, keep_quiet)
+        print('No input genome detected, program exited!')
         exit()
 
 
@@ -715,6 +717,7 @@ def PI(args, config_dict):
         report_and_log('running with grouping-only mode', pwd_log_file, keep_quiet)
     else:
         force_create_folder(MetaCHIP_wd)
+        force_create_folder(pwd_log_folder)
 
 
     ############################################ read GTDB output into dict  ###########################################
@@ -944,7 +947,7 @@ def PI(args, config_dict):
             group_2_taxon_dict[each_group_2_taxon_split[0]] = each_group_2_taxon_split[1]
 
         for each_group in group_id_uniq_sorted:
-            each_group_new = '(%s) %s' % (each_group, group_2_taxon_dict[each_group])
+            each_group_new = group_2_taxon_dict[each_group]
             group_id_with_taxon.append(each_group_new)
 
     group_id_uniq_count = []
@@ -1045,9 +1048,9 @@ def PI(args, config_dict):
     report_and_log(('Copying annotation files of qualified genomes to corresponding folders'), pwd_log_file, keep_quiet)
 
     # create folder
-    force_create_folder(pwd_ffn_folder)
+    #force_create_folder(pwd_ffn_folder)
     force_create_folder(pwd_faa_folder)
-    force_create_folder(pwd_gbk_folder)
+    #force_create_folder(pwd_gbk_folder)
 
     # prepare arguments for copy_annotaion_worker
     list_for_multiple_arguments_copy_annotaion = []
@@ -1254,6 +1257,18 @@ def PI(args, config_dict):
                 pool.join()
 
 
+    ############################################## remove temporary files ##############################################
+
+    # remove temporary files
+    report_and_log(('Deleting temporary files'), pwd_log_file, keep_quiet)
+
+    os.remove(pwd_combined_faa_file)
+
+    os.system('rm -r %s' % pwd_faa_folder)
+    os.system('rm -r %s' % pwd_SCG_tree_wd)
+    # os.system('rm -r %s' % pwd_blast_db_folder)
+
+
     ############################################### for report and log file ##############################################
 
     report_and_log('PrepIn done!', pwd_log_file, keep_quiet)
@@ -1282,5 +1297,21 @@ if __name__ == '__main__':
 
     args = vars(parser.parse_args())
 
-    PI(args, config_dict)
+    detection_rank_list_PI = args['r']
+    if len(detection_rank_list_PI) == 1:
+        PI(args, config_dict)
+    else:
+        gene_predicted = 0
+        for detection_rank_PI in detection_rank_list_PI:
+
+            current_rank_args_PI = args
+            current_rank_args_PI['r'] = detection_rank_PI
+
+            if gene_predicted == 0:
+                current_rank_args_PI['grouping_only'] = False
+                PI(current_rank_args_PI, config_dict)
+                gene_predicted = 1
+            else:
+                current_rank_args_PI['grouping_only'] = True
+                PI(current_rank_args_PI, config_dict)
 

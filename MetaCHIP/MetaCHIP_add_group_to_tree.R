@@ -9,7 +9,7 @@ check.packages <- function(pkg){
 
 # Usage example
 packages<-c("ape", "tools", "optparse")
-check.packages(packages)
+invisible(suppressMessages(check.packages(packages)))
 
 # install.packages('ape')
 # suppressWarnings(library(ape))
