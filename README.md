@@ -65,26 +65,31 @@ if you have both bacterial and archaeal genomes included in your queries. You ne
 
 1. Some examples: 
 
-        # show help information
-        MetaCHIP -h
-        MetaCHIP PI -h
-        MetaCHIP BP -h
+    * show help information
+
+            MetaCHIP -h
+            MetaCHIP PI -h
+            MetaCHIP BP -h
                 
-        # Example 1: run MetaCHIP at single level (class)
-        MetaCHIP PI -i bin_folder -x fasta -taxon NorthSea_GTDB_bac120_ar122_combined.tsv -r c -p NorthSea -t 6
-        MetaCHIP BP -p NorthSea -r c -t 6
+    * Detect HGT at single level (class)
+    
+            MetaCHIP PI -i bin_folder -x fasta -taxon NorthSea_GTDB_bac120_ar122_combined.tsv -r c -p NorthSea -t 6
+            MetaCHIP BP -p NorthSea -r c -t 6
 
-        # Example 2: run MetaCHIP at multiple levels (e.g. class and order)
-        MetaCHIP PI -i bin_folder -x fasta -taxon NorthSea_GTDB_bac120_ar122_combined.tsv -r co -p NorthSea -t 6
-        MetaCHIP BP -p NorthSea -r co -t 6
+    * Detect HGT at multiple levels (e.g. class and order)
 
-        # Example 3: run MetaCHIP at multiple levels (e.g. phylum, class, order and family)
-        MetaCHIP PI -i bin_folder -x fasta -taxon NorthSea_GTDB_bac120_ar122_combined.tsv -r pcofg -p NorthSea -t 6
-        MetaCHIP BP -p NorthSea -r pcofg -t 6
+            MetaCHIP PI -i bin_folder -x fasta -taxon NorthSea_GTDB_bac120_ar122_combined.tsv -r co -p NorthSea -t 6
+            MetaCHIP BP -p NorthSea -r co -t 6
 
-        # Example 4: run MetaCHIP with customized grouping profile
-        MetaCHIP PI -i bin_folder -x fasta -g customized_grouping.txt -p NorthSea -t 6
-        MetaCHIP BP -p NorthSea -g customized_grouping.txt -t 6
+    * Detect HGT at multiple levels (e.g. phylum, class, order and family)
+
+            MetaCHIP PI -i bin_folder -x fasta -taxon NorthSea_GTDB_bac120_ar122_combined.tsv -r pcofg -p NorthSea -t 6
+            MetaCHIP BP -p NorthSea -r pcofg -t 6
+
+    * Detect HGT with customized grouping profile
+
+            MetaCHIP PI -i bin_folder -x fasta -g customized_grouping.txt -p NorthSea -t 6
+            MetaCHIP BP -p NorthSea -g customized_grouping.txt -t 6
         
 
 Output files:

@@ -2708,10 +2708,6 @@ def PG(args, config_dict):
     # combined_output_validated_fasta_nc_handle.close()
     # combined_output_validated_fasta_aa_handle.close()
 
-    # for report and log
-    report_and_log(('Done for Phylogenetic approach!'), pwd_log_file, keep_quiet)
-
-
     ###################################### separate PG validated flanking region plots #####################################
 
     # # create folders
@@ -2778,10 +2774,8 @@ def PG(args, config_dict):
     os.system('rm -r %s' % pwd_ranger_outputs_folder)
     os.system('rm -r %s' % pwd_tree_folder)
 
-
-
     # for report and log
-    report_and_log(('All done!'), pwd_log_file, keep_quiet)
+    report_and_log(('Done for Phylogenetic approach!'), pwd_log_file, keep_quiet)
 
 
 def combine_PG_output(PG_output_file_list_with_path, output_prefix, detection_ranks, combined_PG_output_normal):
