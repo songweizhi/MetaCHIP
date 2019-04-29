@@ -9,6 +9,19 @@ Publication:
 + Affiliation: The Centre for Marine Bio-Innovation, University of New South Wales, Sydney, Australia
 
 
+Change Log:
+---
+
+v1.2.0 (2019-04-29)
+- support multiple-level detections
+
+v1.1.0 (2019-01-19)
+- support multiprocessing
+
+v1.0.0 (2018-12-29)
+- initial release
+
+
 Dependencies:
 ---
 
@@ -31,7 +44,7 @@ to their executables in the config file if they are not on the system path.
 * [HMMER](http://hmmer.org): tool for biosequence analysis using profile hidden Markov models.
 * [MAFFT](https://mafft.cbrc.jp/alignment/software/): multiple sequences alignment program.
 * [BLAST+](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download): you know what it is!
-* [FastTree](http://www.microbesonline.org/fasttree/): tool for inferring phylogenies from alignments (part of MetaCHIP, **no need to install**).
+* [FastTree](http://www.microbesonline.org/fasttree/): tool for inferring phylogenies from alignments.
 * [Ranger-DTL 2.0](https://compbio.engr.uconn.edu/software/RANGER-DTL/): software for inferring gene family evolution (part of MetaCHIP, **no need to install**).
 
 

@@ -621,7 +621,7 @@ def create_blastn_job_script(wd_on_katana, job_script_folder, job_script_file_na
     # Prepare header
     line_1 = '#!/bin/bash'
     line_2 = '#PBS -l nodes=%s:ppn=%s' % (str(node_num), str(ppn_num))
-    line_3 = '#PBS -l vmem=%sgb' % str(memory)
+    line_3 = '#PBS -l mem=%sgb' % str(memory)
     line_4 = '#PBS -l walltime=%s' % walltime
     line_5 = '#PBS -j oe'
     line_6 = '#PBS -M %s' % email

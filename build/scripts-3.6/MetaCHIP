@@ -77,23 +77,10 @@ def print_main_help():
 
 '''
 
-To be added:
-
-    Tree manipulation:
-       plot_tree        ->   [to be added] Plot tree in newick format
-       subset_gtdb_tree ->   [to be added] Subset GTDB tree for provided taxons
-       
-    Annotation modules (to be added):
-       run_prodigal     ->   [to be added] Run Prodigal
-       cog_annotation   ->   [to be added] Perform COG annotation
-       run_barrnap      ->   [to be added] Run barrnap
-       get_SCG_tree     ->   [to be added] Get SCG protein tree
-       
-    Plot modules (to be added):
-       plot_circos      ->   [to be added] Plot circos
-       plot_identity    ->   [to be added] Plot identity distribution
-       get_gene_cluster ->   [to be added] Get gene clusters with Usearch
-       plot_taxon       ->   [to be added] Show taxon correlations with sankey plot
+To be added:       
+    get_SCG_tree     ->   [to be added] Get SCG protein tree
+    plot_circos      ->   [to be added] Plot circos
+    sankey_taxon       ->   [to be added] Show taxon correlations with sankey plot
 '''
 
 
@@ -150,7 +137,8 @@ if __name__ == '__main__':
     time_format = '[%Y-%m-%d %H:%M:%S]'
 
 
-    # run PI module
+    #################### run PI module ####################
+
     if args['subparser_name'] == 'PI':
 
         # for single level detection
@@ -173,7 +161,8 @@ if __name__ == '__main__':
                     PI(current_rank_args_PI, config_dict)
 
 
-    # run BP module
+    #################### run BP module ####################
+
     if args['subparser_name'] == 'BP':
 
         # for single level detection
