@@ -5,8 +5,6 @@ MetaCHIP/BM.py
 MetaCHIP/BM_PG.py
 MetaCHIP/Combine_predictions.py
 MetaCHIP/Combine_predictions_backup.py
-MetaCHIP/FastTree
-MetaCHIP/FastTree.c
 MetaCHIP/MetaCHIP_add_group_to_tree.R
 MetaCHIP/MetaCHIP_circos_HGT.R
 MetaCHIP/MetaCHIP_config.py

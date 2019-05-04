@@ -25,19 +25,21 @@ v1.0.0 (2018-12-29)
 Dependencies:
 ---
 
-### Python libraries (will be installed automatically during pip installation)
+#### Python libraries
+These Python libraries will be installed automatically during pip installation 
 * [BioPython](https://github.com/biopython/biopython.github.io/): Python tools for computational molecular biology.
 * [Numpy](http://www.numpy.org): fundamental package for scientific computing with Python.
 * [SciPy](https://www.scipy.org): Python-based ecosystem for mathematics, science, and engineering.
 * [Matplotlib](http://matplotlib.org): Python plotting library.
 * [ETE3](http://etetoolkit.org): Python environment for tree exploration.
 
-### R packages (will be installed automatically when needed)
+#### R packages
+These R packages will be installed automatically when needed
 * [optparse](https://cran.r-project.org/web/packages/optparse/index.html): command line option parser in R.
 * [ape](https://cran.r-project.org/web/packages/ape/index.html): package for analyses of phylogenetics and evolution in R.
 * [circlize](https://cran.r-project.org/web/packages/circlize/index.html): package for circular visualization.
 
-### Third-party software
+#### Third-party software
 MetaCHIP makes use of the following 3rd party dependencies and assumes these are on your system path. Specify full path 
 to their executables in the config file if they are not on the system path.  
 * [Prodigal](https://github.com/hyattpd/Prodigal): protein-coding gene prediction tool for prokaryotic genomes.
@@ -45,7 +47,7 @@ to their executables in the config file if they are not on the system path.
 * [MAFFT](https://mafft.cbrc.jp/alignment/software/): multiple sequences alignment program.
 * [BLAST+](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download): you know what it is!
 * [FastTree](http://www.microbesonline.org/fasttree/): tool for inferring phylogenies from alignments.
-* [Ranger-DTL 2.0](https://compbio.engr.uconn.edu/software/RANGER-DTL/): software for inferring gene family evolution (part of MetaCHIP, **no need to install**).
+* [Ranger-DTL 2.0](https://compbio.engr.uconn.edu/software/RANGER-DTL/): software for inferring gene family evolution (part of MetaCHIP, **NO NEED to install**).
 
 
 How to install:
@@ -56,6 +58,9 @@ Python libraries required by MetaCHIP will be installed automatically during the
 
         pip install MetaCHIP
         
+        # for upgrade
+        pip install --upgrade MetaCHIP
+        
 1. You can either add MetaCHIP's dependencies to your system path or specify full path to their executables in MetaCHIP_config.py which can be found in Python's folder lib/site-packages/MetaCHIP.
 
 
@@ -63,8 +68,8 @@ How to run:
 ---
 
 1. The input files for MetaCHIP include a folder that holds the sequence file [[example](https://github.com/songweizhi/MetaCHIP/blob/master/input_file_examples/human_gut_bins)] 
-of all query genomes, as well as a text file [[example](https://github.com/songweizhi/MetaCHIP/blob/master/input_file_examples/human_gut_bins_GTDB.tsv)], 
-which holds taxonomic classification of all input genomes. Please make sure the length of **sequence ID** for sequences of all input genomes are <font color="red"> **NO LONGER THAN 22 letters** </font>.
+of all query genomes, as well as a text file [[example](https://github.com/songweizhi/MetaCHIP/blob/master/input_file_examples/human_gut_bins_GTDB.tsv)] 
+which holds taxonomic classification of all input genomes. Please make sure **the length of sequence ID** for sequences of all input genomes are <font color="red"> **NO LONGER THAN 22 letters**</font>.
 
 1. [**GTDB-Tk**](https://github.com/Ecogenomics/GTDBTk) is recommended for taxonomic classification of input genomes. 
 GTDB-Tk with produce two files ([prefix].bac120.summary.tsv and [prefix].ar122.summary.tsv) containing the classification results 
@@ -115,10 +120,10 @@ Output files:
     |Gene_1|The 1st gene involved in a HGT event|
     |Gene_2|The 2nd gene involved in a HGT event|
     |Identity|Identity between Gene_1 and Gene_2|
-    |occurence(taxon_ranks)|Only for multiple-level detections. If you performed HGT detection at phylum, class and order levels, a number of "011" means current HGT was identified at class and order levels, but not phylum level.|
-    |end_match|End match or not (see examples below)|
-    |full_length_match|Full length match or not (see examples below)|
-    |direction|Direction of gene flow|   
+    |Occurence(taxon_ranks)|Only for multiple-level detections. If you performed HGT detection at phylum, class and order levels, a number of "011" means current HGT was identified at class and order levels, but not phylum level.|
+    |End_match|End match or not (see examples below)|
+    |Full_length_match|Full length match or not (see examples below)|
+    |Direction|Direction of gene flow|   
 
 
 1. Nucleotide and amino acid sequences of identified donor and recipient genes.

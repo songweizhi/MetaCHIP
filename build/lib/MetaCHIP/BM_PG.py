@@ -2901,7 +2901,7 @@ def extract_donor_recipient_sequences(pwd_combined_ffn, recipient_gene_list, don
             SeqIO.write(each_seq, pwd_recipient_gene_seq_ffn_handle, 'fasta')
 
             # write out aa sequences
-            each_seq_aa = each_seq
+            each_seq_aa = copy.deepcopy(each_seq)
             each_seq_aa.seq = each_seq_aa.seq.translate()
             SeqIO.write(each_seq_aa, pwd_recipient_gene_seq_faa_handle, 'fasta')
 
@@ -2910,7 +2910,7 @@ def extract_donor_recipient_sequences(pwd_combined_ffn, recipient_gene_list, don
             SeqIO.write(each_seq, pwd_donor_gene_seq_ffn_handle, 'fasta')
 
             # write out aa sequences
-            each_seq_aa = each_seq
+            each_seq_aa = copy.deepcopy(each_seq)
             each_seq_aa.seq = each_seq_aa.seq.translate()
             SeqIO.write(each_seq_aa, pwd_donor_gene_seq_faa_handle, 'fasta')
 
@@ -2920,12 +2920,12 @@ def extract_donor_recipient_sequences(pwd_combined_ffn, recipient_gene_list, don
     pwd_donor_gene_seq_faa_handle.close()
 
 
-def Get_circlize_plot(multi_level_detection, output_prefix, pwd_candidates_file_PG_normal_txt, genome_to_taxon_dict, circos_HGT_R, pwd_plot_circos, taxon_rank, taxon_rank_num):
+def Get_circlize_plot(multi_level_detection, output_prefix, pwd_candidates_file_PG_normal_txt, genome_to_taxon_dict, circos_HGT_R, pwd_plot_circos, taxon_rank, taxon_rank_num, pwd_MetaCHIP_op_folder):
 
-    pwd_cir_plot_t1 =              '%s_%s_cir_plot_t1.txt'              % (output_prefix, taxon_rank_num)
-    pwd_cir_plot_t1_sorted =       '%s_%s_cir_plot_t1_sorted.txt'       % (output_prefix, taxon_rank_num)
-    pwd_cir_plot_t1_sorted_count = '%s_%s_cir_plot_t1_sorted_count.txt' % (output_prefix, taxon_rank_num)
-    pwd_cir_plot_matrix_filename = '%s_%s_cir_plot_matrix.csv'          % (output_prefix, taxon_rank_num)
+    pwd_cir_plot_t1 =              '%s/%s_%s_cir_plot_t1.txt'              % (pwd_MetaCHIP_op_folder, output_prefix, taxon_rank_num)
+    pwd_cir_plot_t1_sorted =       '%s/%s_%s_cir_plot_t1_sorted.txt'       % (pwd_MetaCHIP_op_folder, output_prefix, taxon_rank_num)
+    pwd_cir_plot_t1_sorted_count = '%s/%s_%s_cir_plot_t1_sorted_count.txt' % (pwd_MetaCHIP_op_folder, output_prefix, taxon_rank_num)
+    pwd_cir_plot_matrix_filename = '%s/%s_%s_cir_plot_matrix.csv'          % (pwd_MetaCHIP_op_folder, output_prefix, taxon_rank_num)
 
 
     name2taxon_dict = {}
@@ -3118,9 +3118,9 @@ def combine_multiple_level_predictions(args, config_dict):
         grouping_file_re = '%s_MetaCHIP_wd/%s_%s*_grouping.txt' % (output_prefix, output_prefix, detection_rank_list)
         grouping_file = [os.path.basename(file_name) for file_name in glob.glob(grouping_file_re)][0]
         taxon_rank_num = grouping_file[len(output_prefix) + 1:].split('_')[0]
-        pwd_grouping_file = '%s_MetaCHIP_wd/%s' % (output_prefix, grouping_file)
-        pwd_group_to_taxon_file = '%s_MetaCHIP_wd/%s_%s_group_to_taxon.txt' % (output_prefix, output_prefix, taxon_rank_num)
-        pwd_plot_circos = '%s/%s_%s_HGT_circos.png' % (pwd_MetaCHIP_op_folder, output_prefix, taxon_rank_num)
+        pwd_grouping_file =         '%s_MetaCHIP_wd/%s'                         % (output_prefix, grouping_file)
+        pwd_group_to_taxon_file =   '%s_MetaCHIP_wd/%s_%s_group_to_taxon.txt'   % (output_prefix, output_prefix, taxon_rank_num)
+        pwd_plot_circos =           '%s/%s_%s_HGT_circos.png'                   % (pwd_MetaCHIP_op_folder, output_prefix, taxon_rank_num)
 
         taxon_to_group_id_dict = {}
         for group in open(pwd_group_to_taxon_file):
@@ -3135,7 +3135,7 @@ def combine_multiple_level_predictions(args, config_dict):
             genome_name = genome.strip().split(',')[1]
             genome_to_taxon_dict[genome_name] = taxon_to_group_id_dict[group_id2]
 
-        Get_circlize_plot(multi_level_detection, output_prefix, pwd_detected_HGT_txt, genome_to_taxon_dict, circos_HGT_R, pwd_plot_circos, detection_rank_list, taxon_rank_num)
+        Get_circlize_plot(multi_level_detection, output_prefix, pwd_detected_HGT_txt, genome_to_taxon_dict, circos_HGT_R, pwd_plot_circos, detection_rank_list, taxon_rank_num, pwd_MetaCHIP_op_folder)
 
 
         # remove tmp files
@@ -3252,9 +3252,9 @@ def combine_multiple_level_predictions(args, config_dict):
             grouping_file_re = '%s_MetaCHIP_wd/%s_%s*_grouping.txt' % (output_prefix, output_prefix, detection_rank)
             grouping_file = [os.path.basename(file_name) for file_name in glob.glob(grouping_file_re)][0]
             taxon_rank_num = grouping_file[len(output_prefix) + 1:].split('_')[0]
-            pwd_grouping_file = '%s_MetaCHIP_wd/%s' % (output_prefix, grouping_file)
-            pwd_group_to_taxon_file = '%s_MetaCHIP_wd/%s_%s_group_to_taxon.txt' % (output_prefix, output_prefix, taxon_rank_num)
-            pwd_plot_circos = '%s/%s_%s_HGT_circos.png' % (pwd_combined_prediction_folder, output_prefix, taxon_rank_num)
+            pwd_grouping_file =         '%s_MetaCHIP_wd/%s'                         % (output_prefix, grouping_file)
+            pwd_group_to_taxon_file =   '%s_MetaCHIP_wd/%s_%s_group_to_taxon.txt'   % (output_prefix, output_prefix, taxon_rank_num)
+            pwd_plot_circos =           '%s/%s_%s_HGT_circos.png'                   % (pwd_combined_prediction_folder, output_prefix, taxon_rank_num)
 
             taxon_to_group_id_dict = {}
             for group in open(pwd_group_to_taxon_file):
@@ -3269,7 +3269,7 @@ def combine_multiple_level_predictions(args, config_dict):
                 genome_name = genome.strip().split(',')[1]
                 genome_to_taxon_dict[genome_name] = taxon_to_group_id_dict[group_id2]
 
-            Get_circlize_plot(multi_level_detection, output_prefix, pwd_detected_HGT_txt_combined, genome_to_taxon_dict, circos_HGT_R, pwd_plot_circos, detection_rank, taxon_rank_num)
+            Get_circlize_plot(multi_level_detection, output_prefix, pwd_detected_HGT_txt_combined, genome_to_taxon_dict, circos_HGT_R, pwd_plot_circos, detection_rank, taxon_rank_num, pwd_combined_prediction_folder)
 
 
         ###################################### remove tmp files #######################################
