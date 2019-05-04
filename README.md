@@ -41,7 +41,7 @@ These R packages will be installed automatically when needed
 
 #### Third-party software
 MetaCHIP makes use of the following 3rd party dependencies and assumes these are on your system path. Specify full path 
-to their executables in the config file if they are not on the system path.  
+to their executables in MetaCHIP's config file (MetaCHIP_config.py, which can be found in Python's folder lib/site-packages/MetaCHIP) if they are not on the system path.  
 * [Prodigal](https://github.com/hyattpd/Prodigal): protein-coding gene prediction tool for prokaryotic genomes.
 * [HMMER](http://hmmer.org): tool for biosequence analysis using profile hidden Markov models.
 * [MAFFT](https://mafft.cbrc.jp/alignment/software/): multiple sequences alignment program.
@@ -53,15 +53,15 @@ to their executables in the config file if they are not on the system path.
 How to install:
 ---
 
-1. MetaCHIP can be installed with pip after you have its 3rd party dependencies and R packages installed on your system. 
-Python libraries required by MetaCHIP will be installed automatically during the pip installation:
+1. MetaCHIP can be installed with pip:
 
+        # First-time Installation
         pip install MetaCHIP
         
         # for upgrade
         pip install --upgrade MetaCHIP
         
-1. You can either add MetaCHIP's dependencies to your system path or specify full path to their executables in MetaCHIP_config.py which can be found in Python's folder lib/site-packages/MetaCHIP.
+1. You can either add MetaCHIP's 3rd party dependencies to your system path or specify full path to their executables in MetaCHIP_config.py which can be found in Python's folder lib/site-packages/MetaCHIP.
 
 
 How to run:
@@ -75,9 +75,9 @@ which holds taxonomic classification of all input genomes. Please make sure **th
 GTDB-Tk with produce two files ([prefix].bac120.summary.tsv and [prefix].ar122.summary.tsv) containing the classification results 
 if you have both bacterial and archaeal genomes included in your queries. You need to combine the two files into one and feed it as an input for MetaCHIP.
 
-1. Options for argument '-r' in module PI, BM and PG include: d (domain), p (phylum), c (class), o (order), f (family) and g (genus).
+1. Options for argument '-r' for PI and BP modules can be any combination of d (domain), p (phylum), c (class), o (order), f (family) and g (genus).
 
-1. Output format for BLASTN in the PI and BM steps: 
+1. Output format for BLASTN in the PI and BP steps: 
         
         -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen"
 
