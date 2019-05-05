@@ -18,14 +18,9 @@ Publication:
 Change Log:
 ---
 
-v1.2.0 (2019-04-29)
-- support multiple-level detections
-
-v1.1.0 (2019-01-19)
-- support multiprocessing
-
-v1.0.0 (2018-12-29)
-- initial release
+* v1.2.0 (2019-04-29) - Support multiple-level detections
+* v1.1.0 (2019-01-19) - Support multiprocessing
+* v1.0.0 (2018-12-29) - Initial release
 
 
 Dependencies:
@@ -105,16 +100,10 @@ if you have both bacterial and archaeal genomes included in your queries. You ne
             MetaCHIP PI -i bin_folder -x fasta -taxon NorthSea_GTDB_bac120_ar122_combined.tsv -r co -p NorthSea -t 6
             MetaCHIP BP -p NorthSea -r co -t 6
 
-    * Detect HGT at multiple levels (e.g. phylum, class, order and family)
+    * Detect HGT at multiple levels (e.g. phylum, class, order, family and genus)
 
             MetaCHIP PI -i bin_folder -x fasta -taxon NorthSea_GTDB_bac120_ar122_combined.tsv -r pcofg -p NorthSea -t 6
             MetaCHIP BP -p NorthSea -r pcofg -t 6
-
-    * Detect HGT with customized grouping profile
-
-            MetaCHIP PI -i bin_folder -x fasta -g customized_grouping.txt -p NorthSea -t 6
-            MetaCHIP BP -p NorthSea -g customized_grouping.txt -t 6
-        
 
 Output files:
 ---
