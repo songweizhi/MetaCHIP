@@ -1,4 +1,10 @@
+
 ![logo](images/MetaCHIP_logo.jpg)
+
+[![pypi  licence  ](https://img.shields.io/pypi/l/MetaCHIP.svg)](https://opensource.org/licenses/gpl-3.0.html)
+[![pypi  version  ](https://img.shields.io/pypi/v/MetaCHIP.svg)](https://pypi.python.org/pypi/MetaCHIP) 
+[![pypi  download ](https://img.shields.io/pypi/dm/MetaCHIP.svg)](https://pypi.python.org/pypi/MetaCHIP)
+[![DOI            ](https://img.shields.io/static/v1.svg?label=DOI&message=10.1186/s40168-019-0649-y&color=orange)](https://doi.org/10.1186/s40168-019-0649-y)
 
 
 Publication:
@@ -75,7 +81,7 @@ which holds taxonomic classification of all input genomes. Please make sure **th
 GTDB-Tk with produce two files ([prefix].bac120.summary.tsv and [prefix].ar122.summary.tsv) containing the classification results 
 if you have both bacterial and archaeal genomes included in your queries. You need to combine the two files into one and feed it as an input for MetaCHIP.
 
-1. Options for argument '-r' for PI and BP modules can be any combination of d (domain), p (phylum), c (class), o (order), f (family) and g (genus).
+1. Options for argument '-r' for PI and BP modules can be any combinations of d (domain), p (phylum), c (class), o (order), f (family) and g (genus).
 
 1. Output format for BLASTN in the PI and BP steps: 
         
