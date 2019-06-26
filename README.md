@@ -78,6 +78,11 @@ if you have both bacterial and archaeal genomes included in your queries. You ne
 
 1. Options for argument '-r' for PI and BP modules can be any combinations of d (domain), p (phylum), c (class), o (order), f (family) and g (genus).
 
+1. The all-against-all blastn comparison is the most time-consuming step. 
+   You can speed up this step with qsub if you are running MetaCHIP with HPC. 
+   An example of the job script header [[example](https://github.com/songweizhi/MetaCHIP/blob/master/input_file_examples/blastn_job_script_header_demo.sh)] is needed in this case.
+   The "MetaCHIP BP" module must be run **AFTER** all submitted jobs are finished.
+
 1. Output format for BLASTN in the PI and BP steps: 
         
         -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen"
