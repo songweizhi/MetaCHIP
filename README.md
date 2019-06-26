@@ -105,6 +105,15 @@ if you have both bacterial and archaeal genomes included in your queries. You ne
             MetaCHIP PI -i bin_folder -x fasta -taxon NorthSea_GTDB_bac120_ar122_combined.tsv -r co -p NorthSea -t 6
             MetaCHIP BP -p NorthSea -r co -t 6
 
+    * Run MetaCHIP with qsub to speed up all-against-all blastn comparison. 
+      Here is an example of the job script header file ([blastn_job_script_header_demo.sh](https://github.com/songweizhi/MetaCHIP/blob/master/input_file_examples/blastn_job_script_header_demo.sh)).
+
+            MetaCHIP PI -i bin_folder -x fasta -taxon NorthSea_GTDB_bac120_ar122_combined.tsv -r co -p NorthSea -t 6 -qsub -blastn_js_header blastn_job_script_header_demo.sh
+            
+            # after all submitted jobs are finished (important!!!),run:
+            MetaCHIP BP -p NorthSea -r co -t 6
+
+
     * Detect HGT at multiple levels (e.g. phylum, class, order, family and genus)
 
             MetaCHIP PI -i bin_folder -x fasta -taxon NorthSea_GTDB_bac120_ar122_combined.tsv -r pcofg -p NorthSea -t 6
