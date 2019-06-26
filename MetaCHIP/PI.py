@@ -309,7 +309,7 @@ def prodigal_parser(seq_file, sco_file, prefix, output_folder):
                 seq_to_transl_table_dict[current_seq_id] = current_transl_table
 
             # reset value
-            current_seq_id = each_cds.strip().split('=')[-1][1:-1].split(' ')[0]
+            current_seq_id = each_cds.strip().split(';seqhdr=')[1][1:-1].split(' ')[0]
             current_transl_table = ''
             current_seq_csd_list = []
 
@@ -616,17 +616,15 @@ def parallel_blastn_worker(argument_list):
     os.system(blastn_cmd)
 
 
-def create_blastn_job_script(wd_on_katana, job_script_folder, job_script_file_name, node_num, ppn_num, memory, walltime,
-                             email, modules_list, cmd):
+def create_blastn_job_script(wd_on_katana, job_script_folder, job_script_file_name, node_num, ppn_num, memory, walltime, modules_list, cmd):
     # Prepare header
     line_1 = '#!/bin/bash'
     line_2 = '#PBS -l nodes=%s:ppn=%s' % (str(node_num), str(ppn_num))
     line_3 = '#PBS -l mem=%sgb' % str(memory)
     line_4 = '#PBS -l walltime=%s' % walltime
     line_5 = '#PBS -j oe'
-    line_6 = '#PBS -M %s' % email
     line_7 = '#PBS -m ae'
-    header = '%s\n%s\n%s\n%s\n%s\n%s\n%s\n' % (line_1, line_2, line_3, line_4, line_5, line_6, line_7)
+    header = '%s\n%s\n%s\n%s\n%s\n%s\n' % (line_1, line_2, line_3, line_4, line_5, line_7)
 
     # Prepare module lines
     module_lines = ''
@@ -664,8 +662,6 @@ def PI(args, config_dict):
     noblast =               args['noblast']
 
     # read in config file
-
-
     path_to_hmm =           config_dict['path_to_hmm']
     pwd_makeblastdb_exe =   config_dict['makeblastdb']
     pwd_blastn_exe =        config_dict['blastn']
@@ -679,17 +675,18 @@ def PI(args, config_dict):
     warnings.filterwarnings("ignore")
     minimal_cov_in_msa = 50
     min_consensus_in_msa = 25
-    blast_parameters = '-evalue 1e-5 -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen" -task blastn'
     rank_abbre_dict = {'d': 'domain', 'p': 'phylum', 'c': 'class', 'o': 'order', 'f': 'family', 'g': 'genus', 's': 'species'}
 
     wd_on_katana = os.getcwd()
     node_num = 1
-    ppn_num = 3
-    memory = 20
+    ppn_num = 1
+    memory = 10
     walltime = '11:59:00'
-    email = '244289990@qq.com'
-    modules_list = ['blast+/2.6.0']
+    modules_list = ['blast+']
+    blast_parameters = '-evalue 1e-5 -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen" -task blastn -num_threads %s' % ppn_num
 
+    if input_genome_folder[-1] == '/':
+        input_genome_folder = input_genome_folder[:-1]
 
     #################################################### check input ###################################################
 
@@ -1245,7 +1242,7 @@ def PI(args, config_dict):
                     ffn_file_basename = '.'.join(ffn_file.split('.')[:-1])
                     job_script_file_name = 'qsub_blastn_%s.sh' % ffn_file_basename
                     blastn_cmd = '%s -query %s/%s -db %s -out %s/%s %s' % (pwd_blastn_exe, pwd_prodigal_output_folder, ffn_file, pwd_blast_db, pwd_blast_result_folder, '%s_blastn.tab' % ffn_file_basename, blast_parameters)
-                    create_blastn_job_script(wd_on_katana, pwd_blast_job_scripts_folder, job_script_file_name, node_num, ppn_num, memory, walltime, email, modules_list, blastn_cmd)
+                    create_blastn_job_script(wd_on_katana, pwd_blast_job_scripts_folder, job_script_file_name, node_num, ppn_num, memory, walltime, modules_list, blastn_cmd)
 
             else:
                 report_and_log(('Running blastn for all input genomes with %s cores, blast results exported to: %s' % (num_threads, pwd_blast_result_folder)), pwd_log_file, keep_quiet)
@@ -1272,7 +1269,6 @@ def PI(args, config_dict):
     ############################################### for report and log file ##############################################
 
     report_and_log('PrepIn done!', pwd_log_file, keep_quiet)
-
 
 
 if __name__ == '__main__':
@@ -1314,4 +1310,3 @@ if __name__ == '__main__':
             else:
                 current_rank_args_PI['grouping_only'] = True
                 PI(current_rank_args_PI, config_dict)
-

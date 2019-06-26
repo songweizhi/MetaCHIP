@@ -21,7 +21,7 @@ import sys
 import copy
 import argparse
 from MetaCHIP.PI import PI
-from MetaCHIP import BM_PG as BP
+from MetaCHIP import BP
 from datetime import datetime
 from MetaCHIP import MetaCHIP_config
 from MetaCHIP.MetaCHIP_config import config_dict
@@ -106,7 +106,7 @@ if __name__ == '__main__':
     PI_parser.add_argument('-force',         required=False, action="store_true", help='overwrite previous results')
     PI_parser.add_argument('-quiet',         required=False, action="store_true", help='not report progress')
 
-    # arguments for BM approach
+    # arguments for BP approach
     BP_parser = subparsers.add_parser('BP',  description='BM and PG approach', epilog='Example: MetaCHIP BP -h')
     BP_parser.add_argument('-p',             required=True,  help='output prefix')
     BP_parser.add_argument('-r',             required=False, default=None, help='grouping rank, choose from p (phylum), c (class), o (order), f (family) or g (genus)')

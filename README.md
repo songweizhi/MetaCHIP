@@ -12,7 +12,7 @@ Publication:
 
 + **Song WZ**, Wemheuer B, Zhang S, Steensen K, Thomas T* (2019) MetaCHIP: community-level horizontal gene transfer identification through the combination of best-match and phylogenetic approaches. Microbiome. 7:36 https://doi.org/10.1186/s40168-019-0649-y
 + Contact: Weizhi Song (songwz03@gmail.com), Torsten Thomas (t.thomas@unsw.edu.au)
-+ Affiliation: The Centre for Marine Bio-Innovation, University of New South Wales, Sydney, Australia
++ Affiliation: Centre for Marine Science and Innovation, University of New South Wales, Sydney, Australia
 
 
 Change Log:
@@ -54,7 +54,7 @@ to their executables in MetaCHIP's config file (MetaCHIP_config.py, which can be
 How to install:
 ---
 
-1. MetaCHIP can be installed with pip:
+1. MetaCHIP can be installed with `pip`:
 
         # First-time Installation
         pip install MetaCHIP
@@ -62,7 +62,7 @@ How to install:
         # for upgrade
         pip install --upgrade MetaCHIP
         
-1. You can either add MetaCHIP's 3rd party dependencies to your system path or specify full path to their executables in MetaCHIP_config.py which can be found in Python's folder lib/site-packages/MetaCHIP.
+1. You can either add MetaCHIP's 3rd party dependencies to your system path or specify full path to their executables in MetaCHIP_config.py which can be found in Python's folder `lib/site-packages/MetaCHIP`.
 
 
 How to run:
@@ -105,10 +105,11 @@ if you have both bacterial and archaeal genomes included in your queries. You ne
             MetaCHIP PI -i bin_folder -x fasta -taxon NorthSea_GTDB_bac120_ar122_combined.tsv -r pcofg -p NorthSea -t 6
             MetaCHIP BP -p NorthSea -r pcofg -t 6
 
+
 Output files:
 ---
 
-1. A Tab delimited text file containing all identified HGTs. Filename format: [prefix]_[taxon_ranks]_detected_HGTs.txt
+1. A Tab delimited text file containing all identified HGTs. Filename format: `[prefix]_[taxon_ranks]_detected_HGTs.txt`
 
     |Column|Description|
     |---|---|
@@ -140,3 +141,4 @@ Output files:
 1. Examples of full-length contig match
     ![full_length_match_1](images/full_length_match_1.jpg)
     ![full_length_match_2](images/full_length_match_2.jpg)
+

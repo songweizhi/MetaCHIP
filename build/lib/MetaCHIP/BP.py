@@ -1072,11 +1072,19 @@ def get_gbk_blast_act2(arguments_list):
         os.system('mv %s/%s.%s %s/' % (path_to_output_act_folder, folder_name, flk_plot_fmt, pwd_normal_plot_folder))
 
 
-    # remove temporary folder
-    if keep_temp == 0:
-        shutil.rmtree('%s/%s' % (path_to_output_act_folder, folder_name), ignore_errors=True)
-        if os.path.isdir('%s/%s' % (path_to_output_act_folder, folder_name)):
-            shutil.rmtree('%s/%s' % (path_to_output_act_folder, folder_name), ignore_errors=True)
+    # # remove temporary folder
+    # if keep_temp == 0:
+    #     # shutil.rmtree('%s/%s' % (path_to_output_act_folder, folder_name), ignore_errors=True)
+    #     # if os.path.isdir('%s/%s' % (path_to_output_act_folder, folder_name)):
+    #     #     shutil.rmtree('%s/%s' % (path_to_output_act_folder, folder_name), ignore_errors=True)
+    #     #     if os.path.isdir('%s/%s' % (path_to_output_act_folder, folder_name)):
+    #     #         shutil.rmtree('%s/%s' % (path_to_output_act_folder, folder_name), ignore_errors=True)
+    #     #         if os.path.isdir('%s/%s' % (path_to_output_act_folder, folder_name)):
+    #     #             shutil.rmtree('%s/%s' % (path_to_output_act_folder, folder_name), ignore_errors=True)
+    #     #             if os.path.isdir('%s/%s' % (path_to_output_act_folder, folder_name)):
+    #     #                 shutil.rmtree('%s/%s' % (path_to_output_act_folder, folder_name), ignore_errors=True)
+    #     os.system('rm %s/%s/*' % (path_to_output_act_folder, folder_name))
+    #     os.system('rm -r %s/%s' % (path_to_output_act_folder, folder_name))
 
 
 def remove_bidirection(input_file, candidate2identity_dict, output_file):
@@ -1631,7 +1639,7 @@ def extract_gene_tree_seq_worker(argument_list):
     pwd_seq_file_1st_aln =    '%s/%s___%s_gene_tree.1.aln'            % (pwd_tree_folder, gene_1, gene_2)
     pwd_seq_file_2nd_aln =    '%s/%s___%s_gene_tree.2.aln'            % (pwd_tree_folder, gene_1, gene_2)
     pwd_gene_tree_newick =    '%s/%s___%s_gene_tree.newick'           % (pwd_tree_folder, gene_1, gene_2)
-    pwd_species_tree_newick = '%s/%s_species_tree.newick'             % (pwd_tree_folder, each_to_process_concate)
+    pwd_species_tree_newick = '%s/%s___%s_species_tree.newick'        % (pwd_tree_folder, gene_1, gene_2)
 
     ################################################## Get gene tree ###################################################
 
@@ -1750,7 +1758,7 @@ def extract_gene_tree_seq_worker(argument_list):
         remove_low_cov_and_consensus_columns(pwd_seq_file_1st_aln, 50, 50, pwd_seq_file_2nd_aln)
 
         # run fasttree
-        cmd_fasttree = '%s -quiet -wag %s > %s' % (pwd_fasttree_exe, pwd_seq_file_2nd_aln, pwd_gene_tree_newick)
+        cmd_fasttree = '%s -quiet %s > %s' % (pwd_fasttree_exe, pwd_seq_file_2nd_aln, pwd_gene_tree_newick)
         os.system(cmd_fasttree)
 
         # Get species tree
@@ -1781,7 +1789,7 @@ def Ranger_worker(argument_list):
     pwd_gene_tree_newick = '%s/%s_gene_tree.newick' % (pwd_tree_folder, each_paired_tree_concate)
     # each_paired_tree_concate_short = '%s___%s' % (each_paired_tree[0].split('_')[-1], each_paired_tree[1].split('_')[-1])
 
-    if (os.path.isfile(pwd_species_tree_newick) == True) and (os.path.isfile(pwd_gene_tree_newick) == True):
+    if (os.path.isfile(pwd_species_tree_newick) is True) and (os.path.isfile(pwd_gene_tree_newick) is True):
 
         ranger_inputs_file_name = each_paired_tree_concate + '.txt'
         ranger_outputs_file_name = each_paired_tree_concate + '_ranger_output.txt'
@@ -2253,6 +2261,11 @@ def BM(args, config_dict):
     pool_flanking_regions.close()
     pool_flanking_regions.join()
 
+    # remove temporary folder
+    if keep_temp == 0:
+        os.system('rm %s/*___*/*' % pwd_op_act_folder)
+        os.system('rm -r %s/*___*' % pwd_op_act_folder)
+
     # convert mp.dict to normal dict
     candidates_2_contig_match_category_dict = {each_key: each_value for each_key, each_value in candidates_2_contig_match_category_dict_mp.items()}
 
@@ -2356,6 +2369,7 @@ def PG(args, config_dict):
     end_match_identity_cutoff = args['ei']
     num_threads =               args['t']
     keep_quiet =                args['quiet']
+    keep_temp =                 args['tmp']
 
     # read in config file
     pwd_ranger_exe = config_dict['ranger_linux']
@@ -2477,7 +2491,6 @@ def PG(args, config_dict):
     pwd_grouping_file_with_id =                         '%s/%s/%s'                                    % (MetaCHIP_wd, MetaCHIP_op_folder, grouping_file_with_id_filename)
     pwd_HGT_query_to_subjects_file =                    '%s/%s/%s'                                    % (MetaCHIP_wd, MetaCHIP_op_folder, HGT_query_to_subjects_filename)
 
-
     ###################################### store ortholog information into dictionary ######################################
 
     # create folders
@@ -2488,13 +2501,16 @@ def PG(args, config_dict):
     candidates_list_genes = set()
     for match_group in open(pwd_candidates_file):
         if not match_group.startswith('Gene_1'):
-            match_group_split = match_group.strip().split('\t')[:2]
-            candidates_list.append(match_group_split)
-            candidates_list_genes.add(match_group_split[0])
-            candidates_list_genes.add(match_group_split[1])
+            match_group_split = match_group.strip().split('\t')
+            end_match = match_group_split[5]
+            full_length_match = match_group_split[6]
+            if (end_match == 'no') and (full_length_match == 'no'):
+                candidates_list.append(match_group_split[:2])
+                candidates_list_genes.add(match_group_split[0])
+                candidates_list_genes.add(match_group_split[1])
 
     if candidates_list == []:
-        report_and_log(('No HGT detected by BM approach, program exited!'), pwd_log_file, keep_quiet)
+        report_and_log(('No HGT detected by BM approach, program exited!'), pwd_log_file, keep_quiet=False)
         exit()
 
     # for report and log
@@ -2763,16 +2779,17 @@ def PG(args, config_dict):
 
 
     # remove tmp files
-    os.remove(pwd_combined_faa_file)
-    os.remove(pwd_combined_faa_file_subset)
-    os.remove(pwd_candidates_seq_file)
-    os.remove(pwd_HGT_query_to_subjects_file)
-    os.remove(pwd_grouping_file_with_id)
-    os.remove(pwd_candidates_file)
+    if keep_temp == 0:
+        os.remove(pwd_combined_faa_file)
+        os.remove(pwd_combined_faa_file_subset)
+        os.remove(pwd_candidates_seq_file)
+        os.remove(pwd_HGT_query_to_subjects_file)
+        os.remove(pwd_grouping_file_with_id)
+        os.remove(pwd_candidates_file)
 
-    os.system('rm -r %s' % pwd_ranger_inputs_folder)
-    os.system('rm -r %s' % pwd_ranger_outputs_folder)
-    os.system('rm -r %s' % pwd_tree_folder)
+        os.system('rm -r %s' % pwd_ranger_inputs_folder)
+        os.system('rm -r %s' % pwd_ranger_outputs_folder)
+        os.system('rm -r %s' % pwd_tree_folder)
 
     # for report and log
     report_and_log(('Done for Phylogenetic approach!'), pwd_log_file, keep_quiet)
@@ -3063,10 +3080,10 @@ def combine_multiple_level_predictions(args, config_dict):
         MetaCHIP_op_folder = [os.path.basename(file_name) for file_name in glob.glob(pwd_MetaCHIP_op_folder_re)][0]
         group_num = int(MetaCHIP_op_folder[len(output_prefix) + 1:].split('_')[0][1:])
 
-        pwd_MetaCHIP_op_folder =        '%s_MetaCHIP_wd/%s'                 % (output_prefix, MetaCHIP_op_folder)
-        pwd_detected_HGT_PG_txt =       '%s/%s_%s%s_HGTs_PG.txt'            % (pwd_MetaCHIP_op_folder, output_prefix, detection_rank_list, group_num)
-        pwd_flanking_plot_folder =      '%s/%s_%s%s_Flanking_region_plots'  % (pwd_MetaCHIP_op_folder, output_prefix, detection_rank_list, group_num)
-        pwd_detected_HGT_txt =          '%s/%s_%s_detected_HGTs.txt'        % (pwd_MetaCHIP_op_folder, output_prefix, detection_rank_list)
+        pwd_MetaCHIP_op_folder =        '%s_MetaCHIP_wd/%s'                             % (output_prefix, MetaCHIP_op_folder)
+        pwd_detected_HGT_PG_txt =       '%s/%s_%s%s_HGTs_PG.txt'                        % (pwd_MetaCHIP_op_folder, output_prefix, detection_rank_list, group_num)
+        pwd_flanking_plot_folder =      '%s/%s_%s%s_Flanking_region_plots'              % (pwd_MetaCHIP_op_folder, output_prefix, detection_rank_list, group_num)
+        pwd_detected_HGT_txt =          '%s/%s_%s_detected_HGTs.txt'                    % (pwd_MetaCHIP_op_folder, output_prefix, detection_rank_list)
         pwd_recipient_gene_seq_ffn =    '%s/%s_%s_detected_HGTs_recipient_genes.ffn'    % (pwd_MetaCHIP_op_folder, output_prefix, detection_rank_list)
         pwd_recipient_gene_seq_faa =    '%s/%s_%s_detected_HGTs_recipient_genes.faa'    % (pwd_MetaCHIP_op_folder, output_prefix, detection_rank_list)
         pwd_donor_gene_seq_ffn =        '%s/%s_%s_detected_HGTs_donor_genes.ffn'        % (pwd_MetaCHIP_op_folder, output_prefix, detection_rank_list)
@@ -3111,7 +3128,6 @@ def combine_multiple_level_predictions(args, config_dict):
         for each_flk_plot in flanking_plot_file_list:
             pwd_each_flk_plot = '%s/%s_%s%s_Flanking_region_plots/1_Plots_normal/%s' % (pwd_MetaCHIP_op_folder, output_prefix, detection_rank_list, group_num, each_flk_plot)
             os.system('mv %s %s/%s_%s%s_Flanking_region_plots/' % (pwd_each_flk_plot, pwd_MetaCHIP_op_folder, output_prefix, detection_rank_list, group_num))
-
 
         ###################################### Get_circlize_plot #######################################
 
@@ -3303,13 +3319,13 @@ if __name__ == '__main__':
 
     args = vars(parser.parse_args())
 
-    detection_rank_list_BM_PG = args['r']
-    if len(detection_rank_list_BM_PG) == 1:
+    detection_rank_list_BP = args['r']
+    if len(detection_rank_list_BP) == 1:
         BM(args, config_dict)
         PG(args, config_dict)
 
     else:
-        for detection_rank_BM_PG in detection_rank_list_BM_PG:
+        for detection_rank_BM_PG in detection_rank_list_BP:
             current_rank_args_BM_PG = copy.deepcopy(args)
             current_rank_args_BM_PG['r'] = detection_rank_BM_PG
             current_rank_args_BM_PG['quiet'] = True
