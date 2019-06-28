@@ -102,14 +102,15 @@ if __name__ == '__main__':
     PI_parser.add_argument('-nonmeta',       required=False, action="store_true", help='annotate Non-metagenome-assembled genomes (Non-MAGs)')
     PI_parser.add_argument('-noblast',       required=False, action="store_true", help='not run all-vs-all blastn')
     PI_parser.add_argument('-t',             required=False, type=int, default=1, help='number of threads, default: 1')
-    PI_parser.add_argument('-qsub',          required=False, action="store_true", help='run blastn with job scripts, only for HPC users')
+    PI_parser.add_argument('-blastn_js_header', required=False, help='job script header, for HPC users')
+    PI_parser.add_argument('-qsub',          required=False, action="store_true", help='run blastn with job scripts, for HPC users')
     PI_parser.add_argument('-force',         required=False, action="store_true", help='overwrite previous results')
     PI_parser.add_argument('-quiet',         required=False, action="store_true", help='not report progress')
 
     # arguments for BP approach
     BP_parser = subparsers.add_parser('BP',  description='BM and PG approach', epilog='Example: MetaCHIP BP -h')
     BP_parser.add_argument('-p',             required=True,  help='output prefix')
-    BP_parser.add_argument('-r',             required=False, default=None, help='grouping rank, choose from p (phylum), c (class), o (order), f (family) or g (genus)')
+    BP_parser.add_argument('-r',             required=False, default=None, help='grouping rank, choose from p (phylum), c (class), o (order), f (family), g (genus) or any combination of them')
     BP_parser.add_argument('-g',             required=False, default=None, help='grouping file')
     BP_parser.add_argument('-cov',           required=False, type=int, default=75, help='coverage cutoff, default: 75')
     BP_parser.add_argument('-al',            required=False, type=int, default=200, help='alignment length cutoff, default: 200')

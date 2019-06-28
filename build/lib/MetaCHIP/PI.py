@@ -616,26 +616,15 @@ def parallel_blastn_worker(argument_list):
     os.system(blastn_cmd)
 
 
-def create_blastn_job_script(wd_on_katana, job_script_folder, job_script_file_name, node_num, ppn_num, memory, walltime, modules_list, cmd):
-    # Prepare header
-    line_1 = '#!/bin/bash'
-    line_2 = '#PBS -l nodes=%s:ppn=%s' % (str(node_num), str(ppn_num))
-    line_3 = '#PBS -l mem=%sgb' % str(memory)
-    line_4 = '#PBS -l walltime=%s' % walltime
-    line_5 = '#PBS -j oe'
-    line_7 = '#PBS -m ae'
-    header = '%s\n%s\n%s\n%s\n%s\n%s\n' % (line_1, line_2, line_3, line_4, line_5, line_7)
+def create_blastn_job_script(blastn_wd, job_script_folder, job_script_file_name, blastn_js_header, cmd):
 
-    # Prepare module lines
-    module_lines = ''
-    for module in modules_list:
-        module_lines += 'module load %s\n' % module
+    # Prepare header
+    header_module_lines = read_in_job_script_header(blastn_js_header)
 
     # write to qsub files
     output_file_handle = open('%s/%s' % (job_script_folder, job_script_file_name), 'w')
-    output_file_handle.write(header)
-    output_file_handle.write(module_lines)
-    output_file_handle.write('cd %s\n' % wd_on_katana)
+    output_file_handle.write(header_module_lines)
+    output_file_handle.write('cd %s\n' % blastn_wd)
     output_file_handle.write('%s\n' % cmd)
     output_file_handle.close()
 
@@ -643,6 +632,17 @@ def create_blastn_job_script(wd_on_katana, job_script_folder, job_script_file_na
     os.chdir(job_script_folder)
     os.system('qsub %s' % job_script_file_name)
     os.chdir(current_wd)
+
+
+def read_in_job_script_header(job_script_header_example):
+
+    job_script_header = ''
+    for each in open(job_script_header_example):
+        job_script_header += each
+
+    job_script_header += '\n'
+
+    return job_script_header
 
 
 def PI(args, config_dict):
@@ -658,6 +658,7 @@ def PI(args, config_dict):
     num_threads =           args['t']
     keep_quiet =            args['quiet']
     nonmeta_mode =          args['nonmeta']
+    blastn_js_header =     args['blastn_js_header']
     qsub_on =               args['qsub']
     noblast =               args['noblast']
 
@@ -677,13 +678,13 @@ def PI(args, config_dict):
     min_consensus_in_msa = 25
     rank_abbre_dict = {'d': 'domain', 'p': 'phylum', 'c': 'class', 'o': 'order', 'f': 'family', 'g': 'genus', 's': 'species'}
 
-    wd_on_katana = os.getcwd()
-    node_num = 1
-    ppn_num = 1
-    memory = 10
-    walltime = '11:59:00'
-    modules_list = ['blast+']
-    blast_parameters = '-evalue 1e-5 -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen" -task blastn -num_threads %s' % ppn_num
+    # check input files
+    if (qsub_on is True) and (blastn_js_header is None):
+        print("qsub mode specified, please provide a blastn job script header with '-blastn_js_header'")
+        exit()
+
+    blastn_wd = os.getcwd()
+    blast_parameters = '-evalue 1e-5 -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen" -task blastn -num_threads %s' % 1
 
     if input_genome_folder[-1] == '/':
         input_genome_folder = input_genome_folder[:-1]
@@ -1242,7 +1243,7 @@ def PI(args, config_dict):
                     ffn_file_basename = '.'.join(ffn_file.split('.')[:-1])
                     job_script_file_name = 'qsub_blastn_%s.sh' % ffn_file_basename
                     blastn_cmd = '%s -query %s/%s -db %s -out %s/%s %s' % (pwd_blastn_exe, pwd_prodigal_output_folder, ffn_file, pwd_blast_db, pwd_blast_result_folder, '%s_blastn.tab' % ffn_file_basename, blast_parameters)
-                    create_blastn_job_script(wd_on_katana, pwd_blast_job_scripts_folder, job_script_file_name, node_num, ppn_num, memory, walltime, modules_list, blastn_cmd)
+                    create_blastn_job_script(blastn_wd, pwd_blast_job_scripts_folder, job_script_file_name, blastn_js_header, blastn_cmd)
 
             else:
                 report_and_log(('Running blastn for all input genomes with %s cores, blast results exported to: %s' % (num_threads, pwd_blast_result_folder)), pwd_log_file, keep_quiet)
@@ -1280,14 +1281,15 @@ if __name__ == '__main__':
     parser.add_argument('-i',             required=True,  help='input genome folder')
     parser.add_argument('-taxon',         required=False, help='taxonomic classification')
     parser.add_argument('-p',             required=True,  help='output prefix')
-    parser.add_argument('-r',             required=False, default=None,        help='grouping rank')
+    parser.add_argument('-r',             required=False, default=None,        help='grouping rank, choose from p (phylum), c (class), o (order), f (family), g (genus) or any combination of them')
     parser.add_argument('-g',             required=False, default=None,        help='grouping file')
     parser.add_argument('-x',             required=False, default='fasta',     help='file extension')
     parser.add_argument('-grouping_only', required=False, action="store_true", help='run grouping only, deactivate Prodigal and Blastn')
     parser.add_argument('-nonmeta',       required=False, action="store_true", help='annotate Non-metagenome-assembled genomes (Non-MAGs)')
     parser.add_argument('-noblast',       required=False, action="store_true", help='not run all-vs-all blastn')
     parser.add_argument('-t',             required=False, type=int, default=1, help='number of threads, default: 1')
-    parser.add_argument('-qsub',          required=False, action="store_true", help='run blastn with job scripts, only for HPC users')
+    parser.add_argument('-blastn_js_header', required=False, help='job script header, for HPC user')
+    parser.add_argument('-qsub',          required=False, action="store_true", help='run blastn with job scripts, for HPC user')
     parser.add_argument('-force',         required=False, action="store_true", help='overwrite previous results')
     parser.add_argument('-quiet',         required=False, action="store_true", help='not report progress')
 
