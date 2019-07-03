@@ -1755,7 +1755,7 @@ def extract_gene_tree_seq_worker(argument_list):
         os.system(cmd_mafft)
 
         # remove columns in alignment
-        # remove_low_cov_and_consensus_columns(pwd_seq_file_1st_aln, 50, 50, pwd_seq_file_2nd_aln)
+        # remove_low_cov_and_consensus_columns(pwd_seq_file_1st_aln, 50, 25, pwd_seq_file_2nd_aln)
 
         # run fasttree
         # cmd_fasttree = '%s -quiet %s > %s' % (pwd_fasttree_exe, pwd_seq_file_2nd_aln, pwd_gene_tree_newick)
@@ -1766,15 +1766,15 @@ def extract_gene_tree_seq_worker(argument_list):
         subset_tree(pwd_SCG_tree_all, genome_subset, pwd_species_tree_newick)
 
         # remove temp files
-        # os.remove(self_seq)
-        # os.remove(gene_tree_seq)
+        os.remove(self_seq)
+        os.remove(gene_tree_seq)
         # os.remove(pwd_seq_file_1st_aln)
         # os.remove(pwd_seq_file_2nd_aln)
-        # if non_self_seq_num > 0:
-        #     os.remove(non_self_seq)
-        #     os.remove(blast_output)
-        #     os.remove(blast_output_sorted)
-        #     os.remove(gene_tree_seq_uniq)
+        if non_self_seq_num > 0:
+            os.remove(non_self_seq)
+            os.remove(blast_output)
+            os.remove(blast_output_sorted)
+            os.remove(gene_tree_seq_uniq)
 
 
 def Ranger_worker(argument_list):

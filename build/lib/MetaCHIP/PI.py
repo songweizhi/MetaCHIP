@@ -616,7 +616,7 @@ def parallel_blastn_worker(argument_list):
     os.system(blastn_cmd)
 
 
-def create_blastn_job_script(blastn_wd, job_script_folder, job_script_file_name, blastn_js_header, cmd):
+def create_blastn_job_script(blastn_wd, job_script_folder, job_script_file_name, blastn_js_header, cmd, qsub_on):
 
     # Prepare header
     header_module_lines = read_in_job_script_header(blastn_js_header)
@@ -628,10 +628,11 @@ def create_blastn_job_script(blastn_wd, job_script_folder, job_script_file_name,
     output_file_handle.write('%s\n' % cmd)
     output_file_handle.close()
 
-    current_wd = os.getcwd()
-    os.chdir(job_script_folder)
-    os.system('qsub %s' % job_script_file_name)
-    os.chdir(current_wd)
+    if qsub_on is True:
+        current_wd = os.getcwd()
+        os.chdir(job_script_folder)
+        os.system('qsub %s' % job_script_file_name)
+        os.chdir(current_wd)
 
 
 def read_in_job_script_header(job_script_header_example):
@@ -658,7 +659,7 @@ def PI(args, config_dict):
     num_threads =           args['t']
     keep_quiet =            args['quiet']
     nonmeta_mode =          args['nonmeta']
-    blastn_js_header =     args['blastn_js_header']
+    blastn_js_header =      args['blastn_js_header']
     qsub_on =               args['qsub']
     noblast =               args['noblast']
 
@@ -679,8 +680,8 @@ def PI(args, config_dict):
     rank_abbre_dict = {'d': 'domain', 'p': 'phylum', 'c': 'class', 'o': 'order', 'f': 'family', 'g': 'genus', 's': 'species'}
 
     # check input files
-    if (qsub_on is True) and (blastn_js_header is None):
-        print("qsub mode specified, please provide a blastn job script header with '-blastn_js_header'")
+    if (blastn_js_header is None) and (qsub_on is True):
+        print('%s %s' % ((datetime.now().strftime('[%Y-%m-%d %H:%M:%S]')), "'-qsub_on' specified, please provide job script header with '-blastn_js_header'"))
         exit()
 
     blastn_wd = os.getcwd()
@@ -1234,7 +1235,7 @@ def PI(args, config_dict):
         if noblast is True:
             report_and_log(('All-vs-all blastn disabled, please run blastn with commands provided in: %s' % blast_cmd_file), pwd_log_file, keep_quiet)
         else:
-            if qsub_on is True:
+            if blastn_js_header is not None:
 
                 # create job scripts folder
                 force_create_folder(pwd_blast_job_scripts_folder)
@@ -1243,7 +1244,7 @@ def PI(args, config_dict):
                     ffn_file_basename = '.'.join(ffn_file.split('.')[:-1])
                     job_script_file_name = 'qsub_blastn_%s.sh' % ffn_file_basename
                     blastn_cmd = '%s -query %s/%s -db %s -out %s/%s %s' % (pwd_blastn_exe, pwd_prodigal_output_folder, ffn_file, pwd_blast_db, pwd_blast_result_folder, '%s_blastn.tab' % ffn_file_basename, blast_parameters)
-                    create_blastn_job_script(blastn_wd, pwd_blast_job_scripts_folder, job_script_file_name, blastn_js_header, blastn_cmd)
+                    create_blastn_job_script(blastn_wd, pwd_blast_job_scripts_folder, job_script_file_name, blastn_js_header, blastn_cmd, qsub_on)
 
             else:
                 report_and_log(('Running blastn for all input genomes with %s cores, blast results exported to: %s' % (num_threads, pwd_blast_result_folder)), pwd_log_file, keep_quiet)
@@ -1271,6 +1272,9 @@ def PI(args, config_dict):
 
     report_and_log('PrepIn done!', pwd_log_file, keep_quiet)
 
+    if (grouping_only is False) and (blastn_js_header is not None) and (qsub_on is False):
+        report_and_log('Generated job scripts exported to %s, please submit them manually and start the BP step after all submitted jobs were finished' % pwd_blast_job_scripts_folder, pwd_log_file, False)
+
 
 if __name__ == '__main__':
 
@@ -1278,20 +1282,19 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     # arguments for PI
-    parser.add_argument('-i',             required=True,  help='input genome folder')
-    parser.add_argument('-taxon',         required=False, help='taxonomic classification')
-    parser.add_argument('-p',             required=True,  help='output prefix')
-    parser.add_argument('-r',             required=False, default=None,        help='grouping rank, choose from p (phylum), c (class), o (order), f (family), g (genus) or any combination of them')
-    parser.add_argument('-g',             required=False, default=None,        help='grouping file')
-    parser.add_argument('-x',             required=False, default='fasta',     help='file extension')
-    parser.add_argument('-grouping_only', required=False, action="store_true", help='run grouping only, deactivate Prodigal and Blastn')
-    parser.add_argument('-nonmeta',       required=False, action="store_true", help='annotate Non-metagenome-assembled genomes (Non-MAGs)')
-    parser.add_argument('-noblast',       required=False, action="store_true", help='not run all-vs-all blastn')
-    parser.add_argument('-t',             required=False, type=int, default=1, help='number of threads, default: 1')
-    parser.add_argument('-blastn_js_header', required=False, help='job script header, for HPC user')
-    parser.add_argument('-qsub',          required=False, action="store_true", help='run blastn with job scripts, for HPC user')
-    parser.add_argument('-force',         required=False, action="store_true", help='overwrite previous results')
-    parser.add_argument('-quiet',         required=False, action="store_true", help='not report progress')
+    parser.add_argument('-i',                   required=True,  help='input genome folder')
+    parser.add_argument('-taxon',               required=False, help='taxonomic classification')
+    parser.add_argument('-p',                   required=True,  help='output prefix')
+    parser.add_argument('-r',                   required=False, default=None,        help='grouping rank, choose from p (phylum), c (class), o (order), f (family), g (genus) or any combination of them')
+    parser.add_argument('-g',                   required=False, default=None,        help='grouping file')
+    parser.add_argument('-x',                   required=False, default='fasta',     help='file extension')
+    parser.add_argument('-grouping_only',       required=False, action="store_true", help='run grouping only, deactivate Prodigal and Blastn')
+    parser.add_argument('-nonmeta',             required=False, action="store_true", help='annotate Non-metagenome-assembled genomes (Non-MAGs)')
+    parser.add_argument('-noblast',             required=False, action="store_true", help='not run all-vs-all blastn')
+    parser.add_argument('-t',                   required=False, type=int, default=1, help='number of threads, default: 1')
+    parser.add_argument('-blastn_js_header',    required=False,                      help='speed up all-against-all blastn with separated job script for each of the input genome, provide the job script header here')
+    parser.add_argument('-qsub',                required=False, action="store_true", help='specify to automatically submit generated job scripts, otherwise, submit them manually')
+    parser.add_argument('-quiet',               required=False, action="store_true", help='not report progress')
 
     args = vars(parser.parse_args())
 

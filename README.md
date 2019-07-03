@@ -79,7 +79,7 @@ if you have both bacterial and archaeal genomes included in your queries. You ne
 1. Options for argument '-r' for PI and BP modules can be any combinations of d (domain), p (phylum), c (class), o (order), f (family) and g (genus).
 
 1. The all-against-all blastn comparison is the most time-consuming step. 
-   You can speed up this step with qsub if you are running MetaCHIP with HPC. 
+   You can speed up this step with job scripts if you are running MetaCHIP with HPC. 
    An example of the job script header [[example](https://github.com/songweizhi/MetaCHIP/blob/master/input_file_examples/blastn_job_script_header_demo.sh)] is needed in this case.
    The "MetaCHIP BP" module must be run **AFTER** all submitted jobs are finished.
 
@@ -108,7 +108,7 @@ if you have both bacterial and archaeal genomes included in your queries. You ne
     * Run MetaCHIP with qsub to speed up all-against-all blastn comparison. 
       Here is an example of the job script header file ([blastn_job_script_header_demo.sh](https://github.com/songweizhi/MetaCHIP/blob/master/input_file_examples/blastn_job_script_header_demo.sh)).
 
-            MetaCHIP PI -i bin_folder -x fasta -taxon NorthSea_GTDB_bac120_ar122_combined.tsv -r co -p NorthSea -t 6 -qsub -blastn_js_header blastn_job_script_header_demo.sh
+            MetaCHIP PI -i bin_folder -x fasta -taxon NorthSea_GTDB_bac120_ar122_combined.tsv -r co -p NorthSea -t 6 -blastn_js_header blastn_job_script_header_demo.sh -qsub
             
             # after all submitted jobs are finished (important!!!),run:
             MetaCHIP BP -p NorthSea -r co -t 6
