@@ -592,8 +592,9 @@ def check_full_lenght_and_end_match(qualified_ctg_match_list, identity_cutoff):
     match_category = 'normal'
     best_hit_end_gap_len = 200
     gap_cutoff_for_concatenating = 300
-    # full length match: coverage cutoff 95%
-    if (query_cov_total >= 0.95) or (subject_cov_total >= 0.95):
+
+    # full length match: coverage cutoff 90%
+    if (query_cov_total >= 0.90) or (subject_cov_total >= 0.90):
         match_category = 'full_length_match'
 
 
@@ -3249,7 +3250,14 @@ def combine_multiple_level_predictions(args, config_dict):
         os.mkdir(pwd_flanking_plot_folder_combined)
 
         for flanking_plot_folder in pwd_flanking_plot_folder_list:
-            os.system('cp %s/1_Plots_normal/* %s/' % (flanking_plot_folder, pwd_flanking_plot_folder_combined_tmp))
+            flanking_plot_re = '%s/1_Plots_normal/*.SVG' % flanking_plot_folder
+            flanking_plot_list = [os.path.basename(file_name) for file_name in glob.glob(flanking_plot_re)]
+
+            for flanking_plot in flanking_plot_list:
+                pwd_flanking_plot = '%s/1_Plots_normal/%s' % (flanking_plot_folder, flanking_plot)
+                os.system('cp %s %s/' % (pwd_flanking_plot, pwd_flanking_plot_folder_combined_tmp))
+
+            # os.system('cp %s/1_Plots_normal/* %s/' % (flanking_plot_folder, pwd_flanking_plot_folder_combined_tmp))
 
         for plot_file in plot_file_list:
             pwd_plot_file = '%s/%s' % (pwd_flanking_plot_folder_combined_tmp, plot_file)
