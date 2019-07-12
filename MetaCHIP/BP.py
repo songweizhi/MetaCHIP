@@ -1814,11 +1814,11 @@ def Ranger_worker(argument_list):
 
         ################################################################################################################
 
-        # change species tree leaf name for Ranger-DTL2, replace "_" with "XXXXX", then, replace "." with "SSSSS"
+        # change species tree leaf name for Ranger-DTL2, replace "_" with "XXXXX", then, replace "." with "SSSSS", then replace "-" with "ZZZZZ"
         for each_st_leaf in species_tree:
             each_st_leaf_name = each_st_leaf.name
 
-            # replace '-' with 'XXXXX'
+            # replace '_' with 'XXXXX'
             if '_' in each_st_leaf_name:
                 each_st_leaf_name_no_Underline = 'XXXXX'.join(each_st_leaf_name.split('_'))
             else:
@@ -1830,14 +1830,20 @@ def Ranger_worker(argument_list):
             else:
                 each_st_leaf_name_no_Underline_no_dot = each_st_leaf_name_no_Underline
 
+            # replace '-' with 'ZZZZZ'
+            if '-' in each_st_leaf_name_no_Underline_no_dot:
+                each_st_leaf_name_no_Underline_no_dot_no_hyphen = 'ZZZZZ'.join(each_st_leaf_name_no_Underline_no_dot.split('-'))
+            else:
+                each_st_leaf_name_no_Underline_no_dot_no_hyphen = each_st_leaf_name_no_Underline_no_dot
+
             # rename species tree leaf name
-            each_st_leaf.name = each_st_leaf_name_no_Underline_no_dot
+            each_st_leaf.name = each_st_leaf_name_no_Underline_no_dot_no_hyphen
 
         # change gene tree leaf name for Ranger-DTL2, replace "_" with "XXXXX", then, replace "." with "SSSSS"
         for each_gt_leaf in gene_tree:
             each_gt_leaf_name = each_gt_leaf.name
 
-            # replace '-' with 'XXXXX'
+            # replace '_' with 'XXXXX'
             if '_' in each_gt_leaf_name:
                 each_gt_leaf_name_no_Underline = 'XXXXX'.join(each_gt_leaf_name.split('_')[:-1])
             else:
@@ -1849,8 +1855,14 @@ def Ranger_worker(argument_list):
             else:
                 each_gt_leaf_name_no_Underline_no_dot = each_gt_leaf_name_no_Underline
 
+            # replace '-' with 'ZZZZZ'
+            if '-' in each_gt_leaf_name_no_Underline_no_dot:
+                each_gt_leaf_name_no_Underline_no_dot_no_hyphen = 'ZZZZZ'.join(each_gt_leaf_name_no_Underline_no_dot.split('-'))
+            else:
+                each_gt_leaf_name_no_Underline_no_dot_no_hyphen = each_gt_leaf_name_no_Underline_no_dot
+
             # rename gene tree leaf name
-            each_gt_leaf.name = each_gt_leaf_name_no_Underline_no_dot
+            each_gt_leaf.name = each_gt_leaf_name_no_Underline_no_dot_no_hyphen
 
         ################################################################################################################
 
@@ -2647,12 +2659,14 @@ def PG(args, config_dict):
                         donor_p = mapping.split('-->')[1][1:]
                         donor_p = '_'.join(donor_p.split('XXXXX'))
                         donor_p = '.'.join(donor_p.split('SSSSS'))
+                        donor_p = '-'.join(donor_p.split('ZZZZZ'))
+
                         recipient_p = recipient.split('-->')[1][1:]
                         recipient_p = '_'.join(recipient_p.split('XXXXX'))
                         recipient_p = '.'.join(recipient_p.split('SSSSS'))
+                        recipient_p = '-'.join(recipient_p.split('ZZZZZ'))
                         predicted_transfer = donor_p + '-->' + recipient_p
                         predicted_transfers.append(predicted_transfer)
-
 
             candidate_2_predictions_dict[each_ranger_prediction_concate] = predicted_transfers
 

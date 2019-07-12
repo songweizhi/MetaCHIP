@@ -110,7 +110,7 @@ def get_group_index_list():
     group_index_list = []
     for s in iter_all_strings():
         group_index_list.append(s)
-        if s == 'ZZ':
+        if s == 'ZZZ':
             break
 
     return group_index_list
