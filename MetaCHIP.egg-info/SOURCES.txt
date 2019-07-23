@@ -2,8 +2,6 @@ MANIFEST.in
 README.md
 setup.py
 MetaCHIP/BP.py
-MetaCHIP/Combine_predictions.py
-MetaCHIP/Combine_predictions_backup.py
 MetaCHIP/MetaCHIP_add_group_to_tree.R
 MetaCHIP/MetaCHIP_circos_HGT.R
 MetaCHIP/MetaCHIP_config.py
@@ -13,9 +11,8 @@ MetaCHIP/Ranger-DTL-Dated.linux
 MetaCHIP/Ranger-DTL-Dated.mac
 MetaCHIP/VERSION
 MetaCHIP/__init__.py
-MetaCHIP/combine_multiple_level_predictions.py
-MetaCHIP/s12_HGT_stats_all_levels.py
-MetaCHIP/s2_combine_PG_outputs.py
+MetaCHIP/filter_HGT.py
+MetaCHIP/update_hmms.py
 MetaCHIP.egg-info/PKG-INFO
 MetaCHIP.egg-info/SOURCES.txt
 MetaCHIP.egg-info/dependency_links.txt

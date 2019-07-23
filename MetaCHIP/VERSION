@@ -1,20 +1,23 @@
-1.2.14
+1.6.0
+- support customized grouping profile
+
+1.5.0
+- add module update_hmms
+
+1.4.4
 - bug fixing
+
+1.4.0
+- add module filter_HGT
+
+1.3.0
+- add module CMLP
 
 1.2.0
 - support multiple-level detections
 
-1.1.1
-- bug fixing
-
 1.1.0
 - support multiprocessing
-
-1.0.2
-- bug fixing
-
-1.0.1
-- bug fixing
 
 1.0.0
 - initial release

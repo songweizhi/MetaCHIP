@@ -1,10 +1,10 @@
 
 ![logo](images/MetaCHIP_logo.jpg)
 
-[![pypi  licence  ](https://img.shields.io/pypi/l/MetaCHIP.svg)](https://opensource.org/licenses/gpl-3.0.html)
-[![pypi  version  ](https://img.shields.io/pypi/v/MetaCHIP.svg)](https://pypi.python.org/pypi/MetaCHIP) 
-[![pypi  download ](https://img.shields.io/pypi/dm/MetaCHIP.svg)](https://pypi.python.org/pypi/MetaCHIP)
-[![DOI            ](https://img.shields.io/static/v1.svg?label=DOI&message=10.1186/s40168-019-0649-y&color=orange)](https://doi.org/10.1186/s40168-019-0649-y)
+[![pypi licence ](https://img.shields.io/pypi/l/MetaCHIP.svg)](https://opensource.org/licenses/gpl-3.0.html)
+[![pypi version ](https://img.shields.io/pypi/v/MetaCHIP.svg)](https://pypi.python.org/pypi/MetaCHIP) 
+[![pypi download](https://img.shields.io/pypi/dm/MetaCHIP.svg)](https://pypi.python.org/pypi/MetaCHIP)
+[![DOI          ](https://img.shields.io/static/v1.svg?label=DOI&message=10.1186/s40168-019-0649-y&color=orange)](https://doi.org/10.1186/s40168-019-0649-y)
 
 
 Publication:
@@ -18,6 +18,11 @@ Publication:
 Change Log:
 ---
 
+* v1.6.0 (2019-07-23) - Support customized grouping of query genomes
+* v1.5.2 (2019-07-23) - Pfam hmm profiles updated to v32.0, TIGRFAMS db version is v14.0
+* v1.5.0 (2019-07-19) - Add supplementary module: update_hmms
+* v1.4.0 (2019-07-15) - Add supplementary module: filter_HGT
+* v1.3.0 (2019-07-12) - Add supplementary module: CMLP
 * v1.2.0 (2019-04-29) - Support multiple-level detections
 * v1.1.0 (2019-01-19) - Support multiprocessing
 * v1.0.0 (2018-12-29) - Initial release
@@ -54,9 +59,9 @@ to their executables in MetaCHIP's config file (MetaCHIP_config.py, which can be
 How to install:
 ---
 
-1. MetaCHIP can be installed with `pip`:
+1. MetaCHIP can be installed via `pip`:
 
-        # First-time Installation
+        # First-time installation
         pip install MetaCHIP
         
         # for upgrade
@@ -106,18 +111,24 @@ if you have both bacterial and archaeal genomes included in your queries. You ne
             MetaCHIP BP -p NorthSea -r co -t 6
 
     * Run MetaCHIP with qsub to speed up all-against-all blastn comparison. 
-      Here is an example of the job script header file ([blastn_job_script_header_demo.sh](https://github.com/songweizhi/MetaCHIP/blob/master/input_file_examples/blastn_job_script_header_demo.sh)).
+      Here is an example of the job script header file ([blastn_js_header.sh](https://github.com/songweizhi/MetaCHIP/blob/master/input_file_examples/blastn_js_header.sh)).
 
             MetaCHIP PI -i bin_folder -x fasta -taxon NorthSea_GTDB_bac120_ar122_combined.tsv -r co -p NorthSea -t 6 -blastn_js_header blastn_job_script_header_demo.sh -qsub
             
             # after all submitted jobs are finished (important!!!),run:
             MetaCHIP BP -p NorthSea -r co -t 6
 
-
     * Detect HGT at multiple levels (e.g. phylum, class, order, family and genus)
 
             MetaCHIP PI -i bin_folder -x fasta -taxon NorthSea_GTDB_bac120_ar122_combined.tsv -r pcofg -p NorthSea -t 6
             MetaCHIP BP -p NorthSea -r pcofg -t 6
+
+    * Detect HGT with customized grouping file.
+      Here is an example of the customized grouping file ([customized_grouping.txt](https://github.com/songweizhi/MetaCHIP/blob/master/input_file_examples/customized_grouping.txt)).
+      NOTE: bin file extension (e.g. fasta or fa) should not be included in the grouping file!
+        
+            MetaCHIP PI -p NorthSea -g customized_grouping.txt -i NS_37bins -x fasta -t 6
+            MetaCHIP BP -p NorthSea -g customized_grouping.txt -t 6
 
 
 Output files:
@@ -147,12 +158,10 @@ Output files:
     ![Gene_flow](images/Gene_flow.jpg)
 
 
-1. Examples of contig end match.
-    ![end_match_1](images/end_match_1.jpg)   
-    ![end_match_2](images/end_match_2.jpg)
+1. Examples of contig end matches.
+    ![end_match](images/end_match.jpg)   
 
         
-1. Examples of full-length contig match
-    ![full_length_match_1](images/full_length_match_1.jpg)
-    ![full_length_match_2](images/full_length_match_2.jpg)
+1. Examples of full-length contig matches
+    ![full_length_match](images/full_length_match.jpg)
 
