@@ -1,5 +1,5 @@
-1.5.10
-- bug fixing
+1.6.0
+- support customized grouping profile
 
 1.5.0
 - add module update_hmms
