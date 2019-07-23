@@ -100,25 +100,26 @@ if you have both bacterial and archaeal genomes included in your queries. You ne
             MetaCHIP PI -h
             MetaCHIP BP -h
                 
-    * Detect HGT at single level (class)
+    * Detect HGT at single level (e.g. class) with 6 CPU cores
     
             MetaCHIP PI -p NorthSea -r c -t 6 -i bin_folder -x fasta -taxon NorthSea_GTDB_bac120_ar122_combined.tsv
             MetaCHIP BP -p NorthSea -r c -t 6
 
-    * Detect HGT at multiple levels (e.g. class and order)
+    * Detect HGT at multiple levels (e.g. phylum, class and order) with 12 CPU cores
 
-            MetaCHIP PI -p NorthSea -r co -t 6 -i bin_folder -x fasta -taxon NorthSea_GTDB_bac120_ar122_combined.tsv
-            MetaCHIP BP -p NorthSea -r co -t 6
+            MetaCHIP PI -p NorthSea -r pco -t 12 -i bin_folder -x fasta -taxon NorthSea_GTDB_bac120_ar122_combined.tsv
+            MetaCHIP BP -p NorthSea -r pco -t 12
 
     * Run MetaCHIP with qsub to speed up all-against-all blastn comparison. 
       Here is an example of the job script header file ([blastn_js_header.sh](https://github.com/songweizhi/MetaCHIP/blob/master/input_file_examples/blastn_js_header.sh)).
-
-            MetaCHIP PI -p NorthSea -r pcofg -t 6 -i bin_folder -x fasta -taxon NorthSea_GTDB_bac120_ar122_combined.tsv -blastn_js_header blastn_job_script_header_demo.sh -qsub
-            MetaCHIP BP -p NorthSea -r pcofg -t 6  # (Important: need to wait until all submitted jobs are finished!!!)
+      **The BP module can only be run after all submitted jobs were finished!!!**
+    
+            MetaCHIP PI -p NorthSea -r pcofg -t 9 -i bin_folder -x fasta -taxon NorthSea_GTDB_bac120_ar122_combined.tsv -blastn_js_header blastn_js_header.sh -qsub
+            MetaCHIP BP -p NorthSea -r pcofg -t 9
 
     * Detect HGT with customized grouping file.
       Here is an example of the customized grouping file ([customized_grouping.txt](https://github.com/songweizhi/MetaCHIP/blob/master/input_file_examples/customized_grouping.txt)).
-      NOTE: bin file extension (e.g. fasta or fa) should not be included in the grouping file!
+      NOTE: bin file extension (e.g. fasta or fa) should **NOT** be included in the grouping file.
         
             MetaCHIP PI -p NorthSea -g customized_grouping.txt -t 6 -i NS_37bins -x fasta
             MetaCHIP BP -p NorthSea -g customized_grouping.txt -t 6
