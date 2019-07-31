@@ -1,11 +1,14 @@
+1.7.3
+- bug fix
+
+1.7.0
+- add module get_SCG_tree and SankeyTaxon
+
 1.6.0
 - support customized grouping profile
 
 1.5.0
 - add module update_hmms
-
-1.4.4
-- bug fixing
 
 1.4.0
 - add module filter_HGT

@@ -1,10 +1,10 @@
 
 ![logo](images/MetaCHIP_logo.jpg)
 
-[![pypi licence ](https://img.shields.io/pypi/l/MetaCHIP.svg)](https://opensource.org/licenses/gpl-3.0.html)
-[![pypi version ](https://img.shields.io/pypi/v/MetaCHIP.svg)](https://pypi.python.org/pypi/MetaCHIP) 
-[![pypi download](https://img.shields.io/pypi/dm/MetaCHIP.svg)](https://pypi.python.org/pypi/MetaCHIP)
-[![DOI          ](https://img.shields.io/static/v1.svg?label=DOI&message=10.1186/s40168-019-0649-y&color=orange)](https://doi.org/10.1186/s40168-019-0649-y)
+[![pypi licence       ](https://img.shields.io/pypi/l/MetaCHIP.svg)](https://opensource.org/licenses/gpl-3.0.html)
+[![pypi version       ](https://img.shields.io/pypi/v/MetaCHIP.svg)](https://pypi.python.org/pypi/MetaCHIP) 
+[![pypi download month](https://pepy.tech/badge/MetaCHIP/month)](https://pepy.tech/project/MetaCHIP)
+[![DOI                ](https://img.shields.io/static/v1.svg?label=DOI&message=10.1186/s40168-019-0649-y&color=orange)](https://doi.org/10.1186/s40168-019-0649-y)
 
 
 Publication:
@@ -18,6 +18,7 @@ Publication:
 Change Log:
 ---
 
+* v1.7.0 (2019-07-26) - Add supplementary modules: get_SCG_tree and SankeyTaxon
 * v1.6.0 (2019-07-23) - Support customized grouping of query genomes
 * v1.5.2 (2019-07-23) - Pfam hmm profiles updated to v32.0, TIGRFAMS db version is v14.0
 * v1.5.0 (2019-07-19) - Add supplementary module: update_hmms

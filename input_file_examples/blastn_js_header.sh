@@ -7,4 +7,3 @@
 
 # load needed modules (optional, specify if needed)
 module load blast+/2.6.0
-

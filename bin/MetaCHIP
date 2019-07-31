@@ -26,17 +26,18 @@ from datetime import datetime
 from MetaCHIP import MetaCHIP_config
 from MetaCHIP import filter_HGT
 from MetaCHIP import update_hmms
+from MetaCHIP import get_SCG_tree
+from MetaCHIP import SankeyTaxon
 from MetaCHIP.MetaCHIP_config import config_dict
 
 
 to_do = '''
 
-1. if sh: FastTree: command not found exit, as well as for all other programs
-2. combine grouping and group_to_taxon file
-3. not print if disabled: [2018-12-09 21:54:32] Plotting flanking regions with 16 cores
-4. steps move to PG.py: uclust, get species tree
-5. make a tmp folder
-6. if no PG validated, skip plot, but not report error
+1. not print if disabled: [2018-12-09 21:54:32] Plotting flanking regions with 16 cores
+2. steps move to PG.py: uclust, get species tree
+3. if no PG validated, skip plot, but not report error
+4. move flk plot to the last step
+5. get file list by RE is very slow (put files to delete into a tmp folder, then delete the folder)
 
 '''
 
@@ -59,8 +60,8 @@ def print_main_help():
        CMLP           ->    Combine multi-level predictions (part of BP module)
        filter_HGT     ->    Get HGTs predicted at least n levels (for multi-level predictions)
        update_hmms    ->    update hmm profiles used for inferring SCG tree
-       get_SCG_tree   ->    [to be added] Get SCG protein tree
-       sankey_taxon   ->    [to be added] Visualize taxonomic classification with Sankey plot
+       get_SCG_tree   ->    Get SCG protein tree
+       SankeyTaxon    ->    Visualize taxonomic classification with Sankey plot
        plot_circos    ->    [to be added] Visualize gene flow with circos plot
        rename_cotig   ->    [to be added] rename contigs if their ids longer than 22 letters
        
@@ -81,11 +82,13 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(help="--", dest='subparser_name')
 
-    PI_parser =          subparsers.add_parser('PI',          description='Prepare input files',                  epilog='Example: MetaCHIP PI -h')
-    BP_parser =          subparsers.add_parser('BP',          description='BM and PG approach',                   epilog='Example: MetaCHIP BP -h')
-    CMLP_parser =        subparsers.add_parser('CMLP',        description='Combine multiple level predictions',   epilog='Example: MetaCHIP CMLP -h')
-    filter_HGT_parser =  subparsers.add_parser('filter_HGT',  description='get HGTs detected at least n levels',  usage=filter_HGT.filter_HGT_usage)
-    update_hmms_parser = subparsers.add_parser('update_hmms', description='update hmm profiles',                  usage=update_hmms.update_hmms_usage)
+    PI_parser =             subparsers.add_parser('PI',             description='Prepare input files',                                  epilog='Example: MetaCHIP PI -h')
+    BP_parser =             subparsers.add_parser('BP',             description='BM and PG approach',                                   epilog='Example: MetaCHIP BP -h')
+    CMLP_parser =           subparsers.add_parser('CMLP',           description='Combine multiple level predictions',                   epilog='Example: MetaCHIP CMLP -h')
+    filter_HGT_parser =     subparsers.add_parser('filter_HGT',     description='get HGTs detected at least n levels',                  usage=filter_HGT.filter_HGT_usage)
+    update_hmms_parser =    subparsers.add_parser('update_hmms',    description='update hmm profiles',                                  usage=update_hmms.update_hmms_usage)
+    get_SCG_tree_parser =   subparsers.add_parser('get_SCG_tree',   description='get SCG tree',                                         usage=get_SCG_tree.get_SCG_tree_usage)
+    SankeyTaxon_parser =    subparsers.add_parser('SankeyTaxon',    description='Visualize taxonomic classification with Sankey plot',  usage=SankeyTaxon.SankeyTaxon_parser_usage)
 
 
     ######################################### define arguments for subparsers ##########################################
@@ -104,6 +107,7 @@ if __name__ == '__main__':
     PI_parser.add_argument('-blastn_js_header',         required=False,                         help='speed up all-against-all blastn with separated job script for each of the input genome, provide the job script header here')
     PI_parser.add_argument('-qsub',                     required=False, action="store_true",    help='specify to automatically submit generated job scripts, otherwise, submit them manually')
     PI_parser.add_argument('-quiet',                    required=False, action="store_true",    help='not report progress')
+    PI_parser.add_argument('-tmp',                      required=False, action="store_true",    help='keep temporary files')
 
     # add arguments for BP_parser
     BP_parser.add_argument('-p',                        required=True,                          help='output prefix')
@@ -140,6 +144,21 @@ if __name__ == '__main__':
     update_hmms_parser.add_argument('-hmm',             required=True,                          help='MetaCHIP_phylo.hmm file')
     update_hmms_parser.add_argument('-p_db',            required=False, default=None,           help='Pfam db file, e.g. Pfam-A.hmm')
     update_hmms_parser.add_argument('-t_db',            required=False, default=None,           help='TIGRFAMs db folder, e.g. TIGRFAMs_14.0_HMM')
+
+    # add arguments for get_SCG_tree
+    get_SCG_tree_parser.add_argument('-i',              required=True,                          help='input genome folder')
+    get_SCG_tree_parser.add_argument('-p',              required=True,                          help='output prefix')
+    get_SCG_tree_parser.add_argument('-x',              required=False, default='fasta',        help='file extension')
+    get_SCG_tree_parser.add_argument('-nonmeta',        required=False, action="store_true",    help='annotate Non-metagenome-assembled genomes (Non-MAGs)')
+    get_SCG_tree_parser.add_argument('-t',              required=False, type=int, default=1,    help='number of threads, default: 1')
+
+    # add arguments for SankeyTaxon
+    SankeyTaxon_parser.add_argument('-taxon',           required=True,                          help='taxon classification results')
+    SankeyTaxon_parser.add_argument('-r',               required=True,                          help='taxon ranks to plot, e.g. dpcofgs, pco, pcf, cfs')
+    SankeyTaxon_parser.add_argument('-p',               required=True,                          help='output prefix')
+    SankeyTaxon_parser.add_argument('-ec',              required=False, action='store_true',    help='only plot explicit classifications')
+    SankeyTaxon_parser.add_argument('-x',               required=False, type=int,               help='plot width')
+    SankeyTaxon_parser.add_argument('-y',               required=False, type=int,               help='plot height')
 
 
     ############################## parse provided arguments and run corresponding function #############################
@@ -221,7 +240,7 @@ if __name__ == '__main__':
     #################### run supplementary modules ####################
 
     if args['subparser_name'] == 'CMLP':
-        BP.combine_multiple_level_predictions(args, config_dict)
+        BP.CMLP(args, config_dict)
 
     if args['subparser_name'] == 'filter_HGT':
         filter_HGT.filter_HGT(args)
@@ -229,3 +248,8 @@ if __name__ == '__main__':
     if args['subparser_name'] == 'update_hmms':
         update_hmms.update_hmms(args)
 
+    if args['subparser_name'] == 'get_SCG_tree':
+        get_SCG_tree.get_SCG_tree(args, config_dict)
+
+    if args['subparser_name'] == 'SankeyTaxon':
+        SankeyTaxon.SankeyTaxon(args)

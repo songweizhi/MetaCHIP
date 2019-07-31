@@ -26,6 +26,7 @@ import platform
 import warnings
 import argparse
 import itertools
+import subprocess
 import numpy as np
 import multiprocessing as mp
 from time import sleep
@@ -47,6 +48,19 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 from MetaCHIP.MetaCHIP_config import config_dict
 # from PIL import Image
+
+
+def check_executables(program_list):
+
+    not_detected_programs = []
+    for needed_program in program_list:
+
+        if subprocess.call(['which', needed_program], stdout=open(os.devnull, 'wb')) != 0:
+            not_detected_programs.append(needed_program)
+
+    if not_detected_programs != []:
+        print('%s not detected, program exited!' % ','.join(not_detected_programs))
+        exit()
 
 
 class BinRecord(object):
@@ -77,6 +91,18 @@ def force_create_folder(folder_to_create):
                 if os.path.isdir(folder_to_create):
                     shutil.rmtree(folder_to_create, ignore_errors=True)
     os.mkdir(folder_to_create)
+
+
+def rm_folder_file(target_re):
+    target_list = glob.glob(target_re)
+
+    for target in target_list:
+
+        if os.path.isdir(target) is True:
+            os.system('rm -r %s' % target)
+
+        elif os.path.isfile(target) is True:
+            os.system('rm %s' % target)
 
 
 def unique_list_elements(list_input):
@@ -1345,7 +1371,7 @@ def get_species_tree_newick(tmp_folder, each_subset, pwd_fasttree_exe, tree_fold
     file_out.close()
 
     # calling fasttree for tree calculation
-    os.system('%s -quiet %s > %s' % (pwd_fasttree_exe, pwd_alignment_file, pwd_newick_file))
+    os.system('%s -quiet %s > %s 2>/dev/null' % (pwd_fasttree_exe, pwd_alignment_file, pwd_newick_file))
 
     # draw species tree
     #species_tree = Phylo.read('phylogenticTree.phy', 'newick')
@@ -1759,8 +1785,8 @@ def extract_gene_tree_seq_worker(argument_list):
         # remove_low_cov_and_consensus_columns(pwd_seq_file_1st_aln, 50, 25, pwd_seq_file_2nd_aln)
 
         # run fasttree
-        # cmd_fasttree = '%s -quiet %s > %s' % (pwd_fasttree_exe, pwd_seq_file_2nd_aln, pwd_gene_tree_newick)
-        cmd_fasttree = '%s -quiet %s > %s' % (pwd_fasttree_exe, pwd_seq_file_1st_aln, pwd_gene_tree_newick)
+        # cmd_fasttree = '%s -quiet %s > %s 2>/dev/null' % (pwd_fasttree_exe, pwd_seq_file_2nd_aln, pwd_gene_tree_newick)
+        cmd_fasttree = '%s -quiet %s > %s 2>/dev/null' % (pwd_fasttree_exe, pwd_seq_file_1st_aln, pwd_gene_tree_newick)
         os.system(cmd_fasttree)
 
         # Get species tree
@@ -1947,10 +1973,10 @@ def BM(args, config_dict):
 
     # get path to current script
     pwd_blastn_exe = config_dict['blastn']
-
+    check_executables([pwd_blastn_exe])
     flanking_length = flanking_length_kbp * 1000
-
     warnings.filterwarnings("ignore")
+
 
     #################################### find matched grouping file if not provided  ###################################
 
@@ -1996,14 +2022,12 @@ def BM(args, config_dict):
     blast_result_folder =                               '%s_all_blastn_results'                           % (output_prefix)
     combined_ffn_file =                                 '%s_all_combined_ffn.fasta'                       % (output_prefix)
     prodigal_output_folder =                            '%s_all_prodigal_output'                          % (output_prefix)
-
     blast_result_filtered_folder =                      '%s_%s%s_blastn_results_filtered'                 % (output_prefix, grouping_level, group_num)
     blast_result_filtered_folder_g2g =                  '%s_%s%s_1_blastn_results_filtered_g2g'           % (output_prefix, grouping_level, group_num)
     blast_result_filtered_folder_with_group =           '%s_%s%s_2_blastn_results_filtered_with_group'    % (output_prefix, grouping_level, group_num)
     blast_result_filtered_folder_in_one_line =          '%s_%s%s_3_blastn_results_filtered_in_one_line'   % (output_prefix, grouping_level, group_num)
     op_candidates_only_gene_folder_name =               '%s_%s%s_4_HGTs_only_id'                          % (output_prefix, grouping_level, group_num)
     op_candidates_with_group_folder_name =              '%s_%s%s_5_HGTs_with_group'                       % (output_prefix, grouping_level, group_num)
-    gbk_folder =                                        '%s_%s%s_gbk_files'                               % (output_prefix, grouping_level, group_num)
     iden_distrib_plot_folder =                          '%s_%s%s_identity_distribution'                   % (output_prefix, grouping_level, group_num)
     qual_idens_file =                                   '%s_%s%s_blastn_results_filtered.tab'             % (output_prefix, grouping_level, group_num)
     qual_idens_file_gg =                                '%s_%s%s_qualified_iden_gg.txt'                   % (output_prefix, grouping_level, group_num)
@@ -2022,7 +2046,6 @@ def BM(args, config_dict):
     normal_folder_name =                                '1_Plots_normal'
     end_match_folder_name =                             '2_Plots_end_match'
     full_length_match_folder_name =                     '3_Plots_full_length_match'
-
 
     pwd_MetaCHIP_op_folder =                       '%s/%s'       % (MetaCHIP_wd, MetaCHIP_op_folder)
     pwd_prodigal_output_folder =                   '%s/%s'       % (MetaCHIP_wd, prodigal_output_folder)
@@ -2277,8 +2300,13 @@ def BM(args, config_dict):
 
     # remove temporary folder
     if keep_temp == 0:
-        os.system('rm %s/*___*/*' % pwd_op_act_folder)
-        os.system('rm -r %s/*___*' % pwd_op_act_folder)
+        act_file_re =   '%s/*___*/*' % pwd_op_act_folder
+        act_folder_re = '%s/*___*'   % pwd_op_act_folder
+        rm_folder_file(act_file_re)
+        rm_folder_file(act_folder_re)
+        #os.system('rm %s/*___*/*' % pwd_op_act_folder)
+        #os.system('rm -r %s/*___*' % pwd_op_act_folder)
+
 
     # convert mp.dict to normal dict
     candidates_2_contig_match_category_dict = {each_key: each_value for each_key, each_value in candidates_2_contig_match_category_dict_mp.items()}
@@ -2346,7 +2374,7 @@ def BM(args, config_dict):
 
     ############################################## remove temporary files ##############################################
 
-    if keep_temp == 0:
+    if keep_temp is False:
         report_and_log(('Deleting temporary files'), pwd_log_file, keep_quiet)
         os.remove(pwd_qualified_iden_file)
         os.remove(pwd_qual_iden_file_gg)
@@ -2397,15 +2425,18 @@ def PG(args, config_dict):
 
     warnings.filterwarnings("ignore")
 
+    # check whether needed executables exist
+    check_executables([pwd_ranger_exe, pwd_mafft_exe, pwd_fasttree_exe, pwd_blastp_exe])
+
 
     #################################### find matched grouping file if not provided  ###################################
 
     if grouping_level is None:
         grouping_level = 'x'
 
-    MetaCHIP_wd =   '%s_MetaCHIP_wd'      % output_prefix
-    pwd_log_folder = '%s/%s_log_files'    % (MetaCHIP_wd, output_prefix)
-    pwd_log_file =  '%s/%s_%s_PG_%s.log'  % (pwd_log_folder, output_prefix, grouping_level, datetime.now().strftime('%Y-%m-%d_%Hh-%Mm-%Ss_%f'))
+    MetaCHIP_wd =       '%s_MetaCHIP_wd'        % output_prefix
+    pwd_log_folder =    '%s/%s_log_files'       % (MetaCHIP_wd, output_prefix)
+    pwd_log_file =      '%s/%s_%s_PG_%s.log'    % (pwd_log_folder, output_prefix, grouping_level, datetime.now().strftime('%Y-%m-%d_%Hh-%Mm-%Ss_%f'))
 
 
     pwd_grouping_file = ''
@@ -2455,7 +2486,6 @@ def PG(args, config_dict):
     candidates_file_name_ET_validated_fasta_aa =        '%s_%s%s_HGTs_PG_aa.fasta'                    % (output_prefix, grouping_level, group_num)
     flanking_region_plot_folder_name =                  '%s_%s%s_Flanking_region_plots'               % (output_prefix, grouping_level, group_num)
     newick_tree_file =                                  '%s_%s%s_species_tree.newick'                 % (output_prefix, grouping_level, group_num)
-    grouping_id_to_taxon_file_name =                    '%s_%s%s_group_to_taxon.txt'                  % (output_prefix, grouping_level, group_num)
     grouping_file_with_id_filename =                    '%s_%s%s_grouping_with_id.txt'                % (output_prefix, grouping_level, group_num)
     combined_faa_file_subset =                          '%s_%s%s_combined_subset.faa'                 % (output_prefix, grouping_level, group_num)
     plot_identity_distribution_BM =                     '%s_%s%s_plot_HGT_identity_BM.png'            % (output_prefix, grouping_level, group_num)
@@ -2501,7 +2531,6 @@ def PG(args, config_dict):
     pwd_combined_faa_file_subset =                      '%s/%s'                                       % (pwd_MetaCHIP_op_folder, combined_faa_file_subset)
     pwd_genome_size_file =                              '%s/%s'                                       % (MetaCHIP_wd, genome_size_file_name)
     pwd_newick_tree_file =                              '%s/%s'                                       % (MetaCHIP_wd, newick_tree_file)
-    pwd_grouping_id_to_taxon_file =                     '%s/%s'                                       % (MetaCHIP_wd, grouping_id_to_taxon_file_name)
     pwd_grouping_file_with_id =                         '%s/%s/%s'                                    % (MetaCHIP_wd, MetaCHIP_op_folder, grouping_file_with_id_filename)
     pwd_HGT_query_to_subjects_file =                    '%s/%s/%s'                                    % (MetaCHIP_wd, MetaCHIP_op_folder, HGT_query_to_subjects_filename)
 
@@ -2795,14 +2824,14 @@ def PG(args, config_dict):
 
 
     # remove tmp files
-    if keep_temp == 0:
+    if keep_temp is False:
+
         os.remove(pwd_combined_faa_file)
         os.remove(pwd_combined_faa_file_subset)
         os.remove(pwd_candidates_seq_file)
         os.remove(pwd_HGT_query_to_subjects_file)
         os.remove(pwd_grouping_file_with_id)
         os.remove(pwd_candidates_file)
-
         os.system('rm -r %s' % pwd_ranger_inputs_folder)
         os.system('rm -r %s' % pwd_ranger_outputs_folder)
         os.system('rm -r %s' % pwd_tree_folder)
@@ -2833,6 +2862,115 @@ def combine_PG_output(PG_output_file_list_with_path, output_prefix, detection_ra
                     end_match = PG_HGT_split[5]
                     full_length_match = PG_HGT_split[6]
                     direction = PG_HGT_split[7]
+                    concatenated = '%s___%s' % (gene_1, gene_2)
+
+                    if concatenated not in HGT_concatenated_list:
+                        HGT_concatenated_list.append(concatenated)
+
+                    # store in dict
+                    if concatenated not in HGT_identity_dict:
+                        HGT_identity_dict[concatenated] = identity
+
+                    if concatenated not in HGT_end_match_dict:
+                        HGT_end_match_dict[concatenated] = end_match
+
+                    if concatenated not in HGT_full_length_match_dict:
+                        HGT_full_length_match_dict[concatenated] = full_length_match
+
+                    if direction != 'NA':
+                        if concatenated not in HGT_direction_dict:
+                            HGT_direction_dict[concatenated] = [direction]
+                        else:
+                            HGT_direction_dict[concatenated].append(direction)
+
+                    if direction != 'NA':
+                        if concatenated not in HGT_occurence_dict:
+                            HGT_occurence_dict[concatenated] = [taxon_rank]
+                        else:
+                            HGT_occurence_dict[concatenated].append(taxon_rank)
+
+
+    detection_ranks_all = ['d', 'p', 'c', 'o', 'f', 'g', 's']
+    detection_ranks_list = []
+    for each_rank in detection_ranks_all:
+        if each_rank in detection_ranks:
+            detection_ranks_list.append(each_rank)
+
+
+    HGT_occurence_dict_0_1_format = {}
+    for each_HGT in HGT_occurence_dict:
+        occurence_str = ''
+        for each_level in detection_ranks_list:
+            if each_level in HGT_occurence_dict[each_HGT]:
+                occurence_str += '1'
+            else:
+                occurence_str += '0'
+        HGT_occurence_dict_0_1_format[each_HGT] = occurence_str
+
+
+    combined_output_handle_normal = open(combined_PG_output_normal, 'w')
+
+    combined_output_handle_normal.write('Gene_1\tGene_2\tIdentity\toccurence(%s)\tend_match\tfull_length_match\tdirection\n' % detection_ranks)
+
+    for concatenated_HGT in sorted(HGT_concatenated_list):
+        concatenated_HGT_split = concatenated_HGT.split('___')
+
+        concatenated_HGT_direction = 'NA'
+        if concatenated_HGT in HGT_direction_dict:
+
+            concatenated_HGT_direction_list = HGT_direction_dict[concatenated_HGT]
+            concatenated_HGT_direction_list_uniq = unique_list_elements(concatenated_HGT_direction_list)
+
+            if len(concatenated_HGT_direction_list_uniq) == 1:
+                concatenated_HGT_direction = concatenated_HGT_direction_list[0]
+            else:
+                concatenated_HGT_direction = 'both'
+                for HGT_direction in concatenated_HGT_direction_list_uniq:
+                    HGT_direction_freq = (concatenated_HGT_direction_list.count(HGT_direction))/len(concatenated_HGT_direction_list)
+                    if HGT_direction_freq > 0.5:
+                        concatenated_HGT_direction = HGT_direction + '(' + str(float("{0:.2f}".format(HGT_direction_freq*100))) + '%)'
+
+        if concatenated_HGT in HGT_occurence_dict_0_1_format:
+            occurence_formatted = HGT_occurence_dict_0_1_format[concatenated_HGT]
+        else:
+            occurence_formatted = '0'*len(detection_ranks_list)
+
+        for_out = '%s\t%s\t%s\t%s\t%s\t%s\t%s\n' % (concatenated_HGT_split[0],
+                                                    concatenated_HGT_split[1],
+                                                    HGT_identity_dict[concatenated_HGT],
+                                                    occurence_formatted,
+                                                    HGT_end_match_dict[concatenated_HGT],
+                                                    HGT_full_length_match_dict[concatenated_HGT],
+                                                    concatenated_HGT_direction)
+
+        if (HGT_end_match_dict[concatenated_HGT] == 'no') and (HGT_full_length_match_dict[concatenated_HGT] == 'no') and (concatenated_HGT_direction != 'NA') and (concatenated_HGT_direction != 'both'):
+            combined_output_handle_normal.write(for_out)
+
+    combined_output_handle_normal.close()
+
+
+def combine_PG_output_for_CMLP(PG_output_file_list_with_path, output_prefix, detection_ranks, combined_PG_output_normal):
+
+    HGT_identity_dict = {}
+    HGT_end_match_dict = {}
+    HGT_full_length_match_dict = {}
+    HGT_direction_dict = {}
+    HGT_occurence_dict = {}
+    HGT_concatenated_list = []
+    for pwd_PG_output_file in PG_output_file_list_with_path:
+        file_path, file_name = os.path.split(pwd_PG_output_file)
+        taxon_rank = file_name[len(output_prefix) + 1]
+        if taxon_rank in detection_ranks:
+            for PG_HGT in open(pwd_PG_output_file):
+                if not PG_HGT.startswith('Gene_1'):
+                    PG_HGT_split = PG_HGT.strip().split('\t')
+
+                    gene_1 = PG_HGT_split[0]
+                    gene_2 = PG_HGT_split[1]
+                    identity = float(PG_HGT_split[2])
+                    end_match = PG_HGT_split[3]
+                    full_length_match = PG_HGT_split[4]
+                    direction = PG_HGT_split[5]
                     concatenated = '%s___%s' % (gene_1, gene_2)
 
                     if concatenated not in HGT_concatenated_list:
@@ -2970,8 +3108,6 @@ def Get_circlize_plot(multi_level_detection, output_prefix, pwd_candidates_file_
             Gene_2 = each_split[1]
             Genome_1 = '_'.join(Gene_1.split('_')[:-1])
             Genome_2 = '_'.join(Gene_2.split('_')[:-1])
-            #Genome_1_taxon = genome_to_taxon_dict[Genome_1]
-            #Genome_2_taxon = genome_to_taxon_dict[Genome_2]
 
             if Genome_1 in genome_to_taxon_dict:
                 Genome_1_taxon = genome_to_taxon_dict[Genome_1]
@@ -3057,7 +3193,12 @@ def Get_circlize_plot(multi_level_detection, output_prefix, pwd_candidates_file_
     matrix_file.close()
 
     # get plot with R
-    os.system('Rscript %s -m %s -p %s' % (circos_HGT_R, pwd_cir_plot_matrix_filename, pwd_plot_circos))
+    if len(all_group_id) == 1:
+        print('Too less group (1), plot skipped')
+    elif 1 < len(all_group_id) <= 200:
+        os.system('Rscript %s -m %s -p %s' % (circos_HGT_R, pwd_cir_plot_matrix_filename, pwd_plot_circos))
+    else:
+        print('Too many groups (>200), plot skipped')
 
     # rm tmp files
     os.system('rm %s' % pwd_cir_plot_t1)
@@ -3078,8 +3219,6 @@ def Get_circlize_plot_customized_grouping(multi_level_detection, output_prefix, 
             each_split = each.strip().split('\t')
             Gene_1 = each_split[0]
             Gene_2 = each_split[1]
-            Genome_1 = '_'.join(Gene_1.split('_')[:-1])
-            Genome_2 = '_'.join(Gene_2.split('_')[:-1])
 
             Direction = each_split[5]
             if multi_level_detection == True:
@@ -3150,7 +3289,8 @@ def Get_circlize_plot_customized_grouping(multi_level_detection, output_prefix, 
     matrix_file.close()
 
     # get plot with R
-    os.system('Rscript %s -m %s -p %s' % (circos_HGT_R, pwd_cir_plot_matrix_filename, pwd_plot_circos))
+    if len(all_group_id) > 1:
+        os.system('Rscript %s -m %s -p %s' % (circos_HGT_R, pwd_cir_plot_matrix_filename, pwd_plot_circos))
 
     # rm tmp files
     os.system('rm %s' % pwd_cir_plot_t1)
@@ -3320,14 +3460,14 @@ def combine_multiple_level_predictions(args, config_dict):
             grouping_file = [os.path.basename(file_name) for file_name in glob.glob(grouping_file_re)][0]
             taxon_rank_num = grouping_file[len(output_prefix) + 1:].split('_')[0]
             pwd_grouping_file =         '%s_MetaCHIP_wd/%s'                         % (output_prefix, grouping_file)
-            pwd_group_to_taxon_file =   '%s_MetaCHIP_wd/%s_%s_group_to_taxon.txt'   % (output_prefix, output_prefix, taxon_rank_num)
             pwd_plot_circos =           '%s/%s_%s_HGT_circos.png'                   % (pwd_MetaCHIP_op_folder, output_prefix, taxon_rank_num)
 
             taxon_to_group_id_dict = {}
-            for group in open(pwd_group_to_taxon_file):
+            for group in open(pwd_grouping_file):
                 group_id = group.strip().split(',')[0]
-                group_taxon = group.strip().split(',')[1]
-                taxon_to_group_id_dict[group_id] = group_taxon
+                group_taxon = group.strip().split(',')[2]
+                if group_id not in taxon_to_group_id_dict:
+                    taxon_to_group_id_dict[group_id] = group_taxon
 
             # get genome to taxon dict
             genome_to_taxon_dict = {}
@@ -3461,21 +3601,14 @@ def combine_multiple_level_predictions(args, config_dict):
                 grouping_file = [os.path.basename(file_name) for file_name in glob.glob(grouping_file_re)][0]
                 taxon_rank_num = grouping_file[len(output_prefix) + 1:].split('_')[0]
                 pwd_grouping_file =         '%s_MetaCHIP_wd/%s'                         % (output_prefix, grouping_file)
-                pwd_group_to_taxon_file =   '%s_MetaCHIP_wd/%s_%s_group_to_taxon.txt'   % (output_prefix, output_prefix, taxon_rank_num)
                 pwd_plot_circos =           '%s/%s_%s_HGT_circos.png'                   % (pwd_combined_prediction_folder, output_prefix, taxon_rank_num)
-
-                taxon_to_group_id_dict = {}
-                for group in open(pwd_group_to_taxon_file):
-                    group_id = group.strip().split(',')[0]
-                    group_taxon = group.strip().split(',')[1]
-                    taxon_to_group_id_dict[group_id] = group_taxon
 
                 # get genome to taxon dict
                 genome_to_taxon_dict = {}
                 for genome in open(pwd_grouping_file):
-                    group_id2 = genome.strip().split(',')[0]
                     genome_name = genome.strip().split(',')[1]
-                    genome_to_taxon_dict[genome_name] = taxon_to_group_id_dict[group_id2]
+                    genome_taxon = genome.strip().split(',')[2]
+                    genome_to_taxon_dict[genome_name] = genome_taxon
 
                 Get_circlize_plot(multi_level_detection, output_prefix, pwd_detected_HGT_txt_combined, genome_to_taxon_dict, circos_HGT_R, pwd_plot_circos, detection_rank, taxon_rank_num, pwd_combined_prediction_folder)
 
@@ -3489,25 +3622,176 @@ def combine_multiple_level_predictions(args, config_dict):
     os.remove(pwd_combined_ffn)
 
 
+def CMLP(args, config_dict):
+
+    output_prefix =             args['p']
+    detection_rank_list =       args['r']
+    cover_cutoff =              args['cov']
+    align_len_cutoff =          args['al']
+    flanking_length_kbp =       args['flk']
+    identity_percentile =       args['ip']
+    end_match_identity_cutoff = args['ei']
+
+    circos_HGT_R =              config_dict['circos_HGT_R']
+
+    time_format = '[%Y-%m-%d %H:%M:%S]'
+    print('%s Combine multiple level predictions' % (datetime.now().strftime(time_format)))
+
+    # cat ffn and faa files from prodigal output folder
+    print('%s get combined.ffn file' % (datetime.now().strftime(time_format)))
+    pwd_combined_ffn = '%s_MetaCHIP_wd/combined.ffn' % output_prefix
+    os.system('cat %s_MetaCHIP_wd/%s_all_prodigal_output/*.ffn > %s' % (output_prefix, output_prefix, pwd_combined_ffn))
+
+
+
+    multi_level_detection = True
+
+    pwd_detected_HGT_txt_list = []
+    pwd_flanking_plot_folder_list = []
+    for detection_rank in detection_rank_list:
+
+        pwd_MetaCHIP_op_folder_re = '%s_MetaCHIP_wd/%s_%s*_HGTs_ip%s_al%sbp_c%s_ei%s_f%skbp' % (output_prefix, output_prefix, detection_rank, str(identity_percentile), str(align_len_cutoff), str(cover_cutoff), str(end_match_identity_cutoff), flanking_length_kbp)
+        MetaCHIP_op_folder_list = [os.path.basename(file_name) for file_name in glob.glob(pwd_MetaCHIP_op_folder_re)]
+
+        if 'combined' not in MetaCHIP_op_folder_list[0]:
+            MetaCHIP_op_folder = MetaCHIP_op_folder_list[0]
+        else:
+            MetaCHIP_op_folder = MetaCHIP_op_folder_list[1]
+
+        group_num = int(MetaCHIP_op_folder[len(output_prefix)+1:].split('_')[0][1:])
+        pwd_detected_HGT_txt        = '%s_MetaCHIP_wd/%s/%s_%s_detected_HGTs.txt'       % (output_prefix, MetaCHIP_op_folder, output_prefix, detection_rank)
+        pwd_flanking_plot_folder    = '%s_MetaCHIP_wd/%s/%s_%s%s_Flanking_region_plots' % (output_prefix, MetaCHIP_op_folder, output_prefix, detection_rank, group_num)
+
+        pwd_detected_HGT_txt_list.append(pwd_detected_HGT_txt)
+        pwd_flanking_plot_folder_list.append(pwd_flanking_plot_folder)
+
+
+    pwd_combined_prediction_folder = '%s_MetaCHIP_wd/%s_combined_%s_HGTs_ip%s_al%sbp_c%s_ei%s_f%skbp' % (output_prefix, output_prefix, detection_rank_list, str(identity_percentile), str(align_len_cutoff), str(cover_cutoff), str(end_match_identity_cutoff), flanking_length_kbp)
+
+
+    genome_size_file =                          '%s_MetaCHIP_wd/%s_all_genome_size.txt'         % (output_prefix, output_prefix)
+    pwd_detected_HGT_txt_combined =             '%s/%s_%s_detected_HGTs.txt'                    % (pwd_combined_prediction_folder, output_prefix, detection_rank_list)
+    pwd_recipient_gene_seq_ffn =                '%s/%s_%s_detected_HGTs_recipient_genes.ffn'    % (pwd_combined_prediction_folder, output_prefix, detection_rank_list)
+    pwd_recipient_gene_seq_faa =                '%s/%s_%s_detected_HGTs_recipient_genes.faa'    % (pwd_combined_prediction_folder, output_prefix, detection_rank_list)
+    pwd_donor_gene_seq_ffn =                    '%s/%s_%s_detected_HGTs_donor_genes.ffn'        % (pwd_combined_prediction_folder, output_prefix, detection_rank_list)
+    pwd_donor_gene_seq_faa =                    '%s/%s_%s_detected_HGTs_donor_genes.faa'        % (pwd_combined_prediction_folder, output_prefix, detection_rank_list)
+    pwd_flanking_plot_folder_combined_tmp =     '%s/%s_%s_Flanking_region_plots_tmp'            % (pwd_combined_prediction_folder, output_prefix, detection_rank_list)
+    pwd_flanking_plot_folder_combined =         '%s/%s_%s_Flanking_region_plots'                % (pwd_combined_prediction_folder, output_prefix, detection_rank_list)
+
+
+    # combine prediction
+    force_create_folder(pwd_combined_prediction_folder)
+    combine_PG_output_for_CMLP(pwd_detected_HGT_txt_list, output_prefix, detection_rank_list, pwd_detected_HGT_txt_combined)
+
+
+    ############################################### extract sequences ##############################################
+
+    print('%s extract sequences' % (datetime.now().strftime(time_format)))
+
+    # get recipient and donor gene list
+    recipient_gene_list = set()
+    recipient_genome_list = []
+    donor_gene_list = set()
+    plot_file_list = set()
+    for each in open(pwd_detected_HGT_txt_combined):
+        if not each.startswith('Gene_1'):
+
+            each_split = each.strip().split('\t')
+            gene_1 = each_split[0]
+            gene_2 = each_split[1]
+            gene_1_genome = '_'.join(gene_1.split('_')[:-1])
+            gene_2_genome = '_'.join(gene_2.split('_')[:-1])
+            direction = each_split[6]
+            plot_file = '%s___%s.SVG' % (gene_1, gene_2)
+            plot_file_list.add(plot_file)
+
+            recipient_genome = direction.split('-->')[1]
+            if '%)' in recipient_genome:
+                recipient_genome = recipient_genome.split('(')[0]
+            recipient_genome_list.append(recipient_genome)
+
+            if gene_1_genome == recipient_genome:
+                recipient_gene_list.add(gene_1)
+                donor_gene_list.add(gene_2)
+            if gene_2_genome == recipient_genome:
+                recipient_gene_list.add(gene_2)
+                donor_gene_list.add(gene_1)
+
+    extract_donor_recipient_sequences(pwd_combined_ffn, recipient_gene_list, donor_gene_list, pwd_recipient_gene_seq_ffn, pwd_recipient_gene_seq_faa, pwd_donor_gene_seq_ffn, pwd_donor_gene_seq_faa)
+
+
+    ############################################ combine flanking plots ############################################
+
+    print('%s put flanking region plots together' % (datetime.now().strftime(time_format)))
+
+    # create plot folders
+    os.mkdir(pwd_flanking_plot_folder_combined_tmp)
+    os.mkdir(pwd_flanking_plot_folder_combined)
+
+    for flanking_plot_folder in pwd_flanking_plot_folder_list:
+        flanking_plot_re = '%s/*.SVG' % flanking_plot_folder
+        flanking_plot_list = [os.path.basename(file_name) for file_name in glob.glob(flanking_plot_re)]
+
+        for flanking_plot in flanking_plot_list:
+            pwd_flanking_plot = '%s/%s' % (flanking_plot_folder, flanking_plot)
+            os.system('cp %s %s/' % (pwd_flanking_plot, pwd_flanking_plot_folder_combined_tmp))
+
+        # os.system('cp %s/1_Plots_normal/* %s/' % (flanking_plot_folder, pwd_flanking_plot_folder_combined_tmp))
+
+    for plot_file in plot_file_list:
+        pwd_plot_file = '%s/%s' % (pwd_flanking_plot_folder_combined_tmp, plot_file)
+        os.system('mv %s %s/' % (pwd_plot_file, pwd_flanking_plot_folder_combined))
+
+
+    ###################################### Get_circlize_plot #######################################
+
+    for detection_rank in detection_rank_list:
+
+        print('%s Get circlize plot at rank %s' % (datetime.now().strftime(time_format), detection_rank))
+
+        grouping_file_re = '%s_MetaCHIP_wd/%s_%s*_grouping.txt' % (output_prefix, output_prefix, detection_rank)
+        grouping_file = [os.path.basename(file_name) for file_name in glob.glob(grouping_file_re)][0]
+        taxon_rank_num = grouping_file[len(output_prefix) + 1:].split('_')[0]
+        pwd_grouping_file =         '%s_MetaCHIP_wd/%s'                         % (output_prefix, grouping_file)
+        pwd_plot_circos =           '%s/%s_%s_HGT_circos.png'                   % (pwd_combined_prediction_folder, output_prefix, taxon_rank_num)
+
+        # get genome to taxon dict
+        genome_to_taxon_dict = {}
+        for genome in open(pwd_grouping_file):
+            genome_name = genome.strip().split(',')[1]
+            genome_taxon = genome.strip().split(',')[2]
+            genome_to_taxon_dict[genome_name] = genome_taxon
+
+        Get_circlize_plot(multi_level_detection, output_prefix, pwd_detected_HGT_txt_combined, genome_to_taxon_dict, circos_HGT_R, pwd_plot_circos, detection_rank, taxon_rank_num, pwd_combined_prediction_folder)
+
+
+    ###################################### remove tmp files #######################################
+
+    # remove tmp files
+    print('%s remove tmp files' % (datetime.now().strftime(time_format)))
+    os.system('rm -r %s' % pwd_flanking_plot_folder_combined_tmp)
+    os.remove(pwd_combined_ffn)
+
+
 if __name__ == '__main__':
 
     # initialize the options parser
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('-p',             required=True,  help='output prefix')
-    parser.add_argument('-r',             required=False, default=None, help='grouping rank')
-    parser.add_argument('-g',             required=False, default=None, help='grouping file')
+    parser.add_argument('-p',             required=True,                                help='output prefix')
+    parser.add_argument('-r',             required=False, default=None,                 help='grouping rank')
+    parser.add_argument('-g',             required=False, default=None,                 help='grouping file')
     parser.add_argument('-cov',           required=False, type=int,     default=75,     help='coverage cutoff, default: 75')
     parser.add_argument('-al',            required=False, type=int,     default=200,    help='alignment length cutoff, default: 200')
     parser.add_argument('-flk',           required=False, type=int,     default=10,     help='the length of flanking sequences to plot (Kbp), default: 10')
     parser.add_argument('-ip',            required=False, type=int,     default=90,     help='identity percentile cutoff, default: 90')
     parser.add_argument('-ei',            required=False, type=float,   default=90,     help='end match identity cutoff, default: 95')
     parser.add_argument('-t',             required=False, type=int,     default=1,      help='number of threads, default: 1')
-    parser.add_argument('-plot_iden',     required=False, action="store_true", help='plot identity distribution')
-    parser.add_argument('-NoEbCheck',     required=False, action="store_true", help='disable end break and contig match check for fast processing, not recommend for metagenome-assembled genomes (MAGs)')
-    parser.add_argument('-force',         required=False, action="store_true", help='overwrite previous results')
-    parser.add_argument('-quiet',         required=False, action="store_true", help='Do not report progress')
-    parser.add_argument('-tmp',           required=False, action="store_true", help='keep temporary files')
+    parser.add_argument('-plot_iden',     required=False, action="store_true",          help='plot identity distribution')
+    parser.add_argument('-NoEbCheck',     required=False, action="store_true",          help='disable end break and contig match check for fast processing, not recommend for metagenome-assembled genomes (MAGs)')
+    parser.add_argument('-force',         required=False, action="store_true",          help='overwrite previous results')
+    parser.add_argument('-quiet',         required=False, action="store_true",          help='Do not report progress')
+    parser.add_argument('-tmp',           required=False, action="store_true",          help='keep temporary files')
 
     args = vars(parser.parse_args())
 

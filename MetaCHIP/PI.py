@@ -26,6 +26,7 @@ import shutil
 import argparse
 import warnings
 import itertools
+import subprocess
 from time import sleep
 from datetime import datetime
 from string import ascii_uppercase
@@ -50,6 +51,19 @@ def report_and_log(message_for_report, log_file, keep_quiet):
 
     if keep_quiet is False:
         print('%s %s' % ((datetime.now().strftime(time_format)), message_for_report))
+
+
+def check_executables(program_list):
+
+    not_detected_programs = []
+    for needed_program in program_list:
+
+        if subprocess.call(['which', needed_program], stdout=open(os.devnull, 'wb')) != 0:
+            not_detected_programs.append(needed_program)
+
+    if not_detected_programs != []:
+        print('%s not detected, program exited!' % ','.join(not_detected_programs))
+        exit()
 
 
 def force_create_folder(folder_to_create):
@@ -334,6 +348,20 @@ def prodigal_parser(seq_file, sco_file, prefix, output_folder):
         current_SeqRecord = SeqRecord(current_sequence, id=seq_id)
         current_SeqRecord.seq.alphabet = generic_dna
         transl_table = seq_to_transl_table_dict[seq_id]
+
+        # add SeqRecord annotations
+        current_SeqRecord_annotations = {}
+        # current_SeqRecord_annotations['data_file_division'] =   'UNA'
+        current_SeqRecord_annotations['date'] =                 (datetime.now().strftime('%d-%b-%Y')).upper()
+        # current_SeqRecord_annotations['definition'] =           '%s_%s' % (prefix, seq_id)
+        current_SeqRecord_annotations['accession'] =            ''
+        current_SeqRecord_annotations['version'] =              ''
+        current_SeqRecord_annotations['keywords'] =             ['.']
+        current_SeqRecord_annotations['source'] =               prefix
+        current_SeqRecord_annotations['organism'] =             prefix
+        current_SeqRecord_annotations['taxonomy'] =             ['Unclassified']
+        current_SeqRecord_annotations['comment'] =              '.'
+        current_SeqRecord.annotations = current_SeqRecord_annotations
 
         # add SeqFeature to SeqRecord
         for cds in seq_to_cds_dict[seq_id]:
@@ -662,6 +690,7 @@ def PI(args, config_dict):
     blastn_js_header =      args['blastn_js_header']
     qsub_on =               args['qsub']
     noblast =               args['noblast']
+    keep_tmp =              args['tmp']
 
     # read in config file
     path_to_hmm =           config_dict['path_to_hmm']
@@ -691,6 +720,20 @@ def PI(args, config_dict):
         input_genome_folder = input_genome_folder[:-1]
 
     #################################################### check input ###################################################
+
+    # check whether executables exist
+    check_executables([pwd_makeblastdb_exe,
+                       pwd_blastn_exe,
+                       pwd_prodigal_exe,
+                       pwd_hmmsearch_exe,
+                       pwd_hmmfetch_exe,
+                       pwd_hmmalign_exe,
+                       pwd_hmmstat_exe,
+                       pwd_fasttree_exe])
+
+    if (grouping_level is not None) and (GTDB_output_file is None):
+        print('Taxonomic classifications not detected, program exited')
+        exit()
 
     if grouping_level is None:
         grouping_level = 'x'
@@ -835,11 +878,8 @@ def PI(args, config_dict):
     blast_result_folder =                '%s_all_blastn_results'                % (output_prefix)
     blast_cmd_file =                     '%s_all_blastn_commands.txt'           % (output_prefix)
     blast_job_scripts_folder =           '%s_all_blastn_job_scripts'            % (output_prefix)
-
     grouping_file_name =                 '%s_%s%s_grouping.txt'                 % (output_prefix, grouping_level, group_num)
     grouping_plot_name =                 '%s_%s%s_grouping.png'                 % (output_prefix, grouping_level, group_num)
-    grouping_id_to_taxon_tmp_file_name = '%s_%s%s_group_to_taxon_tmp.txt'       % (output_prefix, grouping_level, group_num)
-    grouping_id_to_taxon_file_name =     '%s_%s%s_group_to_taxon.txt'           % (output_prefix, grouping_level, group_num)
     excluded_genome_file_name =          '%s_%s%s_excluded_genomes.txt'         % (output_prefix, grouping_level, group_num)
     ffn_folder =                         '%s_%s%s_ffn_files'                    % (output_prefix, grouping_level, group_num)
     faa_folder =                         '%s_%s%s_faa_files'                    % (output_prefix, grouping_level, group_num)
@@ -857,8 +897,6 @@ def PI(args, config_dict):
     pwd_genome_size_file =               '%s/%s'                                % (MetaCHIP_wd, genome_size_file_name)
     pwd_grouping_file =                  '%s/%s'                                % (MetaCHIP_wd, grouping_file_name)
     pwd_grouping_plot =                  '%s/%s'                                % (MetaCHIP_wd, grouping_plot_name)
-    pwd_grouping_id_to_taxon_tmp_file =  '%s/%s'                                % (MetaCHIP_wd, grouping_id_to_taxon_tmp_file_name)
-    pwd_grouping_id_to_taxon_file =      '%s/%s'                                % (MetaCHIP_wd, grouping_id_to_taxon_file_name)
     pwd_excluded_genome_file =           '%s/%s'                                % (MetaCHIP_wd, excluded_genome_file_name)
     pwd_prodigal_output_folder =         '%s/%s'                                % (MetaCHIP_wd, prodigal_output_folder)
     pwd_ffn_folder =                     '%s/%s'                                % (MetaCHIP_wd, ffn_folder)
@@ -888,9 +926,8 @@ def PI(args, config_dict):
 
     else:
         group_index_list = get_group_index_list()
-        grouping_file_handle = open(pwd_grouping_file, 'w')
-        grouping_id_to_taxon_tmp_file_handle = open(pwd_grouping_id_to_taxon_tmp_file, 'w')
-        excluded_genome_file_handle = open(pwd_excluded_genome_file, 'w')
+        grouping_file_handle =                  open(pwd_grouping_file, 'w')
+        excluded_genome_file_handle =           open(pwd_excluded_genome_file, 'w')
 
         n = 0
         for each_taxon in taxon_2_genome_dict:
@@ -898,10 +935,9 @@ def PI(args, config_dict):
                 group_id = group_index_list[n]
                 for genome in taxon_2_genome_dict[each_taxon]:
                     genomes_with_grouping.add(genome)
-                    for_write_1 = '%s,%s\n' % (group_id, genome)
-                    for_write_2 = '%s,%s\n' % (group_id, each_taxon)
-                    grouping_file_handle.write(for_write_1)
-                    grouping_id_to_taxon_tmp_file_handle.write(for_write_2)
+                    for_write = '%s,%s,%s\n'  % (group_id, genome, each_taxon)
+                    grouping_file_handle.write(for_write)
+
                 n += 1
 
             # export excluded genomes
@@ -910,11 +946,7 @@ def PI(args, config_dict):
                     excluded_genome_file_handle.write('%s\n' % un_classfided_genome)
 
         grouping_file_handle.close()
-        grouping_id_to_taxon_tmp_file_handle.close()
         excluded_genome_file_handle.close()
-
-        os.system('cat %s | sort | uniq > %s' % (pwd_grouping_id_to_taxon_tmp_file, pwd_grouping_id_to_taxon_file))
-        os.system('rm %s' % pwd_grouping_id_to_taxon_tmp_file)
 
         if ignored_genome_num == 0:
             os.system('rm %s' % pwd_excluded_genome_file)
@@ -941,9 +973,10 @@ def PI(args, config_dict):
     group_id_with_taxon = []
     if grouping_level != 'x':
 
-        for each_group_2_taxon in open(pwd_grouping_id_to_taxon_file):
+        for each_group_2_taxon in open(pwd_grouping_file):
             each_group_2_taxon_split = each_group_2_taxon.strip().split(',')
-            group_2_taxon_dict[each_group_2_taxon_split[0]] = each_group_2_taxon_split[1]
+            if each_group_2_taxon_split[0] not in group_2_taxon_dict:
+                group_2_taxon_dict[each_group_2_taxon_split[0]] = each_group_2_taxon_split[2]
 
         for each_group in group_id_uniq_sorted:
             each_group_new = group_2_taxon_dict[each_group]
@@ -953,38 +986,39 @@ def PI(args, config_dict):
     for each_id in group_id_uniq_sorted:
         group_id_uniq_count.append(group_id_all.count(each_id))
 
-    x_range = range(len(group_id_uniq_sorted))
-    if grouping_level == 'x':
-        plt.bar(x_range, group_id_uniq_count, tick_label=group_id_uniq_sorted, align='center', alpha=0.2, linewidth=0)
-    else:
-        plt.bar(x_range, group_id_uniq_count, tick_label=group_id_with_taxon, align='center', alpha=0.2, linewidth=0)
 
-    # for a,b in zip(x_range, group_id_uniq_count):
-    #     plt.text(a, b, str(b), fontsize=12, horizontalalignment='center',)
+    ##################################### plot the number of genome in each group ######################################
 
-    xticks_fontsize = 10
-    if 25 < len(group_id_uniq_sorted) <= 50:
-        xticks_fontsize = 7
-    elif len(group_id_uniq_sorted) > 50:
-        xticks_fontsize = 5
+    # if grouping_level == 'x':
+    #     plt.bar(range(len(group_id_uniq_sorted)), group_id_uniq_count, tick_label=group_id_uniq_sorted, align='center', alpha=0.2, linewidth=0)
+    # else:
+    #     plt.bar(range(len(group_id_uniq_sorted)), group_id_uniq_count, tick_label=group_id_with_taxon, align='center', alpha=0.2, linewidth=0)
+    #
+    # xticks_fontsize = 10
+    # if 25 < len(group_id_uniq_sorted) <= 50:
+    #     xticks_fontsize = 7
+    # elif 50 < len(group_id_uniq_sorted) <= 100:
+    #     xticks_fontsize = 4
+    # elif len(group_id_uniq_sorted) > 100:
+    #     xticks_fontsize = 2
+    #
+    # if grouping_level == 'x':
+    #     plt.xticks(range(len(group_id_uniq_sorted)), group_id_uniq_sorted, rotation=315, fontsize=xticks_fontsize,horizontalalignment='left')
+    #     plt.title('The number of input genome in each group')
+    # else:
+    #     plt.xticks(range(len(group_id_uniq_sorted)), group_id_with_taxon, rotation=315, fontsize=xticks_fontsize,horizontalalignment='left')
+    #     plt.title('The number of input genome in each %s' % rank_abbre_dict[grouping_level])
+    #
+    # plt.ylabel('The number of genome')
+    # plt.tight_layout()
+    # plt.savefig(pwd_grouping_plot, dpi=300)
+    # plt.close()
+    #
+    # # for report and log
+    # report_and_log(('Grouping stats exported to: %s' % grouping_plot_name), pwd_log_file, keep_quiet)
 
-    if grouping_level == 'x':
-        plt.xticks(x_range, group_id_uniq_sorted, rotation=315, fontsize=xticks_fontsize,horizontalalignment='left')
-        plt.title('The number of input genome in each group')
-    else:
-        plt.xticks(x_range, group_id_with_taxon, rotation=315, fontsize=xticks_fontsize,horizontalalignment='left')
-        plt.title('The number of input genome in each %s' % rank_abbre_dict[grouping_level])
 
-    plt.ylabel('The number of genome')
-    plt.tight_layout()
-    plt.savefig(pwd_grouping_plot, dpi=300)
-    plt.close()
-
-    # for report and log
-    report_and_log(('Grouping stats exported to: %s' % grouping_plot_name), pwd_log_file, keep_quiet)
-
-
-    ################################################### export genome size #################################################
+    ################################################# export genome size ###############################################
 
     if grouping_only == False:
 
@@ -1168,7 +1202,7 @@ def PI(args, config_dict):
     report_and_log('Running FastTree', pwd_log_file, keep_quiet)
 
     # calling fasttree for tree calculation
-    fasttree_cmd = '%s -quiet %s > %s' % (pwd_fasttree_exe, pwd_combined_alignment_file, pwd_newick_tree_file)
+    fasttree_cmd = '%s -quiet %s > %s 2>/dev/null' % (pwd_fasttree_exe, pwd_combined_alignment_file, pwd_newick_tree_file)
     os.system(fasttree_cmd)
 
     # for report and log
@@ -1178,7 +1212,7 @@ def PI(args, config_dict):
     ################################################### run Usearch ####################################################
 
     # combine faa files
-    os.system('cat %s/*.faa > %s' % (pwd_faa_folder, pwd_combined_faa_file))
+    # os.system('cat %s/*.faa > %s' % (pwd_faa_folder, pwd_combined_faa_file))
 
     # report_and_log('Running Usearch to get gene clusters', pwd_log_file, keep_quiet)
     #
@@ -1261,11 +1295,11 @@ def PI(args, config_dict):
     # remove temporary files
     report_and_log(('Deleting temporary files'), pwd_log_file, keep_quiet)
 
-    os.remove(pwd_combined_faa_file)
-
-    os.system('rm -r %s' % pwd_faa_folder)
-    os.system('rm -r %s' % pwd_SCG_tree_wd)
-    # os.system('rm -r %s' % pwd_blast_db_folder)
+    if keep_tmp is False:
+        os.system('rm -r %s' % pwd_faa_folder)
+        os.system('rm -r %s' % pwd_SCG_tree_wd)
+        # os.remove(pwd_combined_faa_file)
+        # os.system('rm -r %s' % pwd_blast_db_folder)
 
 
     ############################################### for report and log file ##############################################
@@ -1295,6 +1329,7 @@ if __name__ == '__main__':
     parser.add_argument('-blastn_js_header',    required=False,                      help='speed up all-against-all blastn with separated job script for each of the input genome, provide the job script header here')
     parser.add_argument('-qsub',                required=False, action="store_true", help='specify to automatically submit generated job scripts, otherwise, submit them manually')
     parser.add_argument('-quiet',               required=False, action="store_true", help='not report progress')
+    parser.add_argument('-tmp',                 required=False, action="store_true", help='keep temporary files')
 
     args = vars(parser.parse_args())
 

@@ -9,9 +9,13 @@ MetaCHIP/MetaCHIP_phylo.hmm
 MetaCHIP/PI.py
 MetaCHIP/Ranger-DTL-Dated.linux
 MetaCHIP/Ranger-DTL-Dated.mac
+MetaCHIP/SankeyTaxon.py
 MetaCHIP/VERSION
 MetaCHIP/__init__.py
 MetaCHIP/filter_HGT.py
+MetaCHIP/get_SCG_tree.py
+MetaCHIP/tmp_1.py
+MetaCHIP/tmp_2.py
 MetaCHIP/update_hmms.py
 MetaCHIP.egg-info/PKG-INFO
 MetaCHIP.egg-info/SOURCES.txt

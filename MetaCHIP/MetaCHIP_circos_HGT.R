@@ -51,4 +51,4 @@ circos.trackPlotRegion(track.index = 1, panel.fun = function(x, y) {
 #circos.track(circos.text, facing = "clockwise")
 invisible(dev.off())
 
-
+rm(list=ls())
