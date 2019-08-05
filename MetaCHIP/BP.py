@@ -321,12 +321,12 @@ def plot_identity_list(identity_list, identity_cut_off, title, output_foler):
     y_max = plt.ylim()[1]  # get the y-axes maximum value
 
     # set text position
-    text_x = x_min + (x_max - x_min)/5 * 3.8
-    text_y_total = y_min + (y_max - y_min) / 5 * 4.4
-    text_y_min = y_min + (y_max - y_min) / 5 * 4.1
-    text_y_max = y_min + (y_max - y_min) / 5 * 3.8
-    text_y_average = y_min + (y_max - y_min) / 5 * 3.5
-    text_y_cutoff = y_min + (y_max - y_min) / 5 * 3.2
+    text_x = x_min + (x_max - x_min)/float(5 * 3.8)
+    text_y_total = y_min + (y_max - y_min) / float(5 * 4.4)
+    text_y_min = y_min + (y_max - y_min) / float(5 * 4.1)
+    text_y_max = y_min + (y_max - y_min) / float(5 * 3.8)
+    text_y_average = y_min + (y_max - y_min) / float(5 * 3.5)
+    text_y_cutoff = y_min + (y_max - y_min) / float(5 * 3.2)
 
     # plot text
     plt.text(text_x, text_y_total, 'Total: %s' % match_number)
@@ -440,7 +440,7 @@ def get_candidates(targets_group_file, gene_with_g_file_name, gene_only_name_fil
                             sg_maximum = each_sg_subject_iden
                         sg_sum += each_sg_subject_iden
                         sg_subject_number += 1
-                    sg_average = sg_sum/sg_subject_number
+                    sg_average = sg_sum/float(sg_subject_number)
 
                     # get the maximum and average identity from non-self-group
                     nsg_maximum = 0
@@ -454,7 +454,7 @@ def get_candidates(targets_group_file, gene_with_g_file_name, gene_only_name_fil
                             nsg_maximum_gene = each_nsg_subject
                         nsg_sum += each_nsg_subject_iden
                         nsg_subject_number += 1
-                    nsg_average = nsg_sum/nsg_subject_number
+                    nsg_average = nsg_sum/float(nsg_subject_number)
 
                     # if the average non-self-group identity > average self-group identity,
                     # Subject with maximum identity from this group will be considered as a HGT donor.
@@ -480,7 +480,7 @@ def get_candidates(targets_group_file, gene_with_g_file_name, gene_only_name_fil
                             sg_maximum = each_sg_subject_iden
                         sg_sum += each_sg_subject_iden
                         sg_subject_number += 1
-                    sg_average = sg_sum/sg_subject_number
+                    sg_average = sg_sum/float(sg_subject_number)
 
                     # get average/maximum for each non-self-group
                     nsg_average_dict = {}
@@ -503,7 +503,7 @@ def get_candidates(targets_group_file, gene_with_g_file_name, gene_only_name_fil
                                     nsg_maximum_gene = each_nsg_subject
                                 nsg_sum += each_nsg_subject_iden
                                 nsg_subject_number += 1
-                        nsg_average = nsg_sum / nsg_subject_number
+                        nsg_average = nsg_sum / float(nsg_subject_number)
                         nsg_average_dict[each_nsg] = nsg_average
                         nsg_maximum_dict[each_nsg] = nsg_maximum
                         nsg_maximum_gene_name_dict[each_nsg] = nsg_maximum_gene
@@ -611,8 +611,8 @@ def check_full_lenght_and_end_match(qualified_ctg_match_list, identity_cutoff):
 
 
     # get total coverage for query and subject
-    query_cov_total = query_matched_len_total/query_len
-    subject_cov_total = subject_matched_len_total/subject_len
+    query_cov_total = query_matched_len_total/float(query_len)
+    subject_cov_total = subject_matched_len_total/float(subject_len)
 
     # get match category
     match_category = 'normal'
@@ -620,7 +620,7 @@ def check_full_lenght_and_end_match(qualified_ctg_match_list, identity_cutoff):
     gap_cutoff_for_concatenating = 300
 
     # full length match: coverage cutoff 90%
-    if (query_cov_total >= 0.90) or (subject_cov_total >= 0.90):
+    if (query_cov_total >= 0.9) or (subject_cov_total >= 0.9):
         match_category = 'full_length_match'
 
 
@@ -680,7 +680,7 @@ def check_full_lenght_and_end_match(qualified_ctg_match_list, identity_cutoff):
 
                         # situation 1
                         if ((current_query_start >= matched_block_query_start) and (current_query_end <= matched_block_query_end)) and ((current_subject_start <= matched_block_subject_start) and (current_subject_end >= matched_block_subject_end)):
-                            pass  # do nothing
+                            pass
 
                         # situation 2
                         if ((current_query_start > matched_block_query_start) and (current_query_end > matched_block_query_end)) and ((current_subject_start < matched_block_subject_start) and (current_subject_end < matched_block_subject_end)) and (-gap_cutoff_for_concatenating <= (current_query_start - matched_block_query_end) <= gap_cutoff_for_concatenating) and (-gap_cutoff_for_concatenating <= (matched_block_subject_end - current_subject_start) <= gap_cutoff_for_concatenating):
@@ -942,18 +942,20 @@ def get_gbk_blast_act2(arguments_list):
     parameters_c_n_full_len = '-evalue 1e-5 -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen" -task blastn'
     command_blast =           '%s -query %s -subject %s -out %s %s' % (pwd_blastn_exe, query_c, subject_c, output_c, parameters_c_n)
     command_blast_full_len =  '%s -query %s -subject %s -out %s %s' % (pwd_blastn_exe, query_c_full_len, subject_c_full_len, output_c_full_len, parameters_c_n_full_len)
-
     os.system(command_blast)
 
-    if No_Eb_Check is False:
-        os.system(command_blast_full_len)
 
     ############################## check whether full length or end match ##############################
 
     # get match category
     if No_Eb_Check is True:
         match_category = 'normal'
+        candidates_2_contig_match_category_dict[folder_name] = match_category
     else:
+
+        # run blast
+        os.system(command_blast_full_len)
+
         # get qualified_ctg_match_list
         min_ctg_match_aln_len = 100
         qualified_ctg_match_list = []
@@ -965,10 +967,10 @@ def get_gbk_blast_act2(arguments_list):
 
         if len(qualified_ctg_match_list) == 0:
             match_category = 'normal'
+            candidates_2_contig_match_category_dict[folder_name] = match_category
         else:
             match_category = check_full_lenght_and_end_match(qualified_ctg_match_list, end_match_iden_cutoff)
-
-    candidates_2_contig_match_category_dict[folder_name] = match_category
+            candidates_2_contig_match_category_dict[folder_name] = match_category
 
 
     ############################## prepare for flanking plot ##############################
@@ -1461,7 +1463,7 @@ def remove_low_cov_and_consensus_columns(alignment_file_in, minimal_cov, min_con
         while n < total_col_num:
             current_column = alignment_in[:, n]
             dash_number = current_column.count('-')
-            gap_percent = (dash_number / sequence_number) * 100
+            gap_percent = dash_number*100/sequence_number
 
             if gap_percent > min_cov_cutoff:
                 low_cov_columns.append(n + 1)
@@ -1491,7 +1493,7 @@ def remove_low_cov_and_consensus_columns(alignment_file_in, minimal_cov, min_con
             # get maximum aa percent
             most_abundant_aa_percent = 0
             for each_aa in aa_list:
-                each_aa_percent = (current_column.count(each_aa) / sequence_number) * 100
+                each_aa_percent = current_column.count(each_aa) * 100 / sequence_number
                 if each_aa_percent > most_abundant_aa_percent:
                     most_abundant_aa_percent = each_aa_percent
 
@@ -2926,9 +2928,9 @@ def combine_PG_output(PG_output_file_list_with_path, output_prefix, detection_ra
             else:
                 concatenated_HGT_direction = 'both'
                 for HGT_direction in concatenated_HGT_direction_list_uniq:
-                    HGT_direction_freq = (concatenated_HGT_direction_list.count(HGT_direction))/len(concatenated_HGT_direction_list)
-                    if HGT_direction_freq > 0.5:
-                        concatenated_HGT_direction = HGT_direction + '(' + str(float("{0:.2f}".format(HGT_direction_freq*100))) + '%)'
+                    HGT_direction_freq = (concatenated_HGT_direction_list.count(HGT_direction)) * 100 / float(len(concatenated_HGT_direction_list))
+                    if HGT_direction_freq > 50:
+                        concatenated_HGT_direction = HGT_direction + '(' + str(float("{0:.2f}".format(HGT_direction_freq))) + '%)'
 
         if concatenated_HGT in HGT_occurence_dict_0_1_format:
             occurence_formatted = HGT_occurence_dict_0_1_format[concatenated_HGT]
@@ -3035,9 +3037,9 @@ def combine_PG_output_for_CMLP(PG_output_file_list_with_path, output_prefix, det
             else:
                 concatenated_HGT_direction = 'both'
                 for HGT_direction in concatenated_HGT_direction_list_uniq:
-                    HGT_direction_freq = (concatenated_HGT_direction_list.count(HGT_direction))/len(concatenated_HGT_direction_list)
-                    if HGT_direction_freq > 0.5:
-                        concatenated_HGT_direction = HGT_direction + '(' + str(float("{0:.2f}".format(HGT_direction_freq*100))) + '%)'
+                    HGT_direction_freq = (concatenated_HGT_direction_list.count(HGT_direction)) * 100 / float(len(concatenated_HGT_direction_list))
+                    if HGT_direction_freq > 50:
+                        concatenated_HGT_direction = HGT_direction + '(' + str(float("{0:.2f}".format(HGT_direction_freq))) + '%)'
 
         if concatenated_HGT in HGT_occurence_dict_0_1_format:
             occurence_formatted = HGT_occurence_dict_0_1_format[concatenated_HGT]
@@ -3313,7 +3315,8 @@ def combine_multiple_level_predictions(args, config_dict):
 
 
     # cat ffn and faa files from prodigal output folder
-    pwd_combined_ffn = '%s_MetaCHIP_wd/combined.ffn' % output_prefix
+    pwd_combined_ffn = '%s_MetaCHIP_wd/combined_%s.ffn' % (output_prefix, datetime.now().strftime('%Y-%m-%d_%Hh-%Mm-%Ss_%f'))
+
     os.system('cat %s_MetaCHIP_wd/%s_all_prodigal_output/*.ffn > %s' % (output_prefix, output_prefix, pwd_combined_ffn))
 
     if grouping_file is not None:
@@ -3639,7 +3642,7 @@ def CMLP(args, config_dict):
 
     # cat ffn and faa files from prodigal output folder
     print('%s get combined.ffn file' % (datetime.now().strftime(time_format)))
-    pwd_combined_ffn = '%s_MetaCHIP_wd/combined.ffn' % output_prefix
+    pwd_combined_ffn = '%s_MetaCHIP_wd/combined_%s.ffn' % (output_prefix, datetime.now().strftime('%Y-%m-%d_%Hh-%Mm-%Ss_%f'))
     os.system('cat %s_MetaCHIP_wd/%s_all_prodigal_output/*.ffn > %s' % (output_prefix, output_prefix, pwd_combined_ffn))
 
 

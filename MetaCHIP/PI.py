@@ -229,7 +229,7 @@ def remove_low_cov_and_consensus_columns(alignment_file_in, minimal_cov, min_con
         while n < total_col_num:
             current_column = alignment_in[:, n]
             dash_number = current_column.count('-')
-            gap_percent = (dash_number / sequence_number) * 100
+            gap_percent = (dash_number / float(sequence_number)) * 100
 
             if gap_percent > min_cov_cutoff:
                 low_cov_columns.append(n + 1)
@@ -259,7 +259,7 @@ def remove_low_cov_and_consensus_columns(alignment_file_in, minimal_cov, min_con
             # get maximum aa percent
             most_abundant_aa_percent = 0
             for each_aa in aa_list:
-                each_aa_percent = (current_column.count(each_aa) / sequence_number) * 100
+                each_aa_percent = (current_column.count(each_aa) / float(sequence_number)) * 100
                 if each_aa_percent > most_abundant_aa_percent:
                     most_abundant_aa_percent = each_aa_percent
 
@@ -1038,7 +1038,7 @@ def PI(args, config_dict):
 
             pwd_each_genome = '%s/%s' % (input_genome_folder, each_genome)
             current_genome_size = get_genome_length(pwd_each_genome)
-            current_genome_size_Mbp = float("{0:.2f}".format(current_genome_size / (1024 * 1024)))
+            current_genome_size_Mbp = float("{0:.2f}".format(current_genome_size / float((1024 * 1024))))
             for_out = '%s\t%s\n' % (each_genome, current_genome_size_Mbp)
             genome_size_file_handle.write(for_out)
             processing += 1
