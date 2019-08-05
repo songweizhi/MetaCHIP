@@ -18,6 +18,7 @@ Publication:
 Change Log:
 ---
 
+* v1.7.5 (2019-08-05) - Fixed a bug which causes failures in full-length contig match detection due to python2/3 differences. This bug only affects python2 users.
 * v1.7.0 (2019-07-26) - Add supplementary modules: get_SCG_tree and SankeyTaxon
 * v1.6.0 (2019-07-23) - Support customized grouping of query genomes
 * v1.5.2 (2019-07-23) - Pfam hmm profiles updated to v32.0, TIGRFAMS db version is v14.0

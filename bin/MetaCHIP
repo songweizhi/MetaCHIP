@@ -20,14 +20,17 @@
 import sys
 import copy
 import argparse
-from MetaCHIP.PI import PI
-from MetaCHIP import BP
 from datetime import datetime
 from MetaCHIP import MetaCHIP_config
 from MetaCHIP import filter_HGT
 from MetaCHIP import update_hmms
 from MetaCHIP import get_SCG_tree
 from MetaCHIP import SankeyTaxon
+from MetaCHIP.PI import PI
+from MetaCHIP.BP import BM
+from MetaCHIP.BP import PG
+from MetaCHIP.BP import CMLP
+from MetaCHIP.BP import combine_multiple_level_predictions
 from MetaCHIP.MetaCHIP_config import config_dict
 
 
@@ -37,7 +40,8 @@ to_do = '''
 2. steps move to PG.py: uclust, get species tree
 3. if no PG validated, skip plot, but not report error
 4. move flk plot to the last step
-5. get file list by RE is very slow (put files to delete into a tmp folder, then delete the folder)
+5. create a SpongeEMP_c52_Flanking_region_plots_wd folder
+6. !!!!!!!!!! get file list by RE is very slow (put files to delete into a tmp folder, then delete the folder)
 
 '''
 
@@ -211,17 +215,17 @@ if __name__ == '__main__':
 
         if args['g'] is not None:
 
-            BP.BM(args, config_dict)
-            BP.PG(args, config_dict)
-            BP.combine_multiple_level_predictions(args, config_dict)
+            BM(args, config_dict)
+            PG(args, config_dict)
+            combine_multiple_level_predictions(args, config_dict)
 
         else:
             detection_ranks_str = args['r']
 
             # for single level detection
             if len(detection_ranks_str) == 1:
-                BP.BM(args, config_dict)
-                BP.PG(args, config_dict)
+                BM(args, config_dict)
+                PG(args, config_dict)
 
             # for multiple level prediction
             if len(detection_ranks_str) > 1:
@@ -231,16 +235,16 @@ if __name__ == '__main__':
                     current_rank_args_BP['quiet'] = True
 
                     print('%s Detect HGT at level: %s' % ((datetime.now().strftime(time_format)), detection_rank_BP))
-                    BP.BM(current_rank_args_BP, config_dict)
-                    BP.PG(current_rank_args_BP, config_dict)
+                    BM(current_rank_args_BP, config_dict)
+                    PG(current_rank_args_BP, config_dict)
 
             # combine multiple level predictions
-            BP.combine_multiple_level_predictions(args, config_dict)
+            combine_multiple_level_predictions(args, config_dict)
 
     #################### run supplementary modules ####################
 
     if args['subparser_name'] == 'CMLP':
-        BP.CMLP(args, config_dict)
+        CMLP(args, config_dict)
 
     if args['subparser_name'] == 'filter_HGT':
         filter_HGT.filter_HGT(args)
