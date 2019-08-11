@@ -3788,7 +3788,7 @@ if __name__ == '__main__':
     parser.add_argument('-al',            required=False, type=int,     default=200,    help='alignment length cutoff, default: 200')
     parser.add_argument('-flk',           required=False, type=int,     default=10,     help='the length of flanking sequences to plot (Kbp), default: 10')
     parser.add_argument('-ip',            required=False, type=int,     default=90,     help='identity percentile cutoff, default: 90')
-    parser.add_argument('-ei',            required=False, type=float,   default=90,     help='end match identity cutoff, default: 95')
+    parser.add_argument('-ei',            required=False, type=float,   default=80,     help='end match identity cutoff, default: 80')
     parser.add_argument('-t',             required=False, type=int,     default=1,      help='number of threads, default: 1')
     parser.add_argument('-plot_iden',     required=False, action="store_true",          help='plot identity distribution')
     parser.add_argument('-NoEbCheck',     required=False, action="store_true",          help='disable end break and contig match check for fast processing, not recommend for metagenome-assembled genomes (MAGs)')

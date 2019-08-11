@@ -1,3 +1,6 @@
+1.7.6
+- bug fixing
+
 1.7.5
 - Fixed a bug which causes failures in full-length contig match detection due to python2/3 differences. This bug only affects python2 users.
 
