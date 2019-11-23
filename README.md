@@ -51,7 +51,7 @@ These R packages will be installed automatically when needed
 MetaCHIP makes use of the following 3rd party dependencies and assumes these are on your system path. Specify full path 
 to their executables in MetaCHIP's config file (MetaCHIP_config.py, which can be found in Python's folder lib/site-packages/MetaCHIP) if they are not on the system path.  
 * [Prodigal](https://github.com/hyattpd/Prodigal): protein-coding gene prediction tool for prokaryotic genomes.
-* [HMMER](http://hmmer.org): tool for biosequence analysis using profile hidden Markov models.
+* [HMMER 3](http://hmmer.org): tool for biosequence analysis using profile hidden Markov models.
 * [MAFFT](https://mafft.cbrc.jp/alignment/software/): multiple sequences alignment program.
 * [BLAST+](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download): you know what it is!
 * [FastTree](http://www.microbesonline.org/fasttree/): tool for inferring phylogenies from alignments.

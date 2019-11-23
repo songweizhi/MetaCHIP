@@ -15,7 +15,7 @@ def check_match_direction(blast_hit_splitted):
     return same_match_direction
 
 
-def check_full_lenght_and_end_match(qualified_ctg_match_list, identity_cutoff):
+def check_full_length_and_end_match(qualified_ctg_match_list, identity_cutoff):
 
     ######################################## check full length match ########################################
 
@@ -178,7 +178,15 @@ def check_full_lenght_and_end_match(qualified_ctg_match_list, identity_cutoff):
     return match_category
 
 
-output_c_full_len = '/Users/songweizhi/Desktop/RHO2_bin_73_00772___RHO3_bin_59_01813/RHO2_bin_73_00772___RHO3_bin_59_01813_full_length.txt'
+#output_c_full_len = '/Users/songweizhi/Desktop/000/RHO2_bin_73_00772___RHO3_bin_59_01813/RHO2_bin_73_00772___RHO3_bin_59_01813_full_length.txt'
+
+#output_c_full_len = '/Users/songweizhi/Desktop/000/COS2_bin_21_00105___APA_bin_43_02125/COS2_bin_21_00105___APA_bin_43_02125_full_length.txt'
+
+output_c_full_len = '/Users/songweizhi/Desktop/000/COS3_bin_21_01438___IRC_PAM_SB0661_bin_58_00227/COS3_bin_21_01438___IRC_PAM_SB0661_bin_58_00227_full_length.txt'
+
+#output_c_full_len = '/Users/songweizhi/Desktop/000/COS4_bin_26_02662___IRC_PAM_SB0668_bin_42_00545/COS4_bin_26_02662___IRC_PAM_SB0668_bin_42_00545_full_length.txt'
+
+
 
 # get qualified_ctg_match_list
 min_ctg_match_aln_len = 100
@@ -192,7 +200,7 @@ for blast_hit in open(output_c_full_len):
 if len(qualified_ctg_match_list) == 0:
     match_category = 'normal'
 else:
-    match_category = check_full_lenght_and_end_match(qualified_ctg_match_list, 90)
+    match_category = check_full_length_and_end_match(qualified_ctg_match_list, 90)
 
 
 print(match_category)

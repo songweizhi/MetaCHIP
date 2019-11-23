@@ -1,5 +1,14 @@
+1.8.2
+- bug fixing
+
+1.8.0
+- add module circos_HGT
+
+1.7.6
+- bug fixing
+
 1.7.5
-- bug fix
+- Fixed a bug which causes failures in full-length contig match detection due to python2/3 differences. This bug only affects python2 users.
 
 1.7.0
 - add module get_SCG_tree and SankeyTaxon
