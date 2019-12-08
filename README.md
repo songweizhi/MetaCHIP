@@ -140,7 +140,7 @@ Output files:
     |Occurence(taxon_ranks)|Only for multiple-level detections. If you performed HGT detection at phylum, class and order levels, a number of "011" means current HGT was identified at class and order levels, but not phylum level.|
     |End_match|End match or not (see examples below)|
     |Full_length_match|Full length match or not (see examples below)|
-    |Direction|Direction of gene flow|   
+    |Direction|The direction of gene flow. Number in parenthesis refers to the percentage of this direction provided by Ranger-DTL, if this HGT being detected at multiple ranks and different directions were observed among them.|   
 
 
 1. Nucleotide and amino acid sequences of identified donor and recipient genes.
