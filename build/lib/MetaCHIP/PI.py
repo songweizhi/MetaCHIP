@@ -585,6 +585,7 @@ def convert_hmmalign_output(align_in, align_out):
 
 
 def hmmalign_worker(argument_list):
+
     fastaFile_basename = argument_list[0]
     pwd_SCG_tree_wd = argument_list[1]
     pwd_hmm_profile_folder = argument_list[2]

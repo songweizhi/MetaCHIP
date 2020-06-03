@@ -3,7 +3,6 @@
 
 [![pypi licence       ](https://img.shields.io/pypi/l/MetaCHIP.svg)](https://opensource.org/licenses/gpl-3.0.html)
 [![pypi version       ](https://img.shields.io/pypi/v/MetaCHIP.svg)](https://pypi.python.org/pypi/MetaCHIP) 
-[![pypi download month](https://pepy.tech/badge/MetaCHIP/month)](https://pepy.tech/project/MetaCHIP)
 [![DOI                ](https://img.shields.io/static/v1.svg?label=DOI&message=10.1186/s40168-019-0649-y&color=orange)](https://doi.org/10.1186/s40168-019-0649-y)
 
 
@@ -18,7 +17,7 @@ Publication:
 Change Log:
 ---
 
-* v1.7.5 (2019-08-05) - Fixed a bug which causes failures in full-length contig match detection due to python2/3 differences. This bug only affects python2 users.
+* v1.9.0 (2020-06-01) - Add supplementary module: rename_seqs
 * v1.7.0 (2019-07-26) - Add supplementary modules: get_SCG_tree and SankeyTaxon
 * v1.6.0 (2019-07-23) - Support customized grouping of query genomes
 * v1.5.2 (2019-07-23) - Pfam hmm profiles updated to v32.0, TIGRFAMS db version is v14.0
