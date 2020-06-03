@@ -32,41 +32,42 @@ Change Log:
 Dependencies:
 ---
 
-#### Python libraries
-These Python libraries will be installed automatically during pip installation 
-* [BioPython](https://github.com/biopython/biopython.github.io/): Python tools for computational molecular biology.
-* [Numpy](http://www.numpy.org): fundamental package for scientific computing with Python.
-* [SciPy](https://www.scipy.org): Python-based ecosystem for mathematics, science, and engineering.
-* [Matplotlib](http://matplotlib.org): Python plotting library.
-* [ETE3](http://etetoolkit.org): Python environment for tree exploration.
+##### Python libraries and R packages:
 
-#### R packages
-These R packages will be installed automatically when needed
-* [optparse](https://cran.r-project.org/web/packages/optparse/index.html): command line option parser in R.
-* [ape](https://cran.r-project.org/web/packages/ape/index.html): package for analyses of phylogenetics and evolution in R.
-* [circlize](https://cran.r-project.org/web/packages/circlize/index.html): package for circular visualization.
+Python libraries:
+[BioPython](https://github.com/biopython/biopython.github.io/), 
+[Numpy](http://www.numpy.org),
+[SciPy](https://www.scipy.org),
+[Matplotlib](http://matplotlib.org) and 
+[ETE3](http://etetoolkit.org)
+
+R packages: 
+[optparse](https://cran.r-project.org/web/packages/optparse/index.html),
+[ape](https://cran.r-project.org/web/packages/ape/index.html) and 
+[circlize](https://cran.r-project.org/web/packages/circlize/index.html)
 
 #### Third-party software
-MetaCHIP makes use of the following 3rd party dependencies and assumes these are on your system path. Specify full path 
-to their executables in MetaCHIP's config file (MetaCHIP_config.py, which can be found in Python's folder lib/site-packages/MetaCHIP) if they are not on the system path.  
-* [Prodigal](https://github.com/hyattpd/Prodigal): protein-coding gene prediction tool for prokaryotic genomes.
-* [HMMER 3](http://hmmer.org): tool for biosequence analysis using profile hidden Markov models.
-* [MAFFT](https://mafft.cbrc.jp/alignment/software/): multiple sequences alignment program.
-* [BLAST+](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download): you know what it is!
-* [FastTree](http://www.microbesonline.org/fasttree/): tool for inferring phylogenies from alignments.
-* [Ranger-DTL 2.0](https://compbio.engr.uconn.edu/software/RANGER-DTL/): software for inferring gene family evolution (part of MetaCHIP, **NO NEED to install**).
+MetaCHIP makes use of the following 3rd party dependencies and assumes they are on your system path. 
+Otherwise, you can provide full path to their executables in lib/site-packages/MetaCHIP/MetaCHIP_config.py.
+
+[Prodigal](https://github.com/hyattpd/Prodigal), 
+[HMMER 3](http://hmmer.org),
+[MAFFT](https://mafft.cbrc.jp/alignment/software/),
+[BLAST+](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download),
+[FastTree](http://www.microbesonline.org/fasttree/) and 
+[Ranger-DTL 2.0](https://compbio.engr.uconn.edu/software/RANGER-DTL/) (part of MetaCHIP, **NO NEED to install**)
 
 
 How to install:
 ---
 
-1. MetaCHIP can be installed via `pip`:
+1. MetaCHIP can be installed via `pip3`:
 
         # First-time installation
-        pip install MetaCHIP
+        pip3 install MetaCHIP
         
         # for upgrade
-        pip install --upgrade MetaCHIP
+        pip3 install --upgrade MetaCHIP
         
 1. You can either add MetaCHIP's 3rd party dependencies to your system path or specify full path to their executables in MetaCHIP_config.py which can be found in Python's folder `lib/site-packages/MetaCHIP`.
 
