@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Copyright (C) 2017, Weizhi Song, Torsten Thomas.
 # songwz03@gmail.com or t.thomas@unsw.edu.au
@@ -64,12 +64,11 @@ def print_main_help():
        
     Supplementary modules:
        CMLP           ->    Combine multi-level predictions (part of BP module)
-       filter_HGT     ->    Get HGTs predicted at least n levels (for multi-level predictions)
+       filter_HGT     ->    Get HGTs predicted at least n levels (for multi-level prediction)
        update_hmms    ->    update hmm profiles used for inferring SCG tree
        get_SCG_tree   ->    Get SCG protein tree
        SankeyTaxon    ->    Visualize taxonomic classification with Sankey plot
        circos_HGT     ->    Visualize gene flow with circos plot
-       rename_cotig   ->    [to be added] rename contigs if their ids longer than 22 letters
        
     # for command specific help
     MetaCHIP PI -h

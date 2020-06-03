@@ -8,18 +8,10 @@ virtualenv --system-site-packages mypythonenv_metachip
 . mypythonenv_metachip/bin/activate
 pip install MetaCHIP
 
-
-# on Katana
-export PATH=/srv/scratch/z5039045/Softwares/Ranger-DTL2/Linux/CorePrograms:$PATH
-export PATH=/srv/scratch/z5039045/Softwares/Ranger-DTL2/Linux/SupplementaryPrograms:$PATH
-
-
 # and make you have the following R packages installed
 # optparse: command line option parser in R.
 # ape: package for analyses of phylogenetics and evolution in R.
 # circlize: package for circular visualization.
-
-
 
 ###################################### run MetaCHIP ######################################
 
