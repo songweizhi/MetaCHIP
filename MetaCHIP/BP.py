@@ -31,7 +31,7 @@ import numpy as np
 import multiprocessing as mp
 from time import sleep
 from ete3 import Tree
-from Bio import SeqIO, AlignIO, Align
+from Bio import SeqIO, AlignIO, Align, Phylo
 from Bio.Seq import Seq
 from Bio.Alphabet import IUPAC
 from Bio.SeqRecord import SeqRecord
@@ -1223,7 +1223,6 @@ def get_HGT_worker(argument_list):
     pwd_hgt_candidates_only_gene = argument_list[5]
     group_pair_iden_cutoff_dict = argument_list[6]
 
-
     file_path, file_basename, file_extension = sep_path_basename_ext(pwd_qual_idens_with_group)
     pwd_qual_idens_with_group_tmp = '%s/%s_tmp.%s' % (file_path, file_basename, file_extension)
 
@@ -1806,6 +1805,11 @@ def extract_gene_tree_seq_worker(argument_list):
             os.remove(gene_tree_seq_uniq)
 
 
+def remove_hyphen_from_branch_length(tree_in, tree_out, tree_format):
+    tree_in = Phylo.parse(tree_in, tree_format)
+    Phylo.write(tree_in, tree_out, tree_format)
+
+
 def Ranger_worker(argument_list):
     each_paired_tree = argument_list[0]
     pwd_ranger_inputs_folder = argument_list[1]
@@ -1815,8 +1819,11 @@ def Ranger_worker(argument_list):
 
     # define Ranger-DTL input file name
     each_paired_tree_concate = '___'.join(each_paired_tree)
-    pwd_species_tree_newick = '%s/%s_species_tree.newick' % (pwd_tree_folder, each_paired_tree_concate)
-    pwd_gene_tree_newick = '%s/%s_gene_tree.newick' % (pwd_tree_folder, each_paired_tree_concate)
+    pwd_species_tree_newick                                 = '%s/%s_species_tree.newick'                               % (pwd_tree_folder, each_paired_tree_concate)
+    pwd_gene_tree_newick                                    = '%s/%s_gene_tree.newick'                                  % (pwd_tree_folder, each_paired_tree_concate)
+    pwd_species_tree_newick_no_hyphen_in_branch_length      = '%s/%s_species_tree_no_hyphen_in_branch_length.newick'    % (pwd_tree_folder, each_paired_tree_concate)
+    pwd_gene_tree_newick_no_hyphen_in_branch_length         = '%s/%s_gene_tree_no_hyphen_in_branch_length.newick'       % (pwd_tree_folder, each_paired_tree_concate)
+
     # each_paired_tree_concate_short = '%s___%s' % (each_paired_tree[0].split('_')[-1], each_paired_tree[1].split('_')[-1])
 
     if (os.path.isfile(pwd_species_tree_newick) is True) and (os.path.isfile(pwd_gene_tree_newick) is True):
@@ -1831,13 +1838,17 @@ def Ranger_worker(argument_list):
 
         # pwd_current_ranger_outputs_folder = '%s/%s' % (pwd_ranger_outputs_folder, each_paired_tree_concate_short)
 
+        # remove hyphen from branch length
+        remove_hyphen_from_branch_length(pwd_species_tree_newick, pwd_species_tree_newick_no_hyphen_in_branch_length, 'newick')
+        remove_hyphen_from_branch_length(pwd_gene_tree_newick, pwd_gene_tree_newick_no_hyphen_in_branch_length, 'newick')
+
         # read in species tree
-        species_tree = Tree(pwd_species_tree_newick, format=0)
+        species_tree = Tree(pwd_species_tree_newick_no_hyphen_in_branch_length, format=0)
         species_tree.resolve_polytomy(recursive=True)  # solving multifurcations
         species_tree.convert_to_ultrametric()  # for dated mode
 
         # read in gene tree
-        gene_tree = Tree(pwd_gene_tree_newick, format=0)
+        gene_tree = Tree(pwd_gene_tree_newick_no_hyphen_in_branch_length, format=0)
         gene_tree.resolve_polytomy(recursive=True)  # solving multifurcations
 
         ################################################################################################################
@@ -1901,13 +1912,16 @@ def Ranger_worker(argument_list):
         ranger_inputs_file.write('%s\n%s\n' % (species_tree.write(format=5), gene_tree.write(format=5)))
         ranger_inputs_file.close()
 
-        # create ranger_outputs_folder
-        # force_create_folder(pwd_current_ranger_outputs_folder)
+        # check if pwd_ranger_inputs is blank
+        ranger_input_file_size = os.stat(pwd_ranger_inputs).st_size
 
-        # run Ranger-DTL
-        ranger_parameters = '-q -D 2 -T 3 -L 1'
-        ranger_cmd = '%s %s -i %s -o %s' % (pwd_ranger_exe, ranger_parameters, pwd_ranger_inputs, pwd_ranger_outputs)
-        os.system(ranger_cmd)
+        if ranger_input_file_size > 1:
+
+            # run Ranger-DTL
+            ranger_parameters = '-q -D 2 -T 3 -L 1'
+            ranger_cmd = '%s %s -i %s -o %s' % (pwd_ranger_exe, ranger_parameters, pwd_ranger_inputs, pwd_ranger_outputs)
+            os.system(ranger_cmd)
+
 
     # # run ranger with 100 bootstrap
     # ranger_bootstrap = 1

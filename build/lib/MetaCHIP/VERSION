@@ -1,3 +1,6 @@
+1.9.1
+- fix a bug that causes error like: ERROR: missing ')' in input tree expression line X column Y
+
 1.9.0
 - add module rename_seqs
 

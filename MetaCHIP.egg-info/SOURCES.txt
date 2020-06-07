@@ -17,7 +17,6 @@ MetaCHIP/filter_HGT.py
 MetaCHIP/get_SCG_tree.py
 MetaCHIP/get_flk_gene_functions.py
 MetaCHIP/rename_seqs.py
-MetaCHIP/tmp_1.py
 MetaCHIP/tuning_full_length_and_end_match.py
 MetaCHIP/update_hmms.py
 MetaCHIP.egg-info/PKG-INFO

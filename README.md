@@ -32,19 +32,17 @@ Change Log:
 Dependencies:
 ---
 
-##### Python libraries and R packages:
-
-Python libraries:
+####Python libraries:
 [BioPython](https://github.com/biopython/biopython.github.io/), 
 [Numpy](http://www.numpy.org),
 [SciPy](https://www.scipy.org),
 [Matplotlib](http://matplotlib.org) and 
-[ETE3](http://etetoolkit.org)
+[ETE3](http://etetoolkit.org).
 
-R packages: 
+####R packages: 
 [optparse](https://cran.r-project.org/web/packages/optparse/index.html),
 [ape](https://cran.r-project.org/web/packages/ape/index.html) and 
-[circlize](https://cran.r-project.org/web/packages/circlize/index.html)
+[circlize](https://cran.r-project.org/web/packages/circlize/index.html).
 
 #### Third-party software
 MetaCHIP makes use of the following 3rd party dependencies and assumes they are on your system path. 
@@ -55,7 +53,7 @@ Otherwise, you can provide full path to their executables in lib/site-packages/M
 [MAFFT](https://mafft.cbrc.jp/alignment/software/),
 [BLAST+](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download),
 [FastTree](http://www.microbesonline.org/fasttree/) and 
-[Ranger-DTL 2.0](https://compbio.engr.uconn.edu/software/RANGER-DTL/) (part of MetaCHIP, **NO NEED to install**)
+[Ranger-DTL 2.0](https://compbio.engr.uconn.edu/software/RANGER-DTL/) (part of MetaCHIP, **NO NEED to install**).
 
 
 How to install:
