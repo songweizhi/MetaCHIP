@@ -1859,19 +1859,19 @@ def Ranger_worker(argument_list):
 
             # replace '_' with 'XXXXX'
             if '_' in each_st_leaf_name:
-                each_st_leaf_name_no_Underline = 'XXXXX'.join(each_st_leaf_name.split('_'))
+                each_st_leaf_name_no_Underline = 'XXAXX'.join(each_st_leaf_name.split('_'))
             else:
                 each_st_leaf_name_no_Underline = each_st_leaf_name
 
             # replace '.' with 'SSSSS'
             if '.' in each_st_leaf_name_no_Underline:
-                each_st_leaf_name_no_Underline_no_dot = 'SSSSS'.join(each_st_leaf_name_no_Underline.split('.'))
+                each_st_leaf_name_no_Underline_no_dot = 'SSASS'.join(each_st_leaf_name_no_Underline.split('.'))
             else:
                 each_st_leaf_name_no_Underline_no_dot = each_st_leaf_name_no_Underline
 
             # replace '-' with 'ZZZZZ'
             if '-' in each_st_leaf_name_no_Underline_no_dot:
-                each_st_leaf_name_no_Underline_no_dot_no_hyphen = 'ZZZZZ'.join(each_st_leaf_name_no_Underline_no_dot.split('-'))
+                each_st_leaf_name_no_Underline_no_dot_no_hyphen = 'ZZAZZ'.join(each_st_leaf_name_no_Underline_no_dot.split('-'))
             else:
                 each_st_leaf_name_no_Underline_no_dot_no_hyphen = each_st_leaf_name_no_Underline_no_dot
 
@@ -1884,19 +1884,19 @@ def Ranger_worker(argument_list):
 
             # replace '_' with 'XXXXX'
             if '_' in each_gt_leaf_name:
-                each_gt_leaf_name_no_Underline = 'XXXXX'.join(each_gt_leaf_name.split('_')[:-1])
+                each_gt_leaf_name_no_Underline = 'XXAXX'.join(each_gt_leaf_name.split('_')[:-1])
             else:
                 each_gt_leaf_name_no_Underline = each_gt_leaf_name
 
             # replace '.' with 'SSSSS'
             if '.' in each_gt_leaf_name_no_Underline:
-                each_gt_leaf_name_no_Underline_no_dot = 'SSSSS'.join(each_gt_leaf_name_no_Underline.split('.'))
+                each_gt_leaf_name_no_Underline_no_dot = 'SSASS'.join(each_gt_leaf_name_no_Underline.split('.'))
             else:
                 each_gt_leaf_name_no_Underline_no_dot = each_gt_leaf_name_no_Underline
 
             # replace '-' with 'ZZZZZ'
             if '-' in each_gt_leaf_name_no_Underline_no_dot:
-                each_gt_leaf_name_no_Underline_no_dot_no_hyphen = 'ZZZZZ'.join(each_gt_leaf_name_no_Underline_no_dot.split('-'))
+                each_gt_leaf_name_no_Underline_no_dot_no_hyphen = 'ZZAZZ'.join(each_gt_leaf_name_no_Underline_no_dot.split('-'))
             else:
                 each_gt_leaf_name_no_Underline_no_dot_no_hyphen = each_gt_leaf_name_no_Underline_no_dot
 
@@ -1917,10 +1917,16 @@ def Ranger_worker(argument_list):
 
         if ranger_input_file_size > 1:
 
+            hyphen_detected = 'No'
+            for line in open(pwd_ranger_inputs):
+                if '-' in line:
+                    hyphen_detected = 'Yes'
+
             # run Ranger-DTL
-            ranger_parameters = '-q -D 2 -T 3 -L 1'
-            ranger_cmd = '%s %s -i %s -o %s' % (pwd_ranger_exe, ranger_parameters, pwd_ranger_inputs, pwd_ranger_outputs)
-            os.system(ranger_cmd)
+            if hyphen_detected == 'No':
+                ranger_parameters = '-q -D 2 -T 3 -L 1'
+                ranger_cmd = '%s %s -i %s -o %s' % (pwd_ranger_exe, ranger_parameters, pwd_ranger_inputs, pwd_ranger_outputs)
+                os.system(ranger_cmd)
 
 
     # # run ranger with 100 bootstrap
@@ -2702,14 +2708,14 @@ def PG(args, config_dict):
                         mapping = each_line.strip().split(':')[1].split(',')[1]
                         recipient = each_line.strip().split(':')[1].split(',')[2]
                         donor_p = mapping.split('-->')[1][1:]
-                        donor_p = '_'.join(donor_p.split('XXXXX'))
-                        donor_p = '.'.join(donor_p.split('SSSSS'))
-                        donor_p = '-'.join(donor_p.split('ZZZZZ'))
+                        donor_p = '_'.join(donor_p.split('XXAXX_'))
+                        donor_p = '.'.join(donor_p.split('SSASS'))
+                        donor_p = '-'.join(donor_p.split('ZZAZZ'))
 
                         recipient_p = recipient.split('-->')[1][1:]
-                        recipient_p = '_'.join(recipient_p.split('XXXXX'))
-                        recipient_p = '.'.join(recipient_p.split('SSSSS'))
-                        recipient_p = '-'.join(recipient_p.split('ZZZZZ'))
+                        recipient_p = '_'.join(recipient_p.split('XXAXX'))
+                        recipient_p = '.'.join(recipient_p.split('SSASS'))
+                        recipient_p = '-'.join(recipient_p.split('ZZAZZ'))
                         predicted_transfer = donor_p + '-->' + recipient_p
                         predicted_transfers.append(predicted_transfer)
 
