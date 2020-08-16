@@ -33,7 +33,7 @@ opt = parse_args(opt_parser);
 
 mat = read.table(opt$matrix, header = TRUE)
 
-png(filename=opt$plot, units="in", width=25, height=25, pointsize=12, res=150)
+pdf(opt$plot, width=15, height=15, pointsize=12)
 grid.col = c(A = 'brown1', B = 'lawngreen', C = 'mediumorchid', D = 'mediumslateblue', E = 'royalblue', F = 'sandybrown')
 par(mar = rep(0,4), cex = 1.2)
 label_order = sort(union(rownames(mat), colnames(mat)))
@@ -45,8 +45,8 @@ circos.trackPlotRegion(track.index = 1, panel.fun = function(x, y) {
   xlim = get.cell.meta.data("xlim")
   ylim = get.cell.meta.data("ylim")
   sector.name = get.cell.meta.data("sector.index")
-  circos.text(mean(xlim), ylim[1] + .1, sector.name, facing = "clockwise", niceFacing = TRUE, adj = c(0, 0.5), cex = 1)
-  circos.axis(h = "top", labels.cex = 0.5, major.tick.percentage = 0.2, sector.index = sector.name, track.index = 2)
+  circos.text(mean(xlim), ylim[1] + .1, sector.name, facing = "clockwise", niceFacing = TRUE, adj = c(0, 0.5), cex = 1.2)
+  circos.axis(h = "top", labels.cex = 0.8, major.tick.percentage = 0.2, sector.index = sector.name, track.index = 2)
 }, bg.border = NA)
 
 #circos.track(circos.text, facing = "clockwise")

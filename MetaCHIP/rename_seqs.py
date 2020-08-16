@@ -8,7 +8,7 @@ from Bio import SeqIO
 rename_seqs_usage = '''
 ========================= rename_seqs example commands =========================
 
-# rename sequences according to file name by incrementally adding suffix by one
+# rename sequences according to the file name by incrementally adding 1 to suffix
 MetaCHIP rename_seqs -inc_suffix -in Contigs.fa
 MetaCHIP rename_seqs -inc_suffix -in bin_folder -x fa
 
@@ -146,17 +146,17 @@ def rename_seqs(args):
 
 if __name__ == '__main__':
 
-    rename_seq_parser = argparse.ArgumentParser()
+    rename_seqs_parser = argparse.ArgumentParser()
 
     # arguments for rename_ctg_parser
-    rename_seq_parser.add_argument('-in',         required=True,                          help='input sequence file')
-    rename_seq_parser.add_argument('-inc_suffix', required=False, action="store_true",    help='rename sequences by incrementally adding suffix to file name')
-    rename_seq_parser.add_argument('-sep_in',     required=False, default=None,           help='separator for input sequences')
-    rename_seq_parser.add_argument('-sep_out',    required=False, default=None,           help='separator for output sequences, default: same as sep_in')
-    rename_seq_parser.add_argument('-n',          required=False, default=None, type=int, help='the number of columns to keep')
-    rename_seq_parser.add_argument('-prefix',     required=False, default=None,           help='add prefix to sequence')
-    rename_seq_parser.add_argument('-x',          required=False,                         help='file extension')
+    rename_seqs_parser.add_argument('-in',         required=True,                          help='input sequence file')
+    rename_seqs_parser.add_argument('-inc_suffix', required=False, action="store_true",    help='rename sequences by incrementally adding suffix to file name')
+    rename_seqs_parser.add_argument('-sep_in',     required=False, default=None,           help='separator for input sequences')
+    rename_seqs_parser.add_argument('-sep_out',    required=False, default=None,           help='separator for output sequences, default: same as sep_in')
+    rename_seqs_parser.add_argument('-n',          required=False, default=None, type=int, help='the number of columns to keep')
+    rename_seqs_parser.add_argument('-prefix',     required=False, default=None,           help='add prefix to sequence')
+    rename_seqs_parser.add_argument('-x',          required=False,                         help='file extension')
 
-    args = vars(rename_seq_parser.parse_args())
+    args = vars(rename_seqs_parser.parse_args())
 
     rename_seqs(args)
