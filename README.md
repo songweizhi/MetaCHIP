@@ -79,7 +79,8 @@ which holds taxonomic classification of all input genomes. Please make sure **th
 
 1. [**GTDB-Tk**](https://github.com/Ecogenomics/GTDBTk) is recommended for taxonomic classification of input genomes. 
 GTDB-Tk with produce two files ([prefix].bac120.summary.tsv and [prefix].ar122.summary.tsv) containing the classification results 
-if you have both bacterial and archaeal genomes included in your queries. You need to combine the two files into one and feed it as an input for MetaCHIP.
+if you have both bacterial and archaeal genomes included in your queries. You need to combine the two files into one and feed it as an input for MetaCHIP. 
+Please note that file extension (e.g. fa, fasta) of the input genomes should **NOT** be included in the taxonomy or grouping file.
 
 1. Options for argument '-r' for PI and BP modules can be any combinations of d (domain), p (phylum), c (class), o (order), f (family) and g (genus).
 
