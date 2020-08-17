@@ -32,14 +32,14 @@ Change Log:
 Dependencies:
 ---
 
-####Python libraries:
+#### Python libraries:
 [BioPython](https://github.com/biopython/biopython.github.io/), 
 [Numpy](http://www.numpy.org),
 [SciPy](https://www.scipy.org),
 [Matplotlib](http://matplotlib.org) and 
 [ETE3](http://etetoolkit.org).
 
-####R packages: 
+#### R packages: 
 [optparse](https://cran.r-project.org/web/packages/optparse/index.html),
 [ape](https://cran.r-project.org/web/packages/ape/index.html) and 
 [circlize](https://cran.r-project.org/web/packages/circlize/index.html).
