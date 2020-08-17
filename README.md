@@ -90,18 +90,8 @@ Please note that file extension (e.g. fa, fasta) of the input genomes should **N
    An example of the job script header [[example](https://github.com/songweizhi/MetaCHIP/blob/master/input_file_examples/blastn_job_script_header_demo.sh)] is needed in this case.
    The "MetaCHIP BP" module must be run **AFTER** all submitted jobs are finished.
 
-1. Output format for BLASTN in the PI and BP steps: 
-        
-        -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen"
-
 1. Some examples: 
-
-    * show help information
-
-            MetaCHIP -h
-            MetaCHIP PI -h
-            MetaCHIP BP -h
-                
+               
     * Detect HGT at single level (e.g. class) with 6 CPU cores
     
             MetaCHIP PI -p NorthSea -r c -t 6 -i bin_folder -x fasta -taxon NorthSea_GTDB_bac120_ar122_combined.tsv
