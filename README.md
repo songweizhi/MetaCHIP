@@ -46,7 +46,7 @@ Dependencies:
 
 #### Third-party software
 MetaCHIP makes use of the following 3rd party dependencies and assumes they are on your system path. 
-Otherwise, you can provide full path to their executables in lib/site-packages/MetaCHIP/MetaCHIP_config.py.
+Otherwise, you need to provide full path to their executables in lib/site-packages/MetaCHIP/MetaCHIP_config.py.
 
 [Prodigal](https://github.com/hyattpd/Prodigal), 
 [HMMER 3](http://hmmer.org),
