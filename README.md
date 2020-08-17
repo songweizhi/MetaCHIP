@@ -17,6 +17,7 @@ Publication:
 Change Log:
 ---
 
+* v1.10.0 (2020-08-16) - Fixed a few bugs
 * v1.9.0 (2020-06-01) - Add supplementary module: rename_seqs
 * v1.7.0 (2019-07-26) - Add supplementary modules: get_SCG_tree and SankeyTaxon
 * v1.6.0 (2019-07-23) - Support customized grouping of query genomes
