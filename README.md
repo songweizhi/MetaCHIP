@@ -76,19 +76,18 @@ How to run:
 
 1. The input files for MetaCHIP include a folder that holds the sequence file [[example](https://github.com/songweizhi/MetaCHIP/blob/master/input_file_examples/human_gut_bins)] 
 of all query genomes, as well as a text file [[example](https://github.com/songweizhi/MetaCHIP/blob/master/input_file_examples/human_gut_bins_GTDB.tsv)] 
-which holds taxonomic classification of all input genomes. Please make sure **the length of sequence ID** for sequences of all input genomes are <font color="red"> **NO LONGER THAN 22 letters**</font>.
+which holds taxonomic classification of all input genomes. 
+
+1. Please make sure the ID of sequences/contigs in your input genomes are **LESS** than 22 letters. 
+You can use the supplementary module "rename_seqs" to rename sequences, see more details with "MetaCHIP rename_seqs -h".
 
 1. [**GTDB-Tk**](https://github.com/Ecogenomics/GTDBTk) is recommended for taxonomic classification of input genomes. 
 GTDB-Tk with produce two files ([prefix].bac120.summary.tsv and [prefix].ar122.summary.tsv) containing the classification results 
 if you have both bacterial and archaeal genomes included in your queries. You need to combine the two files into one and feed it as an input for MetaCHIP. 
-Please note that file extension (e.g. fa, fasta) of the input genomes should **NOT** be included in the taxonomy or grouping file.
+Only the first two columns ('user_genome' and 'classification') in GTDB-Tk's output file are needed. 
+File extension (e.g. fa, fasta) of your input genomes should **NOT** be included in the taxonomy or grouping file.
 
 1. Options for argument '-r' for PI and BP modules can be any combinations of d (domain), p (phylum), c (class), o (order), f (family) and g (genus).
-
-1. The all-against-all blastn comparison is the most time-consuming step. 
-   You can speed up this step with job scripts if you are running MetaCHIP with HPC. 
-   An example of the job script header [[example](https://github.com/songweizhi/MetaCHIP/blob/master/input_file_examples/blastn_job_script_header_demo.sh)] is needed in this case.
-   The "MetaCHIP BP" module must be run **AFTER** all submitted jobs are finished.
 
 1. Some examples: 
                

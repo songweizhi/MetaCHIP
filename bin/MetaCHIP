@@ -19,15 +19,14 @@
 
 import sys
 import argparse
-from MetaCHIP import MetaCHIP_config
-from MetaCHIP import filter_HGT
-from MetaCHIP import update_hmms
-from MetaCHIP import get_SCG_tree
-from MetaCHIP import circos_HGT
-from MetaCHIP import rename_seqs
 from MetaCHIP.PI import PI
 from MetaCHIP.BP import BP
-from MetaCHIP.MetaCHIP_config import config_dict
+from MetaCHIP import filter_HGT
+from MetaCHIP import circos_HGT
+from MetaCHIP import rename_seqs
+from MetaCHIP import update_hmms
+from MetaCHIP import get_SCG_tree
+from MetaCHIP import MetaCHIP_config
 
 
 to_do = '''
@@ -53,14 +52,14 @@ def print_main_help():
             ...::: MetaCHIP v%s :::...
         
     Core modules:
-       PI             ->    Prepare input files 
-       BP             ->    Run Best-match and Phylogenetic approaches
+       PI            ->  Prepare input files 
+       BP            ->  Run Best-match and Phylogenetic approaches
        
     Supplementary modules:
-       filter_HGT     ->    Get HGTs been found at no less than n taxonomic ranks (for multi-rank prediction)
-       update_hmms    ->    update hmm profiles used for inferring SCG tree
-       get_SCG_tree   ->    Get SCG protein tree
-       rename_seqs    ->    Rename sequences in a file
+       filter_HGT    ->  Get HGTs been found at no less than n taxonomic ranks
+       update_hmms   ->  Update hmm profiles used for inferring SCG tree
+       get_SCG_tree  ->  Get SCG protein tree
+       rename_seqs   ->  Rename sequences in a file
 
     # for command specific help info
     MetaCHIP PI -h
@@ -162,10 +161,10 @@ if __name__ == '__main__':
         args = vars(parser.parse_args())
 
     if args['subparser_name'] == 'PI':
-        PI(args, config_dict)
+        PI(args, MetaCHIP_config.config_dict)
 
     if args['subparser_name'] == 'BP':
-        BP(args, config_dict)
+        BP(args, MetaCHIP_config.config_dict)
 
     if args['subparser_name'] == 'filter_HGT':
         filter_HGT.filter_HGT(args)
@@ -174,10 +173,10 @@ if __name__ == '__main__':
         update_hmms.update_hmms(args)
 
     if args['subparser_name'] == 'get_SCG_tree':
-        get_SCG_tree.get_SCG_tree(args, config_dict)
-
-    if args['subparser_name'] == 'circos_HGT':
-        circos_HGT.circos_HGT(args, config_dict)
+        get_SCG_tree.get_SCG_tree(args, MetaCHIP_config.config_dict)
 
     if args['subparser_name'] == 'rename_seqs':
         rename_seqs.rename_seqs(args)
+
+    # if args['subparser_name'] == 'circos_HGT':
+    #     circos_HGT.circos_HGT(args, MetaCHIP_config.config_dict)
