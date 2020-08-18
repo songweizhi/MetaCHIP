@@ -33,28 +33,28 @@ Change Log:
 Dependencies:
 ---
 
-#### Python libraries:
++ Python libraries: 
 [BioPython](https://github.com/biopython/biopython.github.io/), 
 [Numpy](http://www.numpy.org),
 [SciPy](https://www.scipy.org),
 [Matplotlib](http://matplotlib.org) and 
 [ETE3](http://etetoolkit.org).
 
-#### R packages: 
++ R packages: 
 [optparse](https://cran.r-project.org/web/packages/optparse/index.html),
 [ape](https://cran.r-project.org/web/packages/ape/index.html) and 
 [circlize](https://cran.r-project.org/web/packages/circlize/index.html).
 
-#### Third-party software
-MetaCHIP makes use of the following 3rd party dependencies and assumes they are on your system path. 
-Otherwise, you need to provide full path to their executables in lib/site-packages/MetaCHIP/MetaCHIP_config.py.
-
++ Third-party software: 
 [Prodigal](https://github.com/hyattpd/Prodigal), 
 [HMMER 3](http://hmmer.org),
 [MAFFT](https://mafft.cbrc.jp/alignment/software/),
 [BLAST+](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download),
-[FastTree](http://www.microbesonline.org/fasttree/) and 
-[Ranger-DTL 2.0](https://compbio.engr.uconn.edu/software/RANGER-DTL/) (part of MetaCHIP, **NO NEED to install**).
+[Ranger-DTL 2.0](https://compbio.engr.uconn.edu/software/RANGER-DTL/) (part of MetaCHIP, no need to install) and 
+[FastTree](http://www.microbesonline.org/fasttree/).
+
++ MetaCHIP makes use of the above 3rd party dependencies and assumes they are on your system path. 
+Otherwise, you need to provide full path to their executables in python's lib/site-packages/MetaCHIP/MetaCHIP_config.py.
 
 
 How to install:
@@ -78,7 +78,7 @@ How to run:
 of all query genomes, as well as a text file [[example](https://github.com/songweizhi/MetaCHIP/blob/master/input_file_examples/human_gut_bins_GTDB.tsv)] 
 which holds taxonomic classification of all input genomes. 
 
-1. Please make sure the ID of sequences/contigs in your input genomes are **LESS** than 22 letters. 
+1. Please make sure the ID of sequences/contigs in your input genomes are **LESS than 22 letters** . 
 You can use the supplementary module "rename_seqs" to rename sequences, see more details with "MetaCHIP rename_seqs -h".
 
 1. [**GTDB-Tk**](https://github.com/Ecogenomics/GTDBTk) is recommended for taxonomic classification of input genomes. 
@@ -101,7 +101,7 @@ File extension (e.g. fa, fasta) of your input genomes should **NOT** be included
             MetaCHIP PI -p NorthSea -r pco -t 12 -i bin_folder -x fasta -taxon NorthSea_GTDB_bac120_ar122_combined.tsv
             MetaCHIP BP -p NorthSea -r pco -t 12
 
-    * Detect HGT with customized [grouping file](https://github.com/songweizhi/MetaCHIP/blob/master/input_file_examples/customized_grouping.txt).
+    * Detect HGT among customized groups ([here is an example of grouping file](https://github.com/songweizhi/MetaCHIP/blob/master/input_file_examples/customized_grouping.txt)).
       The extension (e.g. fasta or fa) of genome files should **NOT** be included in the grouping file.
         
             MetaCHIP PI -p NorthSea -g customized_grouping.txt -t 6 -i NS_37bins -x fasta
