@@ -76,7 +76,7 @@ of all query genomes, as well as a text file [[example](https://github.com/songw
 which holds taxonomic classification of all input genomes. 
 
 1. Please make sure the ID of sequences/contigs in your input genomes are **LESS than 22 letters** . 
-You can use the supplementary module "**rename_seqs**" to rename sequences, see more details with "MetaCHIP rename_seqs -h".
+You can use the supplementary module "**rename_seqs**" to rename sequences, see more details with `MetaCHIP rename_seqs -h`.
 
 1. [**GTDB-Tk**](https://github.com/Ecogenomics/GTDBTk) is recommended for taxonomic classification of input genomes. 
 GTDB-Tk with produce two files ([prefix].bac120.summary.tsv and [prefix].ar122.summary.tsv) containing the classification results 
@@ -99,7 +99,7 @@ File extension (e.g. fa, fasta) of your input genomes should **NOT** be included
             MetaCHIP BP -p NorthSea -r pco -t 12
 
     * Detect HGT among customized groups ([here is an example of grouping file](https://github.com/songweizhi/MetaCHIP/blob/master/input_file_examples/customized_grouping.txt)).
-      The extension (e.g. fasta or fa) of genome files should **NOT** be included in the grouping file.
+      The extension of genome files (e.g. fasta or fa) should **NOT** be included in the [grouping file](https://github.com/songweizhi/MetaCHIP/blob/master/input_file_examples/customized_grouping.txt).
         
             MetaCHIP PI -p NorthSea -g customized_grouping.txt -t 6 -i NS_37bins -x fasta
             MetaCHIP BP -p NorthSea -g customized_grouping.txt -t 6
