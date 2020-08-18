@@ -53,9 +53,6 @@ Dependencies:
 [Ranger-DTL 2.0](https://compbio.engr.uconn.edu/software/RANGER-DTL/) (part of MetaCHIP, no need to install) and 
 [FastTree](http://www.microbesonline.org/fasttree/).
 
-+ MetaCHIP makes use of the above 3rd party dependencies and assumes they are on your system path. 
-Otherwise, you need to provide full path to their executables in python's lib/site-packages/MetaCHIP/MetaCHIP_config.py.
-
 
 How to install:
 ---
@@ -79,7 +76,7 @@ of all query genomes, as well as a text file [[example](https://github.com/songw
 which holds taxonomic classification of all input genomes. 
 
 1. Please make sure the ID of sequences/contigs in your input genomes are **LESS than 22 letters** . 
-You can use the supplementary module "rename_seqs" to rename sequences, see more details with "MetaCHIP rename_seqs -h".
+You can use the supplementary module "**rename_seqs**" to rename sequences, see more details with "MetaCHIP rename_seqs -h".
 
 1. [**GTDB-Tk**](https://github.com/Ecogenomics/GTDBTk) is recommended for taxonomic classification of input genomes. 
 GTDB-Tk with produce two files ([prefix].bac120.summary.tsv and [prefix].ar122.summary.tsv) containing the classification results 
