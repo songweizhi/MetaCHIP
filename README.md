@@ -72,37 +72,33 @@ How to run:
 ---
 
 1. The input files for MetaCHIP include a folder that holds the sequence file [[example](https://github.com/songweizhi/MetaCHIP/blob/master/input_file_examples/human_gut_bins)] 
-of all query genomes, as well as a text file [[example](https://github.com/songweizhi/MetaCHIP/blob/master/input_file_examples/human_gut_bins_GTDB.tsv)] 
-which holds taxonomic classification of all input genomes. 
+of all query genomes, as well as a text file which provides taxonomic classification ([example](https://github.com/songweizhi/MetaCHIP/blob/master/input_file_examples/human_gut_bins_GTDB.tsv)) 
+or customized grouping ([example](https://github.com/songweizhi/MetaCHIP/blob/master/input_file_examples/customized_grouping.txt))
+of your input genomes. File extension of your input genomes (e.g. fa, fasta) should **NOT** be included in the taxonomy or grouping file.
+
+1. [**GTDB-Tk**](https://github.com/Ecogenomics/GTDBTk) is recommended for taxonomic classification of input genomes. Only the first two columns ('user_genome' and 'classification') in GTDB-Tk's output file are needed. 
 
 1. Please make sure the ID of sequences/contigs in your input genomes are **LESS than 22 letters** . 
-You can use the supplementary module "**rename_seqs**" to rename sequences, see more details with `MetaCHIP rename_seqs -h`.
-
-1. [**GTDB-Tk**](https://github.com/Ecogenomics/GTDBTk) is recommended for taxonomic classification of input genomes. 
-GTDB-Tk with produce two files ([prefix].bac120.summary.tsv and [prefix].ar122.summary.tsv) containing the classification results 
-if you have both bacterial and archaeal genomes included in your queries. You need to combine the two files into one and feed it as an input for MetaCHIP. 
-Only the first two columns ('user_genome' and 'classification') in GTDB-Tk's output file are needed. 
-File extension (e.g. fa, fasta) of your input genomes should **NOT** be included in the taxonomy or grouping file.
+You can use the "**rename_seqs**" module to rename sequences, see more details with `MetaCHIP rename_seqs -h`.
 
 1. Options for argument '-r' in the PI and BP modules can be any combinations of d (domain), p (phylum), c (class), o (order), f (family), g (genus) and s(species).
 
 1. Some examples: 
                
-    * Detect HGT among classes with 6 CPU cores
+    * Detect HGT among classes
     
-            MetaCHIP PI -p NorthSea -r c -t 6 -i bin_folder -x fasta -taxon NorthSea_GTDB_bac120_ar122_combined.tsv
-            MetaCHIP BP -p NorthSea -r c -t 6
+          MetaCHIP PI -p NorthSea -r c -t 6 -i bin_folder -x fasta -taxon GTDB_classifications.tsv
+          MetaCHIP BP -p NorthSea -r c -t 6
 
-    * Detect HGT among phyla, classes and orders with 12 CPU cores
+    * Detect HGT among phyla, classes, orders, families and genera
 
-            MetaCHIP PI -p NorthSea -r pco -t 12 -i bin_folder -x fasta -taxon NorthSea_GTDB_bac120_ar122_combined.tsv
-            MetaCHIP BP -p NorthSea -r pco -t 12
+          MetaCHIP PI -p NorthSea -r pcofg -t 12 -i bin_folder -x fasta -taxon GTDB_classifications.tsv
+          MetaCHIP BP -p NorthSea -r pcofg -t 12
 
-    * Detect HGT among customized groups ([here is an example of grouping file](https://github.com/songweizhi/MetaCHIP/blob/master/input_file_examples/customized_grouping.txt)).
-      The extension of genome files (e.g. fasta or fa) should **NOT** be included in the [grouping file](https://github.com/songweizhi/MetaCHIP/blob/master/input_file_examples/customized_grouping.txt).
+    * Detect HGT among customized groups
         
-            MetaCHIP PI -p NorthSea -g customized_grouping.txt -t 6 -i NS_37bins -x fasta
-            MetaCHIP BP -p NorthSea -g customized_grouping.txt -t 6
+          MetaCHIP PI -p NorthSea -g customized_grouping.txt -t 6 -i NS_37bins -x fasta
+          MetaCHIP BP -p NorthSea -g customized_grouping.txt -t 6
 
 
 Output files:
@@ -136,6 +132,6 @@ Output files:
     ![end_match](images/end_match.jpg)   
 
         
-1. Examples of full-length contig matches
+1. Examples of full-length contig matches.
     ![full_length_match](images/full_length_match.jpg)
 
