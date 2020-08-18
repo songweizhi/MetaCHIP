@@ -11,7 +11,7 @@ Publication:
 
 + **Song WZ**, Wemheuer B, Zhang S, Steensen K, Thomas T* (2019) MetaCHIP: community-level horizontal gene transfer identification through the combination of best-match and phylogenetic approaches. Microbiome. 7:36 https://doi.org/10.1186/s40168-019-0649-y
 + Contact: Weizhi Song (songwz03@gmail.com), Torsten Thomas (t.thomas@unsw.edu.au)
-+ Affiliation: Centre for Marine Science and Innovation, University of New South Wales, Sydney, Australia
++ Affiliation: Centre for Marine Science and Innovation ([CMSI](https://www.cmsi.unsw.edu.au)), University of New South Wales, Sydney, Australia
 
 
 Change Log:
