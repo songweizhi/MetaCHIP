@@ -87,23 +87,22 @@ if you have both bacterial and archaeal genomes included in your queries. You ne
 Only the first two columns ('user_genome' and 'classification') in GTDB-Tk's output file are needed. 
 File extension (e.g. fa, fasta) of your input genomes should **NOT** be included in the taxonomy or grouping file.
 
-1. Options for argument '-r' for PI and BP modules can be any combinations of d (domain), p (phylum), c (class), o (order), f (family) and g (genus).
+1. Options for argument '-r' in the PI and BP modules can be any combinations of d (domain), p (phylum), c (class), o (order), f (family), g (genus) and s(species).
 
 1. Some examples: 
                
-    * Detect HGT at single level (e.g. class) with 6 CPU cores
+    * Detect HGT among classes with 6 CPU cores
     
             MetaCHIP PI -p NorthSea -r c -t 6 -i bin_folder -x fasta -taxon NorthSea_GTDB_bac120_ar122_combined.tsv
             MetaCHIP BP -p NorthSea -r c -t 6
 
-    * Detect HGT at multiple levels (e.g. phylum, class and order) with 12 CPU cores
+    * Detect HGT among phyla, classes and orders with 12 CPU cores
 
             MetaCHIP PI -p NorthSea -r pco -t 12 -i bin_folder -x fasta -taxon NorthSea_GTDB_bac120_ar122_combined.tsv
             MetaCHIP BP -p NorthSea -r pco -t 12
 
-    * Detect HGT with customized grouping file.
-      Here is an example of the customized grouping file ([customized_grouping.txt](https://github.com/songweizhi/MetaCHIP/blob/master/input_file_examples/customized_grouping.txt)).
-      NOTE: bin file extension (e.g. fasta or fa) should **NOT** be included in the grouping file.
+    * Detect HGT with customized [grouping file](https://github.com/songweizhi/MetaCHIP/blob/master/input_file_examples/customized_grouping.txt).
+      The extension (e.g. fasta or fa) of genome files should **NOT** be included in the grouping file.
         
             MetaCHIP PI -p NorthSea -g customized_grouping.txt -t 6 -i NS_37bins -x fasta
             MetaCHIP BP -p NorthSea -g customized_grouping.txt -t 6
