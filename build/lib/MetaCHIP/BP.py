@@ -1,5 +1,4 @@
-from __future__ import division
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Copyright (C) 2017, Weizhi Song, Torsten Thomas.
 # songwz03@gmail.com or t.thomas@unsw.edu.au
@@ -34,7 +33,7 @@ from time import sleep
 from ete3 import Tree
 from Bio import SeqIO, AlignIO, Align, Phylo
 from Bio.Seq import Seq
-from Bio.Alphabet import IUPAC
+# from Bio.Alphabet import IUPAC
 from Bio.SeqRecord import SeqRecord
 from Bio.Graphics import GenomeDiagram
 from Bio.SeqFeature import FeatureLocation
@@ -1889,14 +1888,14 @@ def BP(args, config_dict):
                     detected_grouping_file = grouping_file_list[0]
                     pwd_grouping_file = '%s/%s' % (MetaCHIP_wd, detected_grouping_file)
                     group_num = get_number_of_group(pwd_grouping_file)
-                    report_and_log(('HGT Detection among %s: input genomes were clustered into %s %s.' % (rank_abbre_dict_plural[grouping_level], group_num, rank_abbre_dict_plural[grouping_level])), pwd_log_file, keep_quiet)
+                    report_and_log(('Detect HGT among %s: input genomes were clustered into %s %s.' % (rank_abbre_dict_plural[grouping_level], group_num, rank_abbre_dict_plural[grouping_level])), pwd_log_file, keep_quiet)
 
                 elif len(grouping_file_list) == 0:
-                    report_and_log(('HGT Detection among %s: no grouping file at %s level found, program exited.' % (rank_abbre_dict_plural[grouping_level], rank_abbre_dict[grouping_level])), pwd_log_file, keep_quiet)
+                    report_and_log(('Detect HGT among %s: no grouping file at %s level found, program exited.' % (rank_abbre_dict_plural[grouping_level], rank_abbre_dict[grouping_level])), pwd_log_file, keep_quiet)
                     exit()
 
                 else:
-                    report_and_log(('HGT Detection among %s: multiple grouping file at %s level found, program exited.' % (rank_abbre_dict_plural[grouping_level], rank_abbre_dict[grouping_level])), pwd_log_file, keep_quiet)
+                    report_and_log(('Detect HGT among %s: multiple grouping file at %s level found, program exited.' % (rank_abbre_dict_plural[grouping_level], rank_abbre_dict[grouping_level])), pwd_log_file, keep_quiet)
                     exit()
 
             else:  # with provided grouping file
@@ -1998,13 +1997,13 @@ def BP(args, config_dict):
             ################################## perform HGT detection with BM approach ##################################
             ############################################################################################################
 
-            report_and_log(('HGT Detection among %s: Best-match approach.' % rank_abbre_dict_plural[grouping_level]), pwd_log_file, keep_quiet)
+            report_and_log(('Detect HGT among %s: Best-match approach.' % rank_abbre_dict_plural[grouping_level]), pwd_log_file, keep_quiet)
 
             ########################################### get group-to-group identities ##########################################
 
             os.mkdir(pwd_blast_result_filtered_folder_g2g)
 
-            report_and_log(('HGT Detection among %s: get group-to-group identities with %s cores.' % (rank_abbre_dict_plural[grouping_level], num_threads)), pwd_log_file, keep_quiet)
+            report_and_log(('Detect HGT among %s: get group-to-group identities with %s cores.' % (rank_abbre_dict_plural[grouping_level], num_threads)), pwd_log_file, keep_quiet)
 
             # create folder
             force_create_folder(pwd_blast_result_filtered_folder_g2g)
@@ -2077,7 +2076,7 @@ def BP(args, config_dict):
 
             ############################### add group to blast hits and put subjects in one line ###############################
 
-            report_and_log(('HGT Detection among %s: analyzing Blast hits with %s cores.' % (rank_abbre_dict_plural[grouping_level], num_threads)), pwd_log_file, keep_quiet)
+            report_and_log(('Detect HGT among %s: analyzing Blast hits with %s cores.' % (rank_abbre_dict_plural[grouping_level], num_threads)), pwd_log_file, keep_quiet)
 
             # create folder
             force_create_folder(pwd_blast_result_filtered_folder_with_group)
@@ -2131,7 +2130,7 @@ def BP(args, config_dict):
 
             ############################################### plot flanking region ###############################################
 
-            report_and_log(('HGT Detection among %s: plotting flanking regions with %s cores.' % (rank_abbre_dict_plural[grouping_level], num_threads)), pwd_log_file, keep_quiet)
+            report_and_log(('Detect HGT among %s: plotting flanking regions with %s cores.' % (rank_abbre_dict_plural[grouping_level], num_threads)), pwd_log_file, keep_quiet)
 
             # create folder to hold ACT output
             os.makedirs(pwd_op_act_folder)
@@ -2217,7 +2216,7 @@ def BP(args, config_dict):
 
             ################################### export nc and aa sequence of predicted HGTs ####################################
 
-            report_and_log(('HGT Detection among %s: get sequences of BM predicted HGT candidates.' % rank_abbre_dict_plural[grouping_level]), pwd_log_file, keep_quiet)
+            report_and_log(('Detect HGT among %s: get sequences of BM predicted HGT candidates.' % rank_abbre_dict_plural[grouping_level]), pwd_log_file, keep_quiet)
 
             # get qualified HGT candidates
             HGT_candidates_qualified = set()
@@ -2237,7 +2236,7 @@ def BP(args, config_dict):
             candidates_seq_nc_handle.close()
 
             # report
-            report_and_log(('HGT Detection among %s: done for BM approach!' % rank_abbre_dict_plural[grouping_level]), pwd_log_file, keep_quiet)
+            report_and_log(('Detect HGT among %s: done for BM approach!' % rank_abbre_dict_plural[grouping_level]), pwd_log_file, keep_quiet)
 
 
             ############################################################################################################
@@ -2263,10 +2262,10 @@ def BP(args, config_dict):
                         candidates_list_genes.add(match_group_split[1])
 
             if candidates_list == []:
-                report_and_log(('HGT Detection among %s: no HGT detected by BM approach!' % rank_abbre_dict_plural[grouping_level]), pwd_log_file, keep_quiet=False)
+                report_and_log(('Detect HGT among %s: no HGT detected by BM approach!' % rank_abbre_dict_plural[grouping_level]), pwd_log_file, keep_quiet=False)
 
             # for report and log
-            report_and_log(('HGT Detection among %s: get gene/genome members in gene/species tree for BM predicted HGT candidates.' % rank_abbre_dict_plural[grouping_level]), pwd_log_file, keep_quiet)
+            report_and_log(('Detect HGT among %s: get gene/genome members in gene/species tree for BM predicted HGT candidates.' % rank_abbre_dict_plural[grouping_level]), pwd_log_file, keep_quiet)
 
             # get bin_record_list and genome name list
             bin_record_list = []
@@ -2309,7 +2308,7 @@ def BP(args, config_dict):
             ################################# Prepare subset of faa_file for building gene tree ####################################
 
             # for report and log
-            report_and_log(('HGT Detection among %s: prepare %s subset.' % (rank_abbre_dict_plural[grouping_level], combined_faa_file)), pwd_log_file, keep_quiet)
+            report_and_log(('Detect HGT among %s: prepare %s subset.' % (rank_abbre_dict_plural[grouping_level], combined_faa_file)), pwd_log_file, keep_quiet)
 
             # uniq gene id list
             gene_id_uniq_set = set()
@@ -2330,7 +2329,7 @@ def BP(args, config_dict):
             ################################## get gene tree and SCG tree subset ##################################
 
             # for report and log
-            report_and_log(('HGT Detection among %s: get species and gene tree for %s BM approach identified HGTs.' % (rank_abbre_dict_plural[grouping_level], len(candidates_list))), pwd_log_file, keep_quiet)
+            report_and_log(('Detect HGT among %s: get species and gene tree for %s BM approach identified HGTs.' % (rank_abbre_dict_plural[grouping_level], len(candidates_list))), pwd_log_file, keep_quiet)
 
             # put multiple arguments in list
             list_for_multiple_arguments_extract_gene_tree_seq = []
@@ -2357,7 +2356,7 @@ def BP(args, config_dict):
             force_create_folder(pwd_ranger_outputs_folder)
 
             # for report and log
-            report_and_log(('HGT Detection among %s: running Ranger-DTL2.'% rank_abbre_dict_plural[grouping_level]), pwd_log_file, keep_quiet)
+            report_and_log(('Detect HGT among %s: running Ranger-DTL2.'% rank_abbre_dict_plural[grouping_level]), pwd_log_file, keep_quiet)
 
             # put multiple arguments in list
             list_for_multiple_arguments_Ranger = []
@@ -2374,7 +2373,7 @@ def BP(args, config_dict):
             ########################################### parse Ranger-DTL prediction result #########################################
 
             # for report and log
-            report_and_log(('HGT Detection among %s: parsing Ranger-DTL2 outputs.' % rank_abbre_dict_plural[grouping_level]), pwd_log_file, keep_quiet)
+            report_and_log(('Detect HGT among %s: parsing Ranger-DTL2 outputs.' % rank_abbre_dict_plural[grouping_level]), pwd_log_file, keep_quiet)
 
             candidate_2_predictions_dict = {}
             candidate_2_possible_direction_dict = {}
@@ -2424,7 +2423,7 @@ def BP(args, config_dict):
             #################################################### combine results ###################################################
 
             # for report and log
-            report_and_log(('HGT Detection among %s: add Ranger-DTL predicted direction to %s' % (rank_abbre_dict_plural[grouping_level], candidates_file_name_ET)), pwd_log_file, keep_quiet)
+            report_and_log(('Detect HGT among %s: add Ranger-DTL predicted direction to %s' % (rank_abbre_dict_plural[grouping_level], candidates_file_name_ET)), pwd_log_file, keep_quiet)
 
             # add results to output file of best blast match approach
             combined_output_handle = open(pwd_candidates_file_ET, 'w')
@@ -2466,7 +2465,7 @@ def BP(args, config_dict):
 
             ################################################### remove tmp files ###################################################
 
-            #report_and_log(('HGT Detection among %s: done for Phylogenetic approach!' % rank_abbre_dict_plural[grouping_level]), pwd_log_file, keep_quiet)
+            #report_and_log(('Detect HGT among %s: done for Phylogenetic approach!' % rank_abbre_dict_plural[grouping_level]), pwd_log_file, keep_quiet)
             if keep_temp is False:
                 shutil.rmtree(pwd_blast_result_filtered_folder_g2g)
                 shutil.rmtree(pwd_blast_result_filtered_folder_with_group)

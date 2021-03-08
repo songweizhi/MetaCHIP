@@ -1,5 +1,4 @@
-from __future__ import division
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Copyright (C) 2017, Weizhi Song, Torsten Thomas.
 # songwz03@gmail.com or t.thomas@unsw.edu.au
@@ -29,7 +28,6 @@ from datetime import datetime
 from string import ascii_uppercase
 from Bio import SeqIO, AlignIO, Align
 from Bio.Seq import Seq
-from Bio.Alphabet import IUPAC, generic_dna
 from Bio import SeqFeature as SF
 from Bio.SeqRecord import SeqRecord
 from Bio.SeqFeature import SeqFeature, FeatureLocation
@@ -76,22 +74,6 @@ def get_group_index_list():
             break
 
     return group_index_list
-
-
-def export_dna_record(gene_seq, gene_id, gene_description, output_handle):
-    seq_object = Seq(gene_seq, IUPAC.unambiguous_dna)
-    seq_record = SeqRecord(seq_object)
-    seq_record.id = gene_id
-    seq_record.description = gene_description
-    SeqIO.write(seq_record, output_handle, 'fasta')
-
-
-def export_aa_record(gene_seq, gene_id, gene_description, output_handle):
-    seq_object = Seq(gene_seq, IUPAC.protein)
-    seq_record = SeqRecord(seq_object)
-    seq_record.id = gene_id
-    seq_record.description = gene_description
-    SeqIO.write(seq_record, output_handle, 'fasta')
 
 
 def prodigal_parser(seq_file, sco_file, prefix, output_folder):
@@ -147,13 +129,11 @@ def prodigal_parser(seq_file, sco_file, prefix, output_folder):
     for seq_id in sequence_id_list:
 
         # create SeqRecord
-        current_sequence = Seq(id_to_sequence_dict[seq_id])
-        current_SeqRecord = SeqRecord(current_sequence, id=seq_id)
-        current_SeqRecord.seq.alphabet = generic_dna
+        current_SeqRecord = SeqRecord(Seq(id_to_sequence_dict[seq_id]), id=seq_id, annotations={"molecule_type": "DNA"})
         transl_table = seq_to_transl_table_dict[seq_id]
 
         # add SeqRecord annotations
-        current_SeqRecord_annotations = {}
+        current_SeqRecord_annotations = current_SeqRecord.annotations
         current_SeqRecord_annotations['date'] =                 (datetime.now().strftime('%d-%b-%Y')).upper()
         current_SeqRecord_annotations['accession'] =            ''
         current_SeqRecord_annotations['version'] =              ''
@@ -162,7 +142,6 @@ def prodigal_parser(seq_file, sco_file, prefix, output_folder):
         current_SeqRecord_annotations['organism'] =             prefix
         current_SeqRecord_annotations['taxonomy'] =             ['Unclassified']
         current_SeqRecord_annotations['comment'] =              '.'
-        current_SeqRecord.annotations = current_SeqRecord_annotations
 
         # add SeqFeature to SeqRecord
         for cds in seq_to_cds_dict[seq_id]:
@@ -187,7 +166,7 @@ def prodigal_parser(seq_file, sco_file, prefix, output_folder):
             if cds_strand == '+':
                 sequence_nc = id_to_sequence_dict[seq_id][cds_start-1:cds_end]
             if cds_strand == '-':
-                sequence_nc = str(Seq(id_to_sequence_dict[seq_id][cds_start-1:cds_end], generic_dna).reverse_complement())
+                sequence_nc = str(Seq(id_to_sequence_dict[seq_id][cds_start-1:cds_end]).reverse_complement())
 
             # translate to aa sequence
             sequence_aa = str(SeqRecord(Seq(sequence_nc)).seq.translate(table=transl_table))
@@ -196,8 +175,12 @@ def prodigal_parser(seq_file, sco_file, prefix, output_folder):
             sequence_aa = sequence_aa[:-1]
 
             # export nc and aa sequences
-            export_dna_record(sequence_nc, locus_tag_id, '', bin_ffn_file_handle)
-            export_aa_record(sequence_aa, locus_tag_id, '', bin_faa_file_handle)
+            #export_dna_record(sequence_nc, locus_tag_id, '', bin_ffn_file_handle)
+            bin_ffn_file_handle.write('>%s\n' % locus_tag_id)
+            bin_ffn_file_handle.write('%s\n' % sequence_nc)
+            #export_aa_record(sequence_aa, locus_tag_id, '', bin_faa_file_handle)
+            bin_faa_file_handle.write('>%s\n' % locus_tag_id)
+            bin_faa_file_handle.write('%s\n' % sequence_aa)
 
             # Define feature type
             current_feature_type = 'CDS'
@@ -1001,8 +984,10 @@ def PI(args, config_dict):
     report_and_log(('Making blast database.'), pwd_log_file, keep_quiet)
     os.system('cat %s/*.ffn > %s/%s' % (pwd_prodigal_output_folder, pwd_blast_db_folder, combined_ffn_file))
 
-    makeblastdb_cmd = '%s -in %s/%s -dbtype nucl -parse_seqids -logfile /dev/null' % (pwd_makeblastdb_exe, pwd_blast_db_folder, combined_ffn_file)
+    makeblastdb_cmd = '%s -in %s/%s -dbtype nucl -parse_seqids' % (pwd_makeblastdb_exe, pwd_blast_db_folder, combined_ffn_file)
     os.system(makeblastdb_cmd)
+
+    # check db files
 
     # prepare arguments list for parallel_blastn_worker
     ffn_file_list = ['%s.ffn' % i for i in genome_for_HGT_detection_list]

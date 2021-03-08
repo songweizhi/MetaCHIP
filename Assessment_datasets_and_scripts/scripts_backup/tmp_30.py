@@ -1,23 +1,3 @@
-#!/usr/bin/env python3
-
-import os
-import re
-import glob
-import shutil
-import argparse
-import warnings
-import itertools
-from time import sleep
-from datetime import datetime
-from string import ascii_uppercase
-from Bio import SeqIO, AlignIO, Align
-from Bio.Seq import Seq
-from Bio import SeqFeature as SF
-from Bio.SeqRecord import SeqRecord
-from Bio.SeqFeature import SeqFeature, FeatureLocation
-import multiprocessing as mp
-from distutils.spawn import find_executable
-
 
 def prodigal_parser(seq_file, sco_file, prefix, output_folder):
 
@@ -76,6 +56,7 @@ def prodigal_parser(seq_file, sco_file, prefix, output_folder):
         transl_table = seq_to_transl_table_dict[seq_id]
 
         # add SeqRecord annotations
+        #current_SeqRecord_annotations = {"molecule_type": "DNA"}
         current_SeqRecord_annotations = current_SeqRecord.annotations
         current_SeqRecord_annotations['date'] =                 (datetime.now().strftime('%d-%b-%Y')).upper()
         current_SeqRecord_annotations['accession'] =            ''
@@ -107,21 +88,21 @@ def prodigal_parser(seq_file, sco_file, prefix, output_folder):
             # get nc sequence
             sequence_nc = ''
             if cds_strand == '+':
-                sequence_nc = id_to_sequence_dict[seq_id][cds_start-1:cds_end]
+                sequence_nc = Seq(str(id_to_sequence_dict[seq_id])[cds_start-1:cds_end])
             if cds_strand == '-':
-                sequence_nc = str(Seq(id_to_sequence_dict[seq_id][cds_start-1:cds_end]).reverse_complement())
+                sequence_nc = Seq(str(id_to_sequence_dict[seq_id])[cds_start-1:cds_end]).reverse_complement()
 
             # translate to aa sequence
-            sequence_aa = str(SeqRecord(Seq(sequence_nc)).seq.translate(table=transl_table))
-
+            #sequence_aa = str(SeqRecord(sequence_nc, id=seq_id, annotations={"molecule_type": "DNA"}).seq.translate())
+            sequence_aa = str(sequence_nc.translate())
             # remove * at the end
             sequence_aa = sequence_aa[:-1]
 
             # export nc and aa sequences
-            #export_dna_record(sequence_nc, locus_tag_id, '', bin_ffn_file_handle)
+            # export_dna_record(sequence_nc, locus_tag_id, '', bin_ffn_file_handle)
             bin_ffn_file_handle.write('>%s\n' % locus_tag_id)
-            bin_ffn_file_handle.write('%s\n' % sequence_nc)
-            #export_aa_record(sequence_aa, locus_tag_id, '', bin_faa_file_handle)
+            bin_ffn_file_handle.write('%s\n' % str(sequence_nc))
+            # export_aa_record(sequence_aa, locus_tag_id, '', bin_faa_file_handle)
             bin_faa_file_handle.write('>%s\n' % locus_tag_id)
             bin_faa_file_handle.write('%s\n' % sequence_aa)
 
@@ -148,10 +129,3 @@ def prodigal_parser(seq_file, sco_file, prefix, output_folder):
     bin_ffn_file_handle.close()
     bin_faa_file_handle.close()
 
-
-seq_file        = '/Users/songweizhi/Desktop/NorthSea_bin028.fasta'
-sco_file        = '/Users/songweizhi/Desktop/NorthSea_bin028.sco'
-prefix          = '/Users/songweizhi/Desktop/NorthSea_bin028'
-output_folder   = ''
-
-prodigal_parser(seq_file, sco_file, prefix, output_folder)

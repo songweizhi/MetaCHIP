@@ -9,7 +9,6 @@ import warnings
 from datetime import datetime
 from Bio import SeqIO, AlignIO, Align
 from Bio.Seq import Seq
-from Bio.Alphabet import IUPAC, generic_dna
 from Bio import SeqFeature as SF
 from Bio.SeqRecord import SeqRecord
 from Bio.SeqFeature import SeqFeature, FeatureLocation
@@ -79,22 +78,6 @@ def get_program_path_dict(pwd_cfg_file):
         program_path_dict[program_name] = program_path
 
     return program_path_dict
-
-
-def export_dna_record(gene_seq, gene_id, gene_description, output_handle):
-    seq_object = Seq(gene_seq, IUPAC.unambiguous_dna)
-    seq_record = SeqRecord(seq_object)
-    seq_record.id = gene_id
-    seq_record.description = gene_description
-    SeqIO.write(seq_record, output_handle, 'fasta')
-
-
-def export_aa_record(gene_seq, gene_id, gene_description, output_handle):
-    seq_object = Seq(gene_seq, IUPAC.protein)
-    seq_record = SeqRecord(seq_object)
-    seq_record.id = gene_id
-    seq_record.description = gene_description
-    SeqIO.write(seq_record, output_handle, 'fasta')
 
 
 def remove_low_cov_and_consensus_columns(alignment_file_in, minimal_cov, min_consensus, alignment_file_out):
@@ -294,7 +277,6 @@ def prodigal_parser(seq_file, sco_file, prefix, output_folder):
         # create SeqRecord
         current_sequence = Seq(id_to_sequence_dict[seq_id])
         current_SeqRecord = SeqRecord(current_sequence, id=seq_id)
-        current_SeqRecord.seq.alphabet = generic_dna
         transl_table = seq_to_transl_table_dict[seq_id]
 
         # add SeqFeature to SeqRecord
@@ -320,7 +302,7 @@ def prodigal_parser(seq_file, sco_file, prefix, output_folder):
             if cds_strand == '+':
                 sequence_nc = id_to_sequence_dict[seq_id][cds_start-1:cds_end]
             if cds_strand == '-':
-                sequence_nc = str(Seq(id_to_sequence_dict[seq_id][cds_start-1:cds_end], generic_dna).reverse_complement())
+                sequence_nc = str(Seq(id_to_sequence_dict[seq_id][cds_start-1:cds_end]).reverse_complement())
 
             # translate to aa sequence
             sequence_aa = str(SeqRecord(Seq(sequence_nc)).seq.translate(table=transl_table))
@@ -329,8 +311,12 @@ def prodigal_parser(seq_file, sco_file, prefix, output_folder):
             sequence_aa = sequence_aa[:-1]
 
             # export nc and aa sequences
-            export_dna_record(sequence_nc, locus_tag_id, '', bin_ffn_file_handle)
-            export_aa_record(sequence_aa, locus_tag_id, '', bin_faa_file_handle)
+            # export_dna_record(sequence_nc, locus_tag_id, '', bin_ffn_file_handle)
+            bin_ffn_file_handle.write('>%s\n' % locus_tag_id)
+            bin_ffn_file_handle.write('%s\n' % sequence_nc)
+            # export_aa_record(sequence_aa, locus_tag_id, '', bin_faa_file_handle)
+            bin_faa_file_handle.write('>%s\n' % locus_tag_id)
+            bin_faa_file_handle.write('%s\n' % sequence_aa)
 
             # Define feature type
             current_feature_type = 'CDS'

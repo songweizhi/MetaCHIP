@@ -46,7 +46,7 @@ circos.trackPlotRegion(track.index = 1, panel.fun = function(x, y) {
   ylim = get.cell.meta.data("ylim")
   sector.name = get.cell.meta.data("sector.index")
   circos.text(mean(xlim), ylim[1] + .1, sector.name, facing = "clockwise", niceFacing = TRUE, adj = c(0, 0.5), cex = 1.2)
-  circos.axis(h = "top", labels.cex = 0.8, major.tick.percentage = 0.2, sector.index = sector.name, track.index = 2)
+  circos.axis(h = "top", labels.cex = 0.8, sector.index = sector.name, track.index = 2)
 }, bg.border = NA)
 
 #circos.track(circos.text, facing = "clockwise")
