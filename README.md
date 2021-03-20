@@ -68,6 +68,14 @@ How to install:
 1. You can either add MetaCHIP's 3rd party dependencies to your system path or specify full path to their executables in MetaCHIP_config.py which can be found in Python's folder `lib/site-packages/MetaCHIP`.
 
 
+Notes :warning:
+---
+
+:warning: Please make sure the ID of sequences/contigs in your input genomes are **LESS than 22 letters** . 
+You can use the "**rename_seqs**" module to rename sequences, see more details with `MetaCHIP rename_seqs -h`.
+
+:warning: For a realiable construction of the species tree, input genomes for MetaCHIP should be with at least 40% completeness.
+
 How to run:
 ---
 
@@ -78,8 +86,6 @@ of your input genomes. File extension of your input genomes (e.g. fa, fasta) sho
 
 1. [**GTDB-Tk**](https://github.com/Ecogenomics/GTDBTk) is recommended for taxonomic classification of input genomes. Only the first two columns ('user_genome' and 'classification') in GTDB-Tk's output file are needed. 
 
-1. Please make sure the ID of sequences/contigs in your input genomes are **LESS than 22 letters** . 
-You can use the "**rename_seqs**" module to rename sequences, see more details with `MetaCHIP rename_seqs -h`.
 
 1. Options for argument '-r' in the PI and BP modules can be any combinations of d (domain), p (phylum), c (class), o (order), f (family), g (genus) and s(species).
 
