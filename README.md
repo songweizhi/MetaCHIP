@@ -34,7 +34,7 @@ Dependencies:
 ---
 
 + Python libraries: 
-[BioPython](https://github.com/biopython/biopython.github.io/) (>=1.78, important!), 
+[BioPython](https://github.com/biopython/biopython.github.io/) (>=1.78 :warning::warning::warning:), 
 [Numpy](http://www.numpy.org),
 [SciPy](https://www.scipy.org),
 [Matplotlib](http://matplotlib.org) and 
