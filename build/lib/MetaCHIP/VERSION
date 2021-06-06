@@ -1,3 +1,6 @@
+1.10.4
+- removed the limitation that the length of contigs need to be shorter than 22bp
+
 1.10.3
 - bug fixing
 

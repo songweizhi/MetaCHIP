@@ -16,7 +16,7 @@ Publication:
 
 Change Log:
 ---
-
+* v1.10.4 (2021-06-05) - Removed the limitation that contig length need to be shorter than 22bp
 * v1.10.0 (2020-08-16) - Fixed a few bugs
 * v1.9.0 (2020-06-01) - Add supplementary module: rename_seqs
 * v1.7.0 (2019-07-26) - Add supplementary modules: get_SCG_tree and SankeyTaxon
@@ -70,9 +70,6 @@ How to install:
 
 Notes
 ---
-
-:warning: Please make sure the ID of sequences/contigs in your input genomes are **LESS than 22 letters** . 
-You can use the "**rename_seqs**" module to rename sequences, see more details with `MetaCHIP rename_seqs -h`.
 
 :warning: For a realiable construction of the species tree, input genomes for MetaCHIP should be with at least **40%** completeness.
 

@@ -34,6 +34,7 @@ from Bio.SeqFeature import SeqFeature, FeatureLocation
 import multiprocessing as mp
 from MetaCHIP.MetaCHIP_config import config_dict
 from distutils.spawn import find_executable
+warnings.filterwarnings("ignore")
 
 
 def report_and_log(message_for_report, log_file, keep_quiet):
@@ -555,7 +556,7 @@ def PI(args, config_dict):
     input_genome_folder =   args['i']
     GTDB_output_file =      args['taxon']
     output_prefix =         args['p']
-    grouping_levels =        args['r']
+    grouping_levels =       args['r']
     grouping_file =         args['g']
     file_extension =        args['x']
     nonmeta_mode =          args['nonmeta']
@@ -617,20 +618,20 @@ def PI(args, config_dict):
 
 
     # check the length of sequence id, exit if longer than 22bp
-    long_seq_id_genomes_list = []
-    for input_genome in input_genome_file_name_list:
-        pwd_input_genome = '%s/%s' % (input_genome_folder, input_genome)
-        for seq_record in SeqIO.parse(pwd_input_genome, 'fasta'):
-            if len(seq_record.id) > 22:
-                if input_genome not in long_seq_id_genomes_list:
-                    long_seq_id_genomes_list.append(input_genome)
-
-    if long_seq_id_genomes_list != []:
-        print('Sequence id in the following genomes are longer than 22 letters, please shorten them!')
-        for long_seq_id_genome in sorted(long_seq_id_genomes_list):
-            print(long_seq_id_genome)
-        print('Sequence id in the above genomes are longer than 22 letters, please shorten them!')
-        exit()
+    # long_seq_id_genomes_list = []
+    # for input_genome in input_genome_file_name_list:
+    #     pwd_input_genome = '%s/%s' % (input_genome_folder, input_genome)
+    #     for seq_record in SeqIO.parse(pwd_input_genome, 'fasta'):
+    #         if len(seq_record.id) > 22:
+    #             if input_genome not in long_seq_id_genomes_list:
+    #                 long_seq_id_genomes_list.append(input_genome)
+    #
+    # if long_seq_id_genomes_list != []:
+    #     print('Sequence id in the following genomes are longer than 22 letters, please shorten them!')
+    #     for long_seq_id_genome in sorted(long_seq_id_genomes_list):
+    #         print(long_seq_id_genome)
+    #     print('Sequence id in the above genomes are longer than 22 letters, please shorten them!')
+    #     exit()
 
 
     if grouping_levels is None:

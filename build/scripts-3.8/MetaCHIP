@@ -181,3 +181,18 @@ if __name__ == '__main__':
 
     # if args['subparser_name'] == 'circos_HGT':
     #     circos_HGT.circos_HGT(args, MetaCHIP_config.config_dict)
+
+'''
+cd /Users/songweizhi/PycharmProjects/MetaCHIP
+rm -r build
+rm -r dist
+rm -r MetaCHIP.egg-info
+python setup.py sdist bdist_wheel
+twine upload dist/*
+#twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+songweizhi
+
+pip install --upgrade MetaCHIP
+pip install --upgrade -i https://test.pypi.org/simple/ MetaCHIP
+
+'''
