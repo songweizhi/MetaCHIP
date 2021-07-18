@@ -105,6 +105,10 @@ def filter_blast_results_worker(argument_list):
 
     pwd_qualified_iden_file_handle.close()
 
+    # remove if empty
+    if os.stat(pwd_qualified_iden_file).st_size == 0:
+        os.system('rm %s' % pwd_qualified_iden_file)
+
 
 def get_number_of_group(grouping_file):
 

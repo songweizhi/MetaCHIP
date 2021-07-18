@@ -149,7 +149,6 @@ if __name__ == '__main__':
     # add arguments for circos_HGT
     # circos_HGT_parser.add_argument('-in',          required=True,                          help='input matrix')
 
-
     ############################## parse provided arguments and run corresponding function #############################
 
     # get and check options
@@ -189,8 +188,9 @@ rm -r dist
 rm -r MetaCHIP.egg-info
 python setup.py sdist bdist_wheel
 twine upload dist/*
-#twine upload --repository-url https://test.pypi.org/legacy/ dist/*
 songweizhi
+
+shan88
 
 pip install --upgrade MetaCHIP
 pip install --upgrade -i https://test.pypi.org/simple/ MetaCHIP
