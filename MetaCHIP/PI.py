@@ -40,6 +40,9 @@ warnings.filterwarnings("ignore")
 def report_and_log(message_for_report, log_file, keep_quiet):
 
     time_format = '[%Y-%m-%d %H:%M:%S]'
+    D = os.path.split(log_file)[0]
+    if not os.path.isdir(D):
+        os.makedirs(D)
     with open(log_file, 'a') as log_handle:
         log_handle.write('%s %s\n' % ((datetime.now().strftime(time_format)), message_for_report))
 
@@ -56,7 +59,7 @@ def force_create_folder(folder_to_create):
                 shutil.rmtree(folder_to_create, ignore_errors=True)
                 if os.path.isdir(folder_to_create):
                     shutil.rmtree(folder_to_create, ignore_errors=True)
-    os.mkdir(folder_to_create)
+    os.makedirs(folder_to_create)
 
 
 def get_group_index_list():
