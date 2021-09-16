@@ -904,7 +904,7 @@ def PI(args, config_dict):
     report_and_log(('Get SCG tree: running hmmalign with %s cores.' % num_threads), pwd_log_file, keep_quiet)
 
     # fetch combined hmm profiles
-    os.mkdir(pwd_hmm_profile_sep_folder)
+    os.makedirs(pwd_hmm_profile_sep_folder)
     sep_combined_hmm(path_to_hmm, pwd_hmm_profile_sep_folder, pwd_hmmfetch_exe, pwd_hmmstat_exe)
 
     # Call hmmalign to align all single fasta files with hmms
