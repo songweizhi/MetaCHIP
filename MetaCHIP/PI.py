@@ -31,6 +31,7 @@ from Bio.Seq import Seq
 from Bio import SeqFeature as SF
 from Bio.SeqRecord import SeqRecord
 from Bio.SeqFeature import SeqFeature, FeatureLocation
+from Bio.Alphabet import generic_dna
 import multiprocessing as mp
 from MetaCHIP.MetaCHIP_config import config_dict
 from distutils.spawn import find_executable
@@ -203,6 +204,7 @@ def prodigal_parser(seq_file, sco_file, prefix, output_folder):
             gene_index += 1
 
         # export to gbk file
+        current_SeqRecord.seq.alphabet = generic_dna
         SeqIO.write(current_SeqRecord, bin_gbk_file_handle, 'genbank')
 
     bin_gbk_file_handle.close()
