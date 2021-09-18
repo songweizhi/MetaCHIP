@@ -48,14 +48,18 @@ def report_and_log(message_for_report, log_file, keep_quiet):
 
 
 def force_create_folder(folder_to_create):
-    if os.path.isdir(folder_to_create):
+
+    rm_rd = 0
+    while os.path.isdir(folder_to_create) is True:
         shutil.rmtree(folder_to_create, ignore_errors=True)
-        if os.path.isdir(folder_to_create):
-            shutil.rmtree(folder_to_create, ignore_errors=True)
-            if os.path.isdir(folder_to_create):
-                shutil.rmtree(folder_to_create, ignore_errors=True)
-                if os.path.isdir(folder_to_create):
-                    shutil.rmtree(folder_to_create, ignore_errors=True)
+
+        if rm_rd >= 10:
+            print('Failed in removing %s, program exited!' % folder_to_create)
+            exit()
+
+        rm_rd += 1
+        sleep(1)
+
     os.mkdir(folder_to_create)
 
 
@@ -555,6 +559,7 @@ def PI(args, config_dict):
     # read in arguments
     input_genome_folder =   args['i']
     GTDB_output_file =      args['taxon']
+    output_folder =         args['o']
     output_prefix =         args['p']
     grouping_levels =       args['r']
     grouping_file =         args['g']
@@ -639,6 +644,9 @@ def PI(args, config_dict):
 
     # define folder name
     MetaCHIP_wd =    '%s_MetaCHIP_wd'        % (output_prefix)
+    if output_folder is not None:
+        MetaCHIP_wd = output_folder
+
     pwd_log_folder = '%s/%s_%s_log_files'    % (MetaCHIP_wd, output_prefix, grouping_levels)
     pwd_log_file =   '%s/%s_%s_PI_%s.log'    % (pwd_log_folder, output_prefix, grouping_levels, datetime.now().strftime('%Y-%m-%d_%Hh-%Mm-%Ss_%f'))
     pwd_ignored_taxonomic_rank_file = '%s/ignored_taxonomic_rank.txt' % MetaCHIP_wd
@@ -1029,6 +1037,7 @@ if __name__ == '__main__':
     # arguments for PI
     parser.add_argument('-i',       required=True,                       help='input genome folder')
     parser.add_argument('-taxon',   required=False,                      help='taxonomic classification of input genomes')
+    parser.add_argument('-o',       required=False, default=None,        help='output folder (default: current working directory)')
     parser.add_argument('-p',       required=True,                       help='output prefix')
     parser.add_argument('-r',       required=False, default=None,        help='grouping rank, choose from p (phylum), c (class), o (order), f (family), g (genus) or any combination of them')
     parser.add_argument('-g',       required=False, default=None,        help='grouping file')

@@ -58,14 +58,18 @@ def report_and_log(message_for_report, log_file, keep_quiet):
 
 
 def force_create_folder(folder_to_create):
-    if os.path.isdir(folder_to_create):
+
+    rm_rd = 0
+    while os.path.isdir(folder_to_create) is True:
         shutil.rmtree(folder_to_create, ignore_errors=True)
-        if os.path.isdir(folder_to_create):
-            shutil.rmtree(folder_to_create, ignore_errors=True)
-            if os.path.isdir(folder_to_create):
-                shutil.rmtree(folder_to_create, ignore_errors=True)
-                if os.path.isdir(folder_to_create):
-                    shutil.rmtree(folder_to_create, ignore_errors=True)
+
+        if rm_rd >= 10:
+            print('Failed in removing %s, program exited!' % folder_to_create)
+            exit()
+
+        rm_rd += 1
+        sleep(1)
+
     os.mkdir(folder_to_create)
 
 
@@ -1680,6 +1684,7 @@ def combine_PG_output(PG_output_file_list_with_path, output_prefix, detection_ra
 
 def BP(args, config_dict):
 
+    output_folder =             args['o']
     output_prefix =             args['p']
     grouping_file =             args['g']
     grouping_levels =           args['r']
@@ -1720,16 +1725,16 @@ def BP(args, config_dict):
         print('%s not detected, program exited!' % ','.join(not_detected_programs))
         exit()
 
-
     #################################### find matched grouping file if not provided  ###################################
 
     if grouping_levels is None:
         grouping_levels = 'x'
 
-
     ################################### if provided ranks for PI and BP are different ##################################
 
-    MetaCHIP_wd                         = '%s_MetaCHIP_wd'                              % output_prefix
+    MetaCHIP_wd = '%s_MetaCHIP_wd' % output_prefix
+    if output_folder is not None:
+        MetaCHIP_wd = output_folder
 
     # get provided ranks for PI module
     pwd_prodigal_output_folder_re          = '%s/%s_*_prodigal_output' % (MetaCHIP_wd, output_prefix)
@@ -1752,7 +1757,6 @@ def BP(args, config_dict):
         blast_result_folder                 = '%s_%s_blastn_results'                        % (output_prefix, specified_ranks_for_PI)
         combined_ffn_file                   = '%s_%s_combined_ffn.fasta'                    % (output_prefix, specified_ranks_for_PI)
         newick_tree_file                    = '%s_%s_SCG_tree.newick'                       % (output_prefix, specified_ranks_for_PI)
-
     else:
         prodigal_output_folder              = '%s_%s_prodigal_output'                       % (output_prefix, grouping_levels)
         blast_db_folder                     = '%s_%s_blastdb'                               % (output_prefix, grouping_levels)
@@ -1775,7 +1779,6 @@ def BP(args, config_dict):
 
     if os.path.isdir(pwd_log_folder) is False:
         os.mkdir(pwd_log_folder)
-
 
     ############################################### filter blastn results ##############################################
 
@@ -2823,7 +2826,7 @@ if __name__ == '__main__':
 
     # initialize the options parser
     parser = argparse.ArgumentParser()
-
+    parser.add_argument('-o',             required=False, default=None,                 help='output folder (default: current working directory)')
     parser.add_argument('-p',             required=True,                                help='output prefix')
     parser.add_argument('-r',             required=False, default=None,                 help='grouping rank')
     parser.add_argument('-g',             required=False, default=None,                 help='grouping file')

@@ -93,6 +93,7 @@ if __name__ == '__main__':
     # add arguments for PI_parser
     PI_parser.add_argument('-i',       required=True,                       help='input genome folder')
     PI_parser.add_argument('-taxon',   required=False,                      help='taxonomic classification of input genomes')
+    PI_parser.add_argument('-o',       required=False, default=None,        help='output folder (default: current working directory)')
     PI_parser.add_argument('-p',       required=True,                       help='output prefix')
     PI_parser.add_argument('-r',       required=False, default=None,        help='grouping rank, choose from p (phylum), c (class), o (order), f (family), g (genus) or any combination of them')
     PI_parser.add_argument('-g',       required=False, default=None,        help='grouping file')
@@ -104,6 +105,7 @@ if __name__ == '__main__':
     PI_parser.add_argument('-noblast', required=False, action="store_true", help='skip running all-vs-all blastn, provide if you have other ways (e.g. with job scripts) to speed up the blastn step')
 
     # add arguments for BP_parser
+    BP_parser.add_argument('-o',             required=False, default=None,                 help='output folder (default: current working directory)')
     BP_parser.add_argument('-p',             required=True,                                help='output prefix')
     BP_parser.add_argument('-r',             required=False, default=None,                 help='grouping rank')
     BP_parser.add_argument('-g',             required=False, default=None,                 help='grouping file')

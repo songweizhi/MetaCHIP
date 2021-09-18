@@ -1,9 +1,9 @@
 
 ![logo](images/MetaCHIP_logo.jpg)
 
-[![pypi licence       ](https://img.shields.io/pypi/l/MetaCHIP.svg)](https://opensource.org/licenses/gpl-3.0.html)
-[![pypi version       ](https://img.shields.io/pypi/v/MetaCHIP.svg)](https://pypi.python.org/pypi/MetaCHIP) 
-[![DOI                ](https://img.shields.io/static/v1.svg?label=DOI&message=10.1186/s40168-019-0649-y&color=orange)](https://doi.org/10.1186/s40168-019-0649-y)
+[![pypi licence](https://img.shields.io/pypi/l/MetaCHIP.svg)](https://opensource.org/licenses/gpl-3.0.html)
+[![pypi version](https://img.shields.io/pypi/v/MetaCHIP.svg)](https://pypi.python.org/pypi/MetaCHIP) 
+[![DOI         ](https://img.shields.io/static/v1.svg?label=DOI&message=10.1186/s40168-019-0649-y&color=orange)](https://doi.org/10.1186/s40168-019-0649-y)
 
 
 Publication:
@@ -16,6 +16,7 @@ Publication:
 
 Change Log:
 ---
+* v1.10.6 (2021-09-19) - You can now designate a place for the output files with "-o" 
 * v1.10.4 (2021-06-05) - Removed the limitation that contig length need to be shorter than 22bp
 * v1.10.0 (2020-08-16) - Fixed a few bugs
 * v1.9.0 (2020-06-01) - Add supplementary module: rename_seqs
@@ -66,6 +67,8 @@ How to install:
         pip3 install --upgrade MetaCHIP
         
 1. You can either add MetaCHIP's 3rd party dependencies to your system path or specify full path to their executables in MetaCHIP_config.py which can be found in Python's folder `lib/site-packages/MetaCHIP`.
+
+1. :warning: If you clone the repository directly off GitHub you might end up with a version that is still under development.
 
 
 Notes
