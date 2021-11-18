@@ -74,7 +74,7 @@ How to install:
 Notes
 ---
 
-:warning: For a reliable construction of the species tree, input genomes for MetaCHIP should be with at least **40%** completeness.
+:warning: For a reliable construction of the species tree, input genomes need to be with at least **40%** completeness.
 
 How to run:
 ---
