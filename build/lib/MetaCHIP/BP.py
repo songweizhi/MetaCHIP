@@ -58,14 +58,18 @@ def report_and_log(message_for_report, log_file, keep_quiet):
 
 
 def force_create_folder(folder_to_create):
-    if os.path.isdir(folder_to_create):
+
+    rm_rd = 0
+    while os.path.isdir(folder_to_create) is True:
         shutil.rmtree(folder_to_create, ignore_errors=True)
-        if os.path.isdir(folder_to_create):
-            shutil.rmtree(folder_to_create, ignore_errors=True)
-            if os.path.isdir(folder_to_create):
-                shutil.rmtree(folder_to_create, ignore_errors=True)
-                if os.path.isdir(folder_to_create):
-                    shutil.rmtree(folder_to_create, ignore_errors=True)
+
+        if rm_rd >= 10:
+            print('Failed in removing %s, program exited!' % folder_to_create)
+            exit()
+
+        rm_rd += 1
+        sleep(1)
+
     os.mkdir(folder_to_create)
 
 
@@ -2497,7 +2501,7 @@ def BP(args, config_dict):
     if grouping_file is not None:
 
         multi_level_detection = False
-        pwd_MetaCHIP_op_folder_re = '%s_MetaCHIP_wd/%s_HGT_ip%s_al%sbp_c%s_ei%s_f%skbp_x*' % (output_prefix, output_prefix, str(identity_percentile), str(align_len_cutoff), str(cover_cutoff), str(end_match_identity_cutoff), flanking_length_kbp)
+        pwd_MetaCHIP_op_folder_re = '%s/%s_HGT_ip%s_al%sbp_c%s_ei%s_f%skbp_x*' % (MetaCHIP_wd, output_prefix, str(identity_percentile), str(align_len_cutoff), str(cover_cutoff), str(end_match_identity_cutoff), flanking_length_kbp)
 
         MetaCHIP_op_folder = ''
         if len([os.path.basename(file_name) for file_name in glob.glob(pwd_MetaCHIP_op_folder_re)]) == 1:
@@ -2510,7 +2514,7 @@ def BP(args, config_dict):
 
         group_num = int(MetaCHIP_op_folder.split('_')[-1][1:])
 
-        pwd_MetaCHIP_op_folder =        '%s_MetaCHIP_wd/%s' % (output_prefix, MetaCHIP_op_folder)
+        pwd_MetaCHIP_op_folder =        '%s/%s' % (MetaCHIP_wd, MetaCHIP_op_folder)
         pwd_detected_HGT_PG_txt =       '%s/%s_x%s_HGTs_PG.txt'                      % (pwd_MetaCHIP_op_folder, output_prefix, group_num)
         pwd_flanking_plot_folder =      '%s/%s_x%s_Flanking_region_plots'            % (pwd_MetaCHIP_op_folder, output_prefix, group_num)
         pwd_detected_HGT_txt =          '%s/%s_x_detected_HGTs.txt'                   % (pwd_MetaCHIP_op_folder, output_prefix)
@@ -2593,12 +2597,12 @@ def BP(args, config_dict):
         if len(detection_rank_list) == 1:
 
             multi_level_detection = False
-            pwd_MetaCHIP_op_folder_re = '%s_MetaCHIP_wd/%s_HGT_ip%s_al%sbp_c%s_ei%s_f%skbp_%s*' % (output_prefix, output_prefix, str(identity_percentile), str(align_len_cutoff), str(cover_cutoff), str(end_match_identity_cutoff), flanking_length_kbp, detection_rank_list)
+            pwd_MetaCHIP_op_folder_re = '%s/%s_HGT_ip%s_al%sbp_c%s_ei%s_f%skbp_%s*' % (MetaCHIP_wd, output_prefix, str(identity_percentile), str(align_len_cutoff), str(cover_cutoff), str(end_match_identity_cutoff), flanking_length_kbp, detection_rank_list)
 
             MetaCHIP_op_folder = [os.path.basename(file_name) for file_name in glob.glob(pwd_MetaCHIP_op_folder_re)][0]
             group_num = int(MetaCHIP_op_folder.split('_')[-1][1:])
 
-            pwd_MetaCHIP_op_folder =        '%s_MetaCHIP_wd/%s'                             % (output_prefix, MetaCHIP_op_folder)
+            pwd_MetaCHIP_op_folder =        '%s/%s'                                         % (MetaCHIP_wd, MetaCHIP_op_folder)
             pwd_detected_HGT_PG_txt =       '%s/%s_%s%s_HGTs_PG.txt'                        % (pwd_MetaCHIP_op_folder, output_prefix, detection_rank_list, group_num)
             pwd_flanking_plot_folder =      '%s/%s_%s%s_Flanking_region_plots'              % (pwd_MetaCHIP_op_folder, output_prefix, detection_rank_list, group_num)
             pwd_detected_HGT_txt =          '%s/%s_%s_detected_HGTs.txt'                    % (pwd_MetaCHIP_op_folder, output_prefix, detection_rank_list)
@@ -2649,11 +2653,11 @@ def BP(args, config_dict):
 
             ###################################### Get_circlize_plot #######################################
 
-            grouping_file_re = '%s_MetaCHIP_wd/%s_grouping_%s*.txt' % (output_prefix, output_prefix, detection_rank_list)
+            grouping_file_re = '%s/%s_grouping_%s*.txt' % (MetaCHIP_wd, output_prefix, detection_rank_list)
             grouping_file = [os.path.basename(file_name) for file_name in glob.glob(grouping_file_re)][0]
             taxon_rank_num = grouping_file[len(output_prefix) + 1:].split('_')[0]
-            pwd_grouping_file =         '%s_MetaCHIP_wd/%s'                         % (output_prefix, grouping_file)
-            pwd_plot_circos =           '%s/%s_%s_HGTs_among_provided_groups.pdf'                   % (pwd_MetaCHIP_op_folder, output_prefix, taxon_rank_num)
+            pwd_grouping_file =         '%s/%s'                                     % (MetaCHIP_wd, grouping_file)
+            pwd_plot_circos =           '%s/%s_%s_HGTs_among_provided_groups.pdf'   % (pwd_MetaCHIP_op_folder, output_prefix, taxon_rank_num)
 
             taxon_to_group_id_dict = {}
             for group in open(pwd_grouping_file):
@@ -2699,7 +2703,7 @@ def BP(args, config_dict):
             pwd_flanking_plot_folder_list = []
             for detection_rank in detection_rank_list:
                 if detection_rank not in ignored_rank_list:
-                    pwd_MetaCHIP_op_folder_re = '%s_MetaCHIP_wd/%s_HGT_ip%s_al%sbp_c%s_ei%s_f%skbp_%s*' % (output_prefix, output_prefix, str(identity_percentile), str(align_len_cutoff), str(cover_cutoff), str(end_match_identity_cutoff), flanking_length_kbp, detection_rank)
+                    pwd_MetaCHIP_op_folder_re = '%s/%s_HGT_ip%s_al%sbp_c%s_ei%s_f%skbp_%s*' % (MetaCHIP_wd, output_prefix, str(identity_percentile), str(align_len_cutoff), str(cover_cutoff), str(end_match_identity_cutoff), flanking_length_kbp, detection_rank)
                     MetaCHIP_op_folder_list = [os.path.basename(file_name) for file_name in glob.glob(pwd_MetaCHIP_op_folder_re)]
 
                     if 'combined' not in MetaCHIP_op_folder_list[0]:
@@ -2708,14 +2712,14 @@ def BP(args, config_dict):
                         MetaCHIP_op_folder = MetaCHIP_op_folder_list[1]
 
                     group_num = int(MetaCHIP_op_folder.split('_')[-1][1:])
-                    pwd_detected_HGT_txt        = '%s_MetaCHIP_wd/%s/%s_%s%s_HGTs_PG.txt' % (output_prefix, MetaCHIP_op_folder, output_prefix, detection_rank, group_num)
-                    pwd_flanking_plot_folder    = '%s_MetaCHIP_wd/%s/%s_%s%s_Flanking_region_plots' % (output_prefix, MetaCHIP_op_folder, output_prefix, detection_rank, group_num)
+                    pwd_detected_HGT_txt        = '%s/%s/%s_%s%s_HGTs_PG.txt' % (MetaCHIP_wd, MetaCHIP_op_folder, output_prefix, detection_rank, group_num)
+                    pwd_flanking_plot_folder    = '%s/%s/%s_%s%s_Flanking_region_plots' % (MetaCHIP_wd, MetaCHIP_op_folder, output_prefix, detection_rank, group_num)
                     pwd_detected_HGT_txt_list.append(pwd_detected_HGT_txt)
                     pwd_flanking_plot_folder_list.append(pwd_flanking_plot_folder)
 
-            pwd_combined_prediction_folder = '%s_MetaCHIP_wd/%s_combined_%s_HGTs_ip%s_al%sbp_c%s_ei%s_f%skbp' % (output_prefix, output_prefix, detection_rank_list, str(identity_percentile), str(align_len_cutoff), str(cover_cutoff), str(end_match_identity_cutoff), flanking_length_kbp)
+            pwd_combined_prediction_folder = '%s/%s_combined_%s_HGTs_ip%s_al%sbp_c%s_ei%s_f%skbp' % (MetaCHIP_wd, output_prefix, detection_rank_list, str(identity_percentile), str(align_len_cutoff), str(cover_cutoff), str(end_match_identity_cutoff), flanking_length_kbp)
 
-            genome_size_file =                          '%s_MetaCHIP_wd/%s_all_genome_size.txt'         % (output_prefix, output_prefix)
+            genome_size_file =                          '%s/%s_all_genome_size.txt'                     % (MetaCHIP_wd, output_prefix)
             pwd_detected_HGT_txt_combined =             '%s/%s_%s_detected_HGTs.txt'                    % (pwd_combined_prediction_folder, output_prefix, detection_rank_list)
             pwd_recipient_gene_seq_ffn =                '%s/%s_%s_detected_HGTs_recipient_genes.ffn'    % (pwd_combined_prediction_folder, output_prefix, detection_rank_list)
             pwd_recipient_gene_seq_faa =                '%s/%s_%s_detected_HGTs_recipient_genes.faa'    % (pwd_combined_prediction_folder, output_prefix, detection_rank_list)
@@ -2788,10 +2792,10 @@ def BP(args, config_dict):
 
             for detection_rank in detection_rank_list:
                 if detection_rank not in ignored_rank_list:
-                    grouping_file_re = '%s_MetaCHIP_wd/%s_grouping_%s*.txt' % (output_prefix, output_prefix, detection_rank)
+                    grouping_file_re = '%s/%s_grouping_%s*.txt' % (MetaCHIP_wd, output_prefix, detection_rank)
                     grouping_file = [os.path.basename(file_name) for file_name in glob.glob(grouping_file_re)][0]
                     taxon_rank_num = grouping_file.split('.')[-2].split('_')[-1][1:]
-                    pwd_grouping_file =         '%s_MetaCHIP_wd/%s'                         % (output_prefix, grouping_file)
+                    pwd_grouping_file =         '%s/%s'                         % (MetaCHIP_wd, grouping_file)
                     pwd_plot_circos =           '%s/%s_HGTs_among_%s.pdf'                   % (pwd_combined_prediction_folder, output_prefix, rank_abbre_dict_plural[detection_rank])
                     pwd_df_circos =             '%s/%s_HGTs_among_%s.tab'                   % (pwd_combined_prediction_folder, output_prefix, rank_abbre_dict_plural[detection_rank])
 

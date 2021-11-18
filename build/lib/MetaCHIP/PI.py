@@ -48,14 +48,18 @@ def report_and_log(message_for_report, log_file, keep_quiet):
 
 
 def force_create_folder(folder_to_create):
-    if os.path.isdir(folder_to_create):
+
+    rm_rd = 0
+    while os.path.isdir(folder_to_create) is True:
         shutil.rmtree(folder_to_create, ignore_errors=True)
-        if os.path.isdir(folder_to_create):
-            shutil.rmtree(folder_to_create, ignore_errors=True)
-            if os.path.isdir(folder_to_create):
-                shutil.rmtree(folder_to_create, ignore_errors=True)
-                if os.path.isdir(folder_to_create):
-                    shutil.rmtree(folder_to_create, ignore_errors=True)
+
+        if rm_rd >= 10:
+            print('Failed in removing %s, program exited!' % folder_to_create)
+            exit()
+
+        rm_rd += 1
+        sleep(1)
+
     os.mkdir(folder_to_create)
 
 
@@ -859,7 +863,7 @@ def PI(args, config_dict):
     ######################################## run prodigal with multiprocessing #########################################
 
     # for report and log
-    report_and_log(('Running Prodigal for %s qualified genomes with %s cores (1-3 minutes pre genome per core).' % (len(genome_for_HGT_detection_list), num_threads)), pwd_log_file, keep_quiet)
+    report_and_log(('Running Prodigal for %s qualified genomes with %s cores (1-3 minutes per genome per core).' % (len(genome_for_HGT_detection_list), num_threads)), pwd_log_file, keep_quiet)
 
     # create prodigal output folder
     os.mkdir(pwd_prodigal_output_folder)

@@ -863,7 +863,7 @@ def PI(args, config_dict):
     ######################################## run prodigal with multiprocessing #########################################
 
     # for report and log
-    report_and_log(('Running Prodigal for %s qualified genomes with %s cores (1-3 minutes pre genome per core).' % (len(genome_for_HGT_detection_list), num_threads)), pwd_log_file, keep_quiet)
+    report_and_log(('Running Prodigal for %s qualified genomes with %s cores (1-3 minutes per genome per core).' % (len(genome_for_HGT_detection_list), num_threads)), pwd_log_file, keep_quiet)
 
     # create prodigal output folder
     os.mkdir(pwd_prodigal_output_folder)
