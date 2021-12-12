@@ -97,7 +97,6 @@ def prodigal_parser(seq_file, sco_file, prefix, output_folder):
         id_to_sequence_dict[each_seq.id] = str(each_seq.seq)
         sequence_id_list.append(each_seq.id)
 
-
     # get sequence to cds dict and sequence to transl_table dict
     current_seq_id = ''
     current_transl_table = ''
@@ -105,7 +104,11 @@ def prodigal_parser(seq_file, sco_file, prefix, output_folder):
     seq_to_cds_dict = {}
     seq_to_transl_table_dict = {}
     for each_cds in open(sco_file):
-        if each_cds.startswith('# Sequence Data'):
+
+        if each_cds.startswith('"'):
+            pass
+
+        elif each_cds.startswith('# Sequence Data'):
 
             # add to dict
             if current_seq_id != '':
@@ -113,7 +116,11 @@ def prodigal_parser(seq_file, sco_file, prefix, output_folder):
                 seq_to_transl_table_dict[current_seq_id] = current_transl_table
 
             # reset value
-            current_seq_id = each_cds.strip().split(';seqhdr=')[1][1:-1].split(' ')[0]
+            if each_cds.strip().split(';seqhdr=')[1][-1] == '"':
+                current_seq_id = each_cds.strip().split(';seqhdr=')[1][1:-1].split(' ')[0]
+            else:
+                current_seq_id = each_cds.strip().split(';seqhdr=')[1][1:].split(' ')[0]
+
             current_transl_table = ''
             current_seq_csd_list = []
 
@@ -123,9 +130,9 @@ def prodigal_parser(seq_file, sco_file, prefix, output_folder):
         else:
             current_seq_csd_list.append('_'.join(each_cds.strip().split('_')[1:]))
 
-    seq_to_cds_dict[current_seq_id] = current_seq_csd_list
-    seq_to_transl_table_dict[current_seq_id] = current_transl_table
-
+    if current_seq_id != '':
+        seq_to_cds_dict[current_seq_id] = current_seq_csd_list
+        seq_to_transl_table_dict[current_seq_id] = current_transl_table
 
     bin_gbk_file_handle = open(pwd_bin_gbk_file, 'w')
     bin_ffn_file_handle = open(pwd_bin_ffn_file, 'w')
