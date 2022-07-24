@@ -1,0 +1,201 @@
+#!python
+
+# Copyright (C) 2017, Weizhi Song, Torsten Thomas.
+# songwz03@gmail.com or t.thomas@unsw.edu.au
+
+# MetaCHIP is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# MetaCHIP is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+import sys
+import argparse
+from MetaCHIP.PI import PI
+from MetaCHIP.BP import BP
+from MetaCHIP import filter_HGT
+from MetaCHIP import circos_HGT
+from MetaCHIP import rename_seqs
+from MetaCHIP import update_hmms
+from MetaCHIP import get_SCG_tree
+from MetaCHIP import MetaCHIP_config
+
+
+to_do = '''
+
+1. not print if disabled: [2018-12-09 21:54:32] Plotting flanking regions with 16 cores
+2. steps move to PG.py: uclust, get species tree
+3. if no PG validated, skip plot, but not report error
+4. move flk plot to the last step
+5. create a SpongeEMP_c52_Flanking_region_plots_wd folder
+6. !!!!!!!!!! get file list by RE is very slow (put files to delete into a tmp folder, then delete the folder)
+7. check if db files exist in PI step
+
+'''
+
+
+def version():
+    version_file = open('%s/VERSION' % MetaCHIP_config.config_file_path)
+    return version_file.readline().strip()
+
+
+def print_main_help():
+
+    help_message = ''' 
+            ...::: MetaCHIP v%s :::...
+        
+    Core modules:
+       PI            ->  Prepare input files 
+       BP            ->  Run Best-match and Phylogenetic approaches
+       
+    Supplementary modules:
+       filter_HGT    ->  Get HGTs been found at no less than n taxonomic ranks
+       update_hmms   ->  Update hmm profiles used for inferring SCG tree
+       get_SCG_tree  ->  Get SCG protein tree
+       rename_seqs   ->  Rename sequences in a file
+
+    # for command specific help info
+    MetaCHIP PI -h
+    MetaCHIP BP -h
+    
+    ''' % version()
+
+    print(help_message)
+
+
+if __name__ == '__main__':
+
+    ############################################## initialize subparsers ###############################################
+
+    # initialize the options parser
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(help="--", dest='subparser_name')
+
+    PI_parser =             subparsers.add_parser('PI',             description='Prepare input files',                                  epilog='Example: MetaCHIP PI -h')
+    BP_parser =             subparsers.add_parser('BP',             description='BM and PG approach',                                   epilog='Example: MetaCHIP BP -h')
+    #circos_HGT_parser =     subparsers.add_parser('circos_HGT',     description='Visualize gene flow with circos plot',                 usage=circos_HGT.circos_HGT_usage)
+    filter_HGT_parser =     subparsers.add_parser('filter_HGT',     description='get HGTs detected at least n levels',                  usage=filter_HGT.filter_HGT_usage)
+    update_hmms_parser =    subparsers.add_parser('update_hmms',    description='update hmm profiles',                                  usage=update_hmms.update_hmms_usage)
+    get_SCG_tree_parser =   subparsers.add_parser('get_SCG_tree',   description='get SCG tree',                                         usage=get_SCG_tree.get_SCG_tree_usage)
+    rename_seqs_parser =    subparsers.add_parser('rename_seqs',    description='rename sequences in a file',                           usage=rename_seqs.rename_seqs_usage)
+
+
+    ######################################### define arguments for subparsers ##########################################
+
+    # add arguments for PI_parser
+    PI_parser.add_argument('-i',       required=True,                       help='input genome folder')
+    PI_parser.add_argument('-taxon',   required=False,                      help='taxonomic classification of input genomes')
+    PI_parser.add_argument('-o',       required=False, default=None,        help='output folder (default: current working directory)')
+    PI_parser.add_argument('-p',       required=True,                       help='output prefix')
+    PI_parser.add_argument('-r',       required=False, default=None,        help='grouping rank, choose from p (phylum), c (class), o (order), f (family), g (genus) or any combination of them')
+    PI_parser.add_argument('-g',       required=False, default=None,        help='grouping file')
+    PI_parser.add_argument('-x',       required=False, default='fasta',     help='file extension')
+    PI_parser.add_argument('-nonmeta', required=False, action="store_true", help='provide if input genomes are NOT metagenome-assembled genomes')
+    PI_parser.add_argument('-t',       required=False, type=int, default=1, help='number of threads, default: 1')
+    PI_parser.add_argument('-quiet',   required=False, action="store_true", help='not report progress')
+    PI_parser.add_argument('-force',   required=False, action="store_true", help='force overwrite existing results')
+    PI_parser.add_argument('-noblast', required=False, action="store_true", help='skip running all-vs-all blastn, provide if you have other ways (e.g. with job scripts) to speed up the blastn step')
+
+    # add arguments for BP_parser
+    BP_parser.add_argument('-o',             required=False, default=None,                 help='output folder (default: current working directory)')
+    BP_parser.add_argument('-p',             required=True,                                help='output prefix')
+    BP_parser.add_argument('-r',             required=False, default=None,                 help='grouping rank')
+    BP_parser.add_argument('-g',             required=False, default=None,                 help='grouping file')
+    BP_parser.add_argument('-cov',           required=False, type=int,     default=75,     help='coverage cutoff, default: 75')
+    BP_parser.add_argument('-al',            required=False, type=int,     default=200,    help='alignment length cutoff, default: 200')
+    BP_parser.add_argument('-flk',           required=False, type=int,     default=10,     help='the length of flanking sequences to plot (Kbp), default: 10')
+    BP_parser.add_argument('-pfr',           required=False, action="store_true",          help='plot flanking_regions of identified HGTs')
+    BP_parser.add_argument('-ip',            required=False, type=int,     default=90,     help='identity percentile cutoff, default: 90')
+    BP_parser.add_argument('-ei',            required=False, type=float,   default=80,     help='end match identity cutoff, default: 80')
+    BP_parser.add_argument('-t',             required=False, type=int,     default=1,      help='number of threads, default: 1')
+    BP_parser.add_argument('-NoEbCheck',     required=False, action="store_true",          help='disable end break and contig match check for fast processing, not recommend for metagenome-assembled genomes (MAGs)')
+    BP_parser.add_argument('-force',         required=False, action="store_true",          help='overwrite previous results')
+    BP_parser.add_argument('-quiet',         required=False, action="store_true",          help='Do not report progress')
+    BP_parser.add_argument('-tmp',           required=False, action="store_true",          help='keep temporary files')
+
+    # add arguments for filter_HGT_parser
+    filter_HGT_parser.add_argument('-i',                required=True,                          help='txt file containing detected HGTs, e.g. [prefix]_[ranks]_detected_HGTs.txt ')
+    filter_HGT_parser.add_argument('-n',                required=True, type=int,                help='HGTs detected at least n levels, 2 <= n <= 5')
+    filter_HGT_parser.add_argument('-plot',             required=False,                         help='flanking plots folder')
+    filter_HGT_parser.add_argument('-ffn',              required=False, default=None,           help='get nucleotide sequences for qualified HGTs')
+    filter_HGT_parser.add_argument('-faa',              required=False, default=None,           help='get amino acid sequences for qualified HGTs')
+
+    # add arguments for update_hmm
+    update_hmms_parser.add_argument('-hmm',             required=True,                          help='MetaCHIP_phylo.hmm file')
+    update_hmms_parser.add_argument('-p_db',            required=False, default=None,           help='Pfam db file, e.g. Pfam-A.hmm')
+    update_hmms_parser.add_argument('-t_db',            required=False, default=None,           help='TIGRFAMs db folder, e.g. TIGRFAMs_14.0_HMM')
+
+    # add arguments for get_SCG_tree
+    get_SCG_tree_parser.add_argument('-i',              required=True,                          help='input genome folder')
+    get_SCG_tree_parser.add_argument('-p',              required=True,                          help='output prefix')
+    get_SCG_tree_parser.add_argument('-x',              required=False, default='fasta',        help='file extension')
+    get_SCG_tree_parser.add_argument('-nonmeta',        required=False, action="store_true",    help='annotate Non-metagenome-assembled genomes (Non-MAGs)')
+    get_SCG_tree_parser.add_argument('-t',              required=False, type=int, default=1,    help='number of threads, default: 1')
+
+    # add arguments for rename_seqs
+    rename_seqs_parser.add_argument('-in',         required=True,                          help='input sequence file')
+    rename_seqs_parser.add_argument('-inc_suffix', required=False, action="store_true",    help='rename sequences by incrementally adding suffix to file name')
+    rename_seqs_parser.add_argument('-sep_in',     required=False, default=None,           help='separator for input sequences')
+    rename_seqs_parser.add_argument('-sep_out',    required=False, default=None,           help='separator for output sequences, default: same as sep_in')
+    rename_seqs_parser.add_argument('-n',          required=False, default=None, type=int, help='the number of columns to keep')
+    rename_seqs_parser.add_argument('-prefix',     required=False, default=None,           help='add prefix to sequence')
+    rename_seqs_parser.add_argument('-x',          required=False,                         help='file extension')
+
+    # add arguments for circos_HGT
+    # circos_HGT_parser.add_argument('-in',          required=True,                          help='input matrix')
+
+    ############################## parse provided arguments and run corresponding function #############################
+
+    # get and check options
+    args = None
+    if (len(sys.argv) == 1) or (sys.argv[1] == '-h') or (sys.argv[1] == '-help') or (sys.argv[1] == '--help'):
+        print_main_help()
+        sys.exit(0)
+
+    else:
+        args = vars(parser.parse_args())
+
+    if args['subparser_name'] == 'PI':
+        PI(args, MetaCHIP_config.config_dict)
+
+    if args['subparser_name'] == 'BP':
+        BP(args, MetaCHIP_config.config_dict)
+
+    if args['subparser_name'] == 'filter_HGT':
+        filter_HGT.filter_HGT(args)
+
+    if args['subparser_name'] == 'update_hmms':
+        update_hmms.update_hmms(args)
+
+    if args['subparser_name'] == 'get_SCG_tree':
+        get_SCG_tree.get_SCG_tree(args, MetaCHIP_config.config_dict)
+
+    if args['subparser_name'] == 'rename_seqs':
+        rename_seqs.rename_seqs(args)
+
+    # if args['subparser_name'] == 'circos_HGT':
+    #     circos_HGT.circos_HGT(args, MetaCHIP_config.config_dict)
+
+'''
+cd /Users/songweizhi/PycharmProjects/MetaCHIP
+rm -r build
+rm -r dist
+rm -r MetaCHIP.egg-info
+python3 setup.py sdist bdist_wheel
+twine upload dist/*
+songweizhi
+
+shan88
+
+pip install --upgrade MetaCHIP
+pip install --upgrade -i https://test.pypi.org/simple/ MetaCHIP
+
+'''

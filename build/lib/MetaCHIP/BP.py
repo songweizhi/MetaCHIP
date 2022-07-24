@@ -644,7 +644,6 @@ def check_full_lenght_and_end_match(qualified_ctg_match_list, identity_cutoff):
         elif subject_matched[0] == current_subject_end:
             subject_matched_len_total += subject_matched[1] - current_subject_end
 
-
     # get total coverage for query and subject
     query_cov_total = query_matched_len_total/float(query_len)
     subject_cov_total = subject_matched_len_total/float(subject_len)
@@ -657,7 +656,6 @@ def check_full_lenght_and_end_match(qualified_ctg_match_list, identity_cutoff):
     # full length match: coverage cutoff 90%
     if (query_cov_total >= 0.9) or (subject_cov_total >= 0.9):
         match_category = 'full_length_match'
-
 
     ######################################## check end match ########################################
 
@@ -726,7 +724,6 @@ def check_full_lenght_and_end_match(qualified_ctg_match_list, identity_cutoff):
                             matched_block_query_start = current_query_start
                             matched_block_subject_start = current_subject_start
 
-
             ######################################## check end_match ########################################
 
             # situation 1
@@ -748,7 +745,7 @@ def check_full_lenght_and_end_match(qualified_ctg_match_list, identity_cutoff):
     return match_category
 
 
-def set_contig_track_features(gene_contig, name_group_dict, candidate_list, HGT_iden, feature_set):
+def set_contig_track_features(gene_contig, candidate_list, HGT_iden, feature_set):
     # add features to feature set
     for feature in gene_contig.features:
         if feature.type == "CDS":
@@ -782,33 +779,30 @@ def set_contig_track_features(gene_contig, name_group_dict, candidate_list, HGT_
 
 def get_gbk_blast_act2(arguments_list):
 
-    match = arguments_list[0]
-    pwd_gbk_folder = arguments_list[1]
-    flanking_length = arguments_list[2]
-    aln_len_cutoff = arguments_list[3]
-    name_to_group_number_dict = arguments_list[4]
-    path_to_output_act_folder = arguments_list[5]
-    pwd_normal_plot_folder = arguments_list[6]
-    pwd_at_ends_plot_folder = arguments_list[7]
-    pwd_full_contig_match_plot_folder = arguments_list[8]
-    pwd_blastn_exe = arguments_list[9]
-    keep_temp = arguments_list[10]
-    candidates_2_contig_match_category_dict = arguments_list[11]
-    end_match_iden_cutoff = arguments_list[12]
-    No_Eb_Check = arguments_list[13]
-    flk_plot_fmt = 'SVG'
+    match                                   = arguments_list[0]
+    pwd_gbk_folder                          = arguments_list[1]
+    flanking_length                         = arguments_list[2]
+    path_to_output_act_folder               = arguments_list[3]
+    pwd_normal_plot_folder                  = arguments_list[4]
+    pwd_at_ends_plot_folder                 = arguments_list[5]
+    pwd_full_contig_match_plot_folder       = arguments_list[6]
+    pwd_blastn_exe                          = arguments_list[7]
+    candidates_2_contig_match_category_dict = arguments_list[8]
+    end_match_iden_cutoff                   = arguments_list[9]
+    No_Eb_Check                             = arguments_list[10]
+    plt_flk_region                          = arguments_list[11]
+    flk_plot_fmt                            = 'SVG'
 
-    genes = match.strip().split('\t')[:-1]
-    current_HGT_iden = float("{0:.1f}".format(float(match.strip().split('\t')[-1])))
-    folder_name = '___'.join(genes)
+    genes               = match.strip().split('\t')[:-1]
+    gene_1              = genes[0]
+    gene_2              = genes[1]
+    genome_1            = '_'.join(gene_1.split('_')[:-1])
+    genome_2            = '_'.join(gene_2.split('_')[:-1])
+    pwd_genome_1_gbk    = '%s/%s.gbk' % (pwd_gbk_folder, genome_1)
+    pwd_genome_2_gbk    = '%s/%s.gbk' % (pwd_gbk_folder, genome_2)
+    current_HGT_iden    = float("{0:.1f}".format(float(match.strip().split('\t')[-1])))
+    folder_name         = '___'.join(genes)
     os.mkdir('%s/%s' % (path_to_output_act_folder, folder_name))
-
-    gene_1 = genes[0]
-    gene_2 = genes[1]
-    genome_1 = '_'.join(gene_1.split('_')[:-1])
-    genome_2 = '_'.join(gene_2.split('_')[:-1])
-    pwd_genome_1_gbk = '%s/%s.gbk' % (pwd_gbk_folder, genome_1)
-    pwd_genome_2_gbk = '%s/%s.gbk' % (pwd_gbk_folder, genome_2)
 
     dict_value_list = []
     # Extract gbk and fasta files for gene 1
@@ -816,40 +810,32 @@ def get_gbk_blast_act2(arguments_list):
         for gene_1_f in genome_1_record.features:
             if 'locus_tag' in gene_1_f.qualifiers:
                 if gene_1 in gene_1_f.qualifiers["locus_tag"]:
-                    dict_value_list.append([gene_1, int(gene_1_f.location.start), int(gene_1_f.location.end), gene_1_f.location.strand, len(genome_1_record.seq)])
+                    dict_value_list.append(
+                        [gene_1, int(gene_1_f.location.start), int(gene_1_f.location.end), gene_1_f.location.strand,
+                         len(genome_1_record.seq)])
                     pwd_gene_1_gbk_file = '%s/%s/%s.gbk' % (path_to_output_act_folder, folder_name, gene_1)
                     pwd_gene_1_fasta_file = '%s/%s/%s.fasta' % (path_to_output_act_folder, folder_name, gene_1)
-                    SeqIO.write(genome_1_record, pwd_gene_1_gbk_file, 'genbank')
                     SeqIO.write(genome_1_record, pwd_gene_1_fasta_file, 'fasta')
-                    get_flanking_region(pwd_gene_1_gbk_file, gene_1, flanking_length)
+
+                    if plt_flk_region is True:
+                        SeqIO.write(genome_1_record, pwd_gene_1_gbk_file, 'genbank')
+                        get_flanking_region(pwd_gene_1_gbk_file, gene_1, flanking_length)
 
     # Extract gbk and fasta files for gene 2
     for genome_2_record in SeqIO.parse(pwd_genome_2_gbk, 'genbank'):
         for gene_2_f in genome_2_record.features:
             if 'locus_tag' in gene_2_f.qualifiers:
                 if gene_2 in gene_2_f.qualifiers["locus_tag"]:
-                    dict_value_list.append([gene_2, int(gene_2_f.location.start), int(gene_2_f.location.end), gene_2_f.location.strand, len(genome_2_record.seq)])
+                    dict_value_list.append(
+                        [gene_2, int(gene_2_f.location.start), int(gene_2_f.location.end), gene_2_f.location.strand,
+                         len(genome_2_record.seq)])
                     pwd_gene_2_gbk_file = '%s/%s/%s.gbk' % (path_to_output_act_folder, folder_name, gene_2)
                     pwd_gene_2_fasta_file = '%s/%s/%s.fasta' % (path_to_output_act_folder, folder_name, gene_2)
-                    SeqIO.write(genome_2_record, pwd_gene_2_gbk_file, 'genbank')
                     SeqIO.write(genome_2_record, pwd_gene_2_fasta_file, 'fasta')
-                    get_flanking_region(pwd_gene_2_gbk_file, gene_2, flanking_length)
 
-    # Run Blast
-    prefix_c =              '%s/%s'                 % (path_to_output_act_folder, folder_name)
-    query_c =               '%s/%s_%sbp.fasta'      % (prefix_c, gene_1, flanking_length)
-    query_c_full_len =      '%s/%s.fasta'           % (prefix_c, gene_1)
-    subject_c =             '%s/%s_%sbp.fasta'      % (prefix_c, gene_2, flanking_length)
-    subject_c_full_len =    '%s/%s.fasta'           % (prefix_c, gene_2)
-    output_c =              '%s/%s.txt'             % (prefix_c, folder_name)
-    output_c_full_len =     '%s/%s_full_length.txt' % (prefix_c, folder_name)
-
-    parameters_c_n =          '-evalue 1e-5 -outfmt 6 -task blastn'
-    parameters_c_n_full_len = '-evalue 1e-5 -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen" -task blastn'
-    command_blast =           '%s -query %s -subject %s -out %s %s' % (pwd_blastn_exe, query_c, subject_c, output_c, parameters_c_n)
-    command_blast_full_len =  '%s -query %s -subject %s -out %s %s' % (pwd_blastn_exe, query_c_full_len, subject_c_full_len, output_c_full_len, parameters_c_n_full_len)
-    os.system(command_blast)
-
+                    if plt_flk_region is True:
+                        SeqIO.write(genome_2_record, pwd_gene_2_gbk_file, 'genbank')
+                        get_flanking_region(pwd_gene_2_gbk_file, gene_2, flanking_length)
 
     ############################## check whether full length or end match ##############################
 
@@ -858,8 +844,13 @@ def get_gbk_blast_act2(arguments_list):
         match_category = 'normal'
         candidates_2_contig_match_category_dict[folder_name] = match_category
     else:
+        query_c_full_len        = '%s/%s/%s.fasta'              % (path_to_output_act_folder, folder_name, gene_1)
+        subject_c_full_len      = '%s/%s/%s.fasta'              % (path_to_output_act_folder, folder_name, gene_2)
+        output_c_full_len       = '%s/%s/%s_full_length.txt'    % (path_to_output_act_folder, folder_name, folder_name)
+        parameters_c_n_full_len = '-evalue 1e-5 -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen" -task blastn'
 
         # run blast
+        command_blast_full_len  = '%s -query %s -subject %s -out %s %s' % (pwd_blastn_exe, query_c_full_len, subject_c_full_len, output_c_full_len, parameters_c_n_full_len)
         os.system(command_blast_full_len)
 
         # get qualified_ctg_match_list
@@ -871,140 +862,115 @@ def get_gbk_blast_act2(arguments_list):
             if align_len >= min_ctg_match_aln_len:
                 qualified_ctg_match_list.append(blast_hit_split)
 
-        if len(qualified_ctg_match_list) == 0:
-            match_category = 'normal'
-            candidates_2_contig_match_category_dict[folder_name] = match_category
-        else:
+        match_category = 'normal'
+        if len(qualified_ctg_match_list) != 0:
             match_category = check_full_lenght_and_end_match(qualified_ctg_match_list, end_match_iden_cutoff)
-            candidates_2_contig_match_category_dict[folder_name] = match_category
-
+        candidates_2_contig_match_category_dict[folder_name] = match_category
 
     ############################## prepare for flanking plot ##############################
 
-    # read in gbk files
-    matche_pair_list = []
-    for each_gene in genes:
-        path_to_gbk_file = '%s/%s/%s_%sbp.gbk' % (path_to_output_act_folder, folder_name, each_gene, flanking_length)
-        gene_contig = SeqIO.read(path_to_gbk_file, "genbank")
-        matche_pair_list.append(gene_contig)
-    bin_record_list = []
-    bin_record_list.append(matche_pair_list)
+    if plt_flk_region is True:
 
-    # get the distance of the gene to contig ends
-    gene_1_left_len = dict_value_list[0][1]
-    gene_1_right_len = dict_value_list[0][4] - dict_value_list[0][2]
-    gene_2_left_len = dict_value_list[1][1]
-    gene_2_right_len = dict_value_list[1][4] - dict_value_list[1][2]
+        # Run Blast
+        query_c              = '%s/%s/%s_%sbp.fasta'  % (path_to_output_act_folder, folder_name, gene_1, flanking_length)
+        subject_c            = '%s/%s/%s_%sbp.fasta'  % (path_to_output_act_folder, folder_name, gene_2, flanking_length)
+        path_to_blast_result = '%s/%s/%s.txt'         % (path_to_output_act_folder, folder_name, folder_name)
+        parameters_c_n       = '-evalue 1e-5 -outfmt 6 -task blastn'
+        command_blast        = '%s -query %s -subject %s -out %s %s' % (pwd_blastn_exe, query_c, subject_c, path_to_blast_result, parameters_c_n)
+        os.system(command_blast)
 
-    # create an empty diagram
-    diagram = GenomeDiagram.Diagram()
+        # read in gbk files
+        matche_pair_list = []
+        for each_gene in genes:
+            path_to_gbk_file = '%s/%s/%s_%sbp.gbk' % (path_to_output_act_folder, folder_name, each_gene, flanking_length)
+            gene_contig = SeqIO.read(path_to_gbk_file, "genbank")
+            matche_pair_list.append(gene_contig)
+        bin_record_list = []
+        bin_record_list.append(matche_pair_list)
 
-    # add tracks to diagram
-    max_len = 0
-    for gene1_contig, gene2_contig in bin_record_list:
-        # set diagram track length
-        max_len = max(max_len, len(gene1_contig), len(gene2_contig))
+        # get the distance of the gene to contig ends
+        gene_1_left_len  = dict_value_list[0][1]
+        gene_1_right_len = dict_value_list[0][4] - dict_value_list[0][2]
+        gene_2_left_len  = dict_value_list[1][1]
+        gene_2_right_len = dict_value_list[1][4] - dict_value_list[1][2]
 
-        # add gene content track for gene1_contig
-        contig_1_gene_content_track = diagram.new_track(1,
-                                                        name='%s (left %sbp, right %sbp)' % (gene1_contig.name, gene_1_left_len, gene_1_right_len),
-                                                        greytrack=True,
-                                                        greytrack_labels=1,
-                                                        greytrack_font='Helvetica',
-                                                        greytrack_fontsize=12,
-                                                        height=0.35,
-                                                        start=0,
-                                                        end=len(gene1_contig),
-                                                        scale=True,
-                                                        scale_fontsize=6,
-                                                        scale_ticks=1,
-                                                        scale_smalltick_interval=10000,
-                                                        scale_largetick_interval=10000)
+        # create an empty diagram
+        diagram = GenomeDiagram.Diagram()
 
-        # add gene content track for gene2_contig
-        contig_2_gene_content_track = diagram.new_track(1,
-                                                        name='%s (left %sbp, right %sbp)' % (gene2_contig.name, gene_2_left_len, gene_2_right_len),
-                                                        greytrack=True,
-                                                        greytrack_labels=1,
-                                                        greytrack_font='Helvetica',
-                                                        greytrack_fontsize=12,
-                                                        height=0.35,
-                                                        start=0,
-                                                        end=len(gene2_contig),
-                                                        scale=True,
-                                                        scale_fontsize=6,
-                                                        scale_ticks=1,
-                                                        scale_smalltick_interval=10000,
-                                                        scale_largetick_interval=10000)
+        # add tracks to diagram
+        max_len = 0
+        for gene1_contig, gene2_contig in bin_record_list:
+            # set diagram track length
+            max_len = max(max_len, len(gene1_contig), len(gene2_contig))
 
-        # add blank feature/graph sets to each track
-        feature_sets_1 = contig_1_gene_content_track.new_set(type='feature')
-        feature_sets_2 = contig_2_gene_content_track.new_set(type='feature')
+            # add gene content track for gene1_contig
+            contig_1_gene_content_track = diagram.new_track(1, name='%s (left %sbp, right %sbp)' % (gene1_contig.name, gene_1_left_len, gene_1_right_len),
+                                                            greytrack=True, greytrack_labels=1,
+                                                            greytrack_font='Helvetica', greytrack_fontsize=12,
+                                                            height=0.35, start=0, end=len(gene1_contig),
+                                                            scale=True, scale_fontsize=6, scale_ticks=1,
+                                                            scale_smalltick_interval=10000, scale_largetick_interval=10000)
 
-        # add gene features to 2 blank feature sets
-        set_contig_track_features(gene1_contig, name_to_group_number_dict, genes, current_HGT_iden, feature_sets_1)
-        set_contig_track_features(gene2_contig, name_to_group_number_dict, genes, current_HGT_iden, feature_sets_2)
+            # add gene content track for gene2_contig
+            contig_2_gene_content_track = diagram.new_track(1, name='%s (left %sbp, right %sbp)' % (gene2_contig.name, gene_2_left_len, gene_2_right_len),
+                                                            greytrack=True, greytrack_labels=1,
+                                                            greytrack_font='Helvetica', greytrack_fontsize=12,
+                                                            height=0.35, start=0, end=len(gene2_contig),
+                                                            scale=True, scale_fontsize=6, scale_ticks=1,
+                                                            scale_smalltick_interval=10000, scale_largetick_interval=10000)
 
-        ####################################### add crosslink from blast results #######################################
+            # add blank feature/graph sets to each track
+            feature_sets_1 = contig_1_gene_content_track.new_set(type='feature')
+            feature_sets_2 = contig_2_gene_content_track.new_set(type='feature')
 
-        path_to_blast_result = '%s/%s/%s.txt' % (path_to_output_act_folder, folder_name, folder_name)
-        blast_results = open(path_to_blast_result)
+            # add gene features to 2 blank feature sets
+            set_contig_track_features(gene1_contig, genes, current_HGT_iden, feature_sets_1)
+            set_contig_track_features(gene2_contig, genes, current_HGT_iden, feature_sets_2)
 
-        # parse blast results
-        for each_line in blast_results:
-            each_line_split = each_line.split('\t')
-            query = each_line_split[0]
-            identity = float(each_line_split[2])
-            alignment_len = int(each_line_split[3])
-            query_start = int(each_line_split[6])
-            query_end = int(each_line_split[7])
-            target_start = int(each_line_split[8])
-            target_end = int(each_line_split[9])
+            ####################################### add crosslink from blast results #######################################
 
-            # use color to reflect identity
-            color = colors.linearlyInterpolatedColor(colors.white, colors.red, 50, 100, identity)
+            # parse blast results
+            for each_line in open(path_to_blast_result):
+                each_line_split = each_line.split('\t')
+                query = each_line_split[0]
+                identity = float(each_line_split[2])
+                alignment_len = int(each_line_split[3])
+                query_start = int(each_line_split[6])
+                query_end = int(each_line_split[7])
+                target_start = int(each_line_split[8])
+                target_end = int(each_line_split[9])
 
-            # only focus on matches longer than 100 bp
-            if alignment_len >= 200:
+                # use color to reflect identity
+                color = colors.linearlyInterpolatedColor(colors.white, colors.red, 50, 100, identity)
 
-                # if query is contig_1
-                if query == gene1_contig.name:
-                    link = CrossLink((contig_1_gene_content_track, query_start, query_end),
-                                     (contig_2_gene_content_track, target_start, target_end),
-                                     color=color,
-                                     border=color,
-                                     flip=False)
-                    diagram.cross_track_links.append(link)
+                # only focus on matches longer than 100 bp
+                if alignment_len >= 200:
 
-                # if query is contig_2
-                elif query == gene2_contig.name:
-                    link = CrossLink((contig_2_gene_content_track, query_start, query_end),
-                                     (contig_1_gene_content_track, target_start, target_end),
-                                     color=color,
-                                     border=color,
-                                     flip=False)
-                    diagram.cross_track_links.append(link)
+                    # if query is contig_1
+                    if query == gene1_contig.name:
+                        link = CrossLink((contig_1_gene_content_track, query_start, query_end),
+                                         (contig_2_gene_content_track, target_start, target_end),
+                                         color=color, border=color, flip=False)
+                        diagram.cross_track_links.append(link)
 
-        ############################################### Draw and Export ################################################
+                    # if query is contig_2
+                    elif query == gene2_contig.name:
+                        link = CrossLink((contig_2_gene_content_track, query_start, query_end),
+                                         (contig_1_gene_content_track, target_start, target_end),
+                                         color=color, border=color, flip=False)
+                        diagram.cross_track_links.append(link)
 
-        diagram.draw(format="linear",
-                     orientation="landscape",
-                     pagesize=(50 * cm, 25 * cm),
-                     fragments=1,
-                     start=0,
-                     end=max_len)
+            # Draw and Export
+            diagram.draw(format="linear", orientation="landscape", pagesize=(50 * cm, 25 * cm), fragments=1, start=0, end=max_len)
+            diagram.write('%s/%s.%s' % (path_to_output_act_folder, folder_name, flk_plot_fmt), flk_plot_fmt)
 
-
-        diagram.write('%s/%s.%s' % (path_to_output_act_folder, folder_name, flk_plot_fmt), flk_plot_fmt)
-
-
-    # move plot to corresponding folder
-    if match_category == 'end_match':
-        os.system('mv %s/%s.%s %s/' % (path_to_output_act_folder, folder_name, flk_plot_fmt, pwd_at_ends_plot_folder))
-    elif match_category == 'full_length_match':
-        os.system('mv %s/%s.%s %s/' % (path_to_output_act_folder, folder_name, flk_plot_fmt, pwd_full_contig_match_plot_folder))
-    else:
-        os.system('mv %s/%s.%s %s/' % (path_to_output_act_folder, folder_name, flk_plot_fmt, pwd_normal_plot_folder))
+        # move plot to corresponding folder
+        if match_category == 'end_match':
+            os.system('mv %s/%s.%s %s/' % (path_to_output_act_folder, folder_name, flk_plot_fmt, pwd_at_ends_plot_folder))
+        elif match_category == 'full_length_match':
+            os.system('mv %s/%s.%s %s/' % (path_to_output_act_folder, folder_name, flk_plot_fmt, pwd_full_contig_match_plot_folder))
+        else:
+            os.system('mv %s/%s.%s %s/' % (path_to_output_act_folder, folder_name, flk_plot_fmt, pwd_normal_plot_folder))
 
 
 def export_HGT_query_to_subjects(pwd_BM_HGTs, pwd_blast_subjects_in_one_line, pwd_query_to_subjects_file):
@@ -1684,19 +1650,20 @@ def combine_PG_output(PG_output_file_list_with_path, output_prefix, detection_ra
 
 def BP(args, config_dict):
 
-    output_folder =             args['o']
-    output_prefix =             args['p']
-    grouping_file =             args['g']
-    grouping_levels =           args['r']
-    cover_cutoff =              args['cov']
-    align_len_cutoff =          args['al']
-    flanking_length_kbp =       args['flk']
-    identity_percentile =       args['ip']
-    end_match_identity_cutoff = args['ei']
-    num_threads =               args['t']
-    No_Eb_Check =               args['NoEbCheck']
-    keep_quiet =                args['quiet']
-    keep_temp =                 args['tmp']
+    output_folder               = args['o']
+    output_prefix               = args['p']
+    grouping_file               = args['g']
+    grouping_levels             = args['r']
+    cover_cutoff                = args['cov']
+    align_len_cutoff            = args['al']
+    flanking_length_kbp         = args['flk']
+    identity_percentile         = args['ip']
+    end_match_identity_cutoff   = args['ei']
+    num_threads                 = args['t']
+    No_Eb_Check                 = args['NoEbCheck']
+    keep_quiet                  = args['quiet']
+    keep_temp                   = args['tmp']
+    plot_flk_region             = args['pfr']
 
 
     # get path to current script
@@ -2137,13 +2104,15 @@ def BP(args, config_dict):
 
             ############################################### plot flanking region ###############################################
 
-            report_and_log(('Detect HGT among %s: plotting flanking regions with %s cores.' % (rank_abbre_dict_plural[grouping_level], num_threads)), pwd_log_file, keep_quiet)
+            if plot_flk_region is True:
+                report_and_log(('Detect HGT among %s: plotting flanking regions with %s cores.' % (rank_abbre_dict_plural[grouping_level], num_threads)), pwd_log_file, keep_quiet)
 
             # create folder to hold ACT output
             os.makedirs(pwd_op_act_folder)
-            os.makedirs(pwd_normal_folder)
-            os.makedirs(pwd_end_match_folder)
-            os.makedirs(pwd_full_length_match_folder)
+            if plot_flk_region is True:
+                os.makedirs(pwd_normal_folder)
+                os.makedirs(pwd_end_match_folder)
+                os.makedirs(pwd_full_length_match_folder)
 
             # initialize manager.dict
             manager = mp.Manager()
@@ -2154,17 +2123,14 @@ def BP(args, config_dict):
                 list_for_multiple_arguments_flanking_regions.append([match,
                                                                      pwd_prodigal_output_folder,
                                                                      flanking_length,
-                                                                     align_len_cutoff,
-                                                                     name_to_group_number_dict,
                                                                      pwd_op_act_folder,
                                                                      pwd_normal_folder,
                                                                      pwd_end_match_folder,
                                                                      pwd_full_length_match_folder,
                                                                      pwd_blastn_exe,
-                                                                     keep_temp,
                                                                      candidates_2_contig_match_category_dict_mp,
                                                                      end_match_identity_cutoff,
-                                                                     No_Eb_Check])
+                                                                     No_Eb_Check, plot_flk_region])
 
             pool_flanking_regions = mp.Pool(processes=num_threads)
             pool_flanking_regions.map(get_gbk_blast_act2, list_for_multiple_arguments_flanking_regions)
@@ -2769,23 +2735,24 @@ def BP(args, config_dict):
 
             ############################################ combine flanking plots ############################################
 
-            # create plot folders
-            os.mkdir(pwd_flanking_plot_folder_combined_tmp)
-            os.mkdir(pwd_flanking_plot_folder_combined)
+            if plot_flk_region is True:
+                # create plot folders
+                os.mkdir(pwd_flanking_plot_folder_combined_tmp)
+                os.mkdir(pwd_flanking_plot_folder_combined)
 
-            for flanking_plot_folder in pwd_flanking_plot_folder_list:
-                flanking_plot_re = '%s/1_Plots_normal/*.SVG' % flanking_plot_folder
-                flanking_plot_list = [os.path.basename(file_name) for file_name in glob.glob(flanking_plot_re)]
+                for flanking_plot_folder in pwd_flanking_plot_folder_list:
+                    flanking_plot_re = '%s/1_Plots_normal/*.SVG' % flanking_plot_folder
+                    flanking_plot_list = [os.path.basename(file_name) for file_name in glob.glob(flanking_plot_re)]
 
-                for flanking_plot in flanking_plot_list:
-                    pwd_flanking_plot = '%s/1_Plots_normal/%s' % (flanking_plot_folder, flanking_plot)
-                    os.system('cp %s %s/' % (pwd_flanking_plot, pwd_flanking_plot_folder_combined_tmp))
+                    for flanking_plot in flanking_plot_list:
+                        pwd_flanking_plot = '%s/1_Plots_normal/%s' % (flanking_plot_folder, flanking_plot)
+                        os.system('cp %s %s/' % (pwd_flanking_plot, pwd_flanking_plot_folder_combined_tmp))
 
-                # os.system('cp %s/1_Plots_normal/* %s/' % (flanking_plot_folder, pwd_flanking_plot_folder_combined_tmp))
+                    # os.system('cp %s/1_Plots_normal/* %s/' % (flanking_plot_folder, pwd_flanking_plot_folder_combined_tmp))
 
-            for plot_file in plot_file_list:
-                pwd_plot_file = '%s/%s' % (pwd_flanking_plot_folder_combined_tmp, plot_file)
-                os.system('mv %s %s/' % (pwd_plot_file, pwd_flanking_plot_folder_combined))
+                for plot_file in plot_file_list:
+                    pwd_plot_file = '%s/%s' % (pwd_flanking_plot_folder_combined_tmp, plot_file)
+                    os.system('mv %s %s/' % (pwd_plot_file, pwd_flanking_plot_folder_combined))
 
 
             ###################################### Get_circlize_plot #######################################
@@ -2819,7 +2786,8 @@ def BP(args, config_dict):
             ###################################### remove tmp files #######################################
 
             # remove tmp files
-            os.system('rm -r %s' % pwd_flanking_plot_folder_combined_tmp)
+            if plot_flk_region is True:
+                os.system('rm -r %s' % pwd_flanking_plot_folder_combined_tmp)
 
 
 if __name__ == '__main__':
@@ -2833,6 +2801,7 @@ if __name__ == '__main__':
     parser.add_argument('-cov',           required=False, type=int,     default=75,     help='coverage cutoff, default: 75')
     parser.add_argument('-al',            required=False, type=int,     default=200,    help='alignment length cutoff, default: 200')
     parser.add_argument('-flk',           required=False, type=int,     default=10,     help='the length of flanking sequences to plot (Kbp), default: 10')
+    parser.add_argument('-pfr',           required=False, action="store_true",          help='plot flanking_regions of identified HGTs')
     parser.add_argument('-ip',            required=False, type=int,     default=90,     help='identity percentile cutoff, default: 90')
     parser.add_argument('-ei',            required=False, type=float,   default=80,     help='end match identity cutoff, default: 80')
     parser.add_argument('-t',             required=False, type=int,     default=1,      help='number of threads, default: 1')

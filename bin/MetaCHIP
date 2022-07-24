@@ -112,6 +112,7 @@ if __name__ == '__main__':
     BP_parser.add_argument('-cov',           required=False, type=int,     default=75,     help='coverage cutoff, default: 75')
     BP_parser.add_argument('-al',            required=False, type=int,     default=200,    help='alignment length cutoff, default: 200')
     BP_parser.add_argument('-flk',           required=False, type=int,     default=10,     help='the length of flanking sequences to plot (Kbp), default: 10')
+    BP_parser.add_argument('-pfr',           required=False, action="store_true",          help='plot flanking_regions of identified HGTs')
     BP_parser.add_argument('-ip',            required=False, type=int,     default=90,     help='identity percentile cutoff, default: 90')
     BP_parser.add_argument('-ei',            required=False, type=float,   default=80,     help='end match identity cutoff, default: 80')
     BP_parser.add_argument('-t',             required=False, type=int,     default=1,      help='number of threads, default: 1')
