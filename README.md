@@ -6,6 +6,14 @@
 [![DOI         ](https://img.shields.io/static/v1.svg?label=DOI&message=10.1186/s40168-019-0649-y&color=orange)](https://doi.org/10.1186/s40168-019-0649-y)
 
 
+Before you start
+---
+
+:warning: MetaCHIP was designed to predict HGT among prokaryotes, please do NOT include eukaryotic genomes in your genome folder.
+
+:warning: To get reliable HGT prediction results, input genomes need to be with at least **40%** completeness.
+
+
 Publication:
 ---
 
@@ -71,11 +79,6 @@ How to install:
 
 1. :warning: If you clone the repository directly off GitHub you might end up with a version that is still under development.
 
-
-Notes
----
-
-:warning: For a reliable construction of the species tree, input genomes need to be with at least **40%** completeness.
 
 How to run:
 ---
