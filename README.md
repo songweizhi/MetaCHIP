@@ -6,19 +6,19 @@
 [![DOI         ](https://img.shields.io/static/v1.svg?label=DOI&message=10.1186/s40168-019-0649-y&color=orange)](https://doi.org/10.1186/s40168-019-0649-y)
 
 
-:warning: Before you start :warning:
----
-
-+ MetaCHIP was designed to predict HGT among prokaryotes, please do NOT include eukaryotic genomes in your genome folder.
-+ To get reliable HGT prediction results, input genomes need to be with at least **40%** completeness.
-
-
 Publication:
 ---
 
 + **Song WZ**, Wemheuer B, Zhang S, Steensen K, Thomas T* (2019) MetaCHIP: community-level horizontal gene transfer identification through the combination of best-match and phylogenetic approaches. Microbiome. 7:36 https://doi.org/10.1186/s40168-019-0649-y
 + Contact: Weizhi Song (songwz03@gmail.com), Torsten Thomas (t.thomas@unsw.edu.au)
 + Centre for Marine Science and Innovation ([CMSI](https://www.cmsi.unsw.edu.au)), University of New South Wales, Sydney, Australia
+
+
+:warning: Before you start 
+---
+
++ :warning: MetaCHIP was designed to predict HGT among prokaryotes, please do NOT include eukaryotic genomes in your genome folder.
++ :warning: To get reliable HGT prediction results, input genomes need to be with at least **40%** completeness.
 
 
 Change Log:
