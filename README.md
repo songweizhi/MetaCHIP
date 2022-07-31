@@ -6,12 +6,11 @@
 [![DOI         ](https://img.shields.io/static/v1.svg?label=DOI&message=10.1186/s40168-019-0649-y&color=orange)](https://doi.org/10.1186/s40168-019-0649-y)
 
 
-Before you start
+:warning: Before you start :warning:
 ---
 
-:warning: MetaCHIP was designed to predict HGT among prokaryotes, please do NOT include eukaryotic genomes in your genome folder.
-
-:warning: To get reliable HGT prediction results, input genomes need to be with at least **40%** completeness.
++ MetaCHIP was designed to predict HGT among prokaryotes, please do NOT include eukaryotic genomes in your genome folder.
++ To get reliable HGT prediction results, input genomes need to be with at least **40%** completeness.
 
 
 Publication:
