@@ -19,7 +19,7 @@ Publication:
 
 + :warning: MetaCHIP was designed to predict HGT among prokaryotes, please do NOT include eukaryotic genomes in your genome folder.
 + :warning: To get reliable HGT prediction results, input genomes need to be with at least **40%** completeness.
-
++ :warning: Biopython has to be >= 1.78, upgrade with `pip3 install --upgrade biopython`.
 
 Change Log:
 ---
@@ -74,9 +74,9 @@ How to install:
         # for upgrade
         pip3 install --upgrade MetaCHIP
         
-1. You can either add MetaCHIP's 3rd party dependencies to your system path or specify full path to their executables in MetaCHIP_config.py which can be found in Python's folder `lib/site-packages/MetaCHIP`.
+2. You can either add MetaCHIP's 3rd party dependencies to your system path or specify full path to their executables in MetaCHIP_config.py which can be found in Python's folder `lib/site-packages/MetaCHIP`.
 
-1. :warning: If you clone the repository directly off GitHub you might end up with a version that is still under development.
+3. :warning: If you clone the repository directly off GitHub you might end up with a version that is still under development.
 
 
 How to run:
