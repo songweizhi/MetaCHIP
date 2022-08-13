@@ -1703,11 +1703,22 @@ def BP(args, config_dict):
     if output_folder is not None:
         MetaCHIP_wd = output_folder
 
-    # get provided ranks for PI module
-    pwd_prodigal_output_folder_re          = '%s/%s_*_prodigal_output' % (MetaCHIP_wd, output_prefix)
-    pwd_prodigal_output_folder_detected    = [os.path.basename(file_name) for file_name in glob.glob(pwd_prodigal_output_folder_re)][0]
-    specified_ranks_for_PI = pwd_prodigal_output_folder_detected.split('_prodigal_output')[0].split('_')[-1]
+    if os.path.isdir(MetaCHIP_wd) is False:
+        print('Outputs from the PI module not detected, please make sure that parameters provided with "-p" and/or "-o" are the same for the PI and BP modules')
+        print('Folder not found: %s' % MetaCHIP_wd)
+        print('MetaCHIP exited!')
+        exit()
 
+    # get provided ranks for PI module
+    pwd_prodigal_output_folder_re = '%s/%s_*_prodigal_output' % (MetaCHIP_wd, output_prefix)
+    pwd_prodigal_output_folder_list = [os.path.basename(file_name) for file_name in glob.glob(pwd_prodigal_output_folder_re)]
+    if len(pwd_prodigal_output_folder_list) == 0:
+        print('Prodigal output folder not found, please make sure that parameters provided with "-p" and/or "-o" are the same for the PI and BP modules')
+        print('MetaCHIP exited!')
+        exit()
+
+    pwd_prodigal_output_folder_detected = pwd_prodigal_output_folder_list[0]
+    specified_ranks_for_PI = pwd_prodigal_output_folder_detected.split('_prodigal_output')[0].split('_')[-1]
 
     specified_ranks_uniq_to_BP = []
     for each_BP_rank in grouping_levels:
@@ -2613,9 +2624,10 @@ def BP(args, config_dict):
 
             extract_donor_recipient_sequences(pwd_combined_ffn_file, recipient_gene_list, donor_gene_list, pwd_recipient_gene_seq_ffn, pwd_recipient_gene_seq_faa, pwd_donor_gene_seq_ffn, pwd_donor_gene_seq_faa)
 
-            for each_flk_plot in flanking_plot_file_list:
-                pwd_each_flk_plot = '%s/%s_%s%s_Flanking_region_plots/1_Plots_normal/%s' % (pwd_MetaCHIP_op_folder, output_prefix, detection_rank_list, group_num, each_flk_plot)
-                os.system('mv %s %s/%s_%s%s_Flanking_region_plots/' % (pwd_each_flk_plot, pwd_MetaCHIP_op_folder, output_prefix, detection_rank_list, group_num))
+            if plot_flk_region is True:
+                for each_flk_plot in flanking_plot_file_list:
+                    pwd_each_flk_plot = '%s/%s_%s%s_Flanking_region_plots/1_Plots_normal/%s' % (pwd_MetaCHIP_op_folder, output_prefix, detection_rank_list, group_num, each_flk_plot)
+                    os.system('mv %s %s/%s_%s%s_Flanking_region_plots/' % (pwd_each_flk_plot, pwd_MetaCHIP_op_folder, output_prefix, detection_rank_list, group_num))
 
             ###################################### Get_circlize_plot #######################################
 
@@ -2652,14 +2664,18 @@ def BP(args, config_dict):
 
             # remove tmp files
             os.remove(pwd_detected_HGT_PG_txt)
-            os.system('rm -r %s/%s_%s%s_Flanking_region_plots/1_Plots_normal'               % (pwd_MetaCHIP_op_folder, output_prefix, detection_rank_list, group_num))
-            os.system('rm -r %s/%s_%s%s_Flanking_region_plots/2_Plots_end_match'            % (pwd_MetaCHIP_op_folder, output_prefix, detection_rank_list, group_num))
-            os.system('rm -r %s/%s_%s%s_Flanking_region_plots/3_Plots_full_length_match'    % (pwd_MetaCHIP_op_folder, output_prefix, detection_rank_list, group_num))
+            if plot_flk_region is True:
+                os.system('rm -r %s/%s_%s%s_Flanking_region_plots/1_Plots_normal'               % (pwd_MetaCHIP_op_folder, output_prefix, detection_rank_list, group_num))
+                os.system('rm -r %s/%s_%s%s_Flanking_region_plots/2_Plots_end_match'            % (pwd_MetaCHIP_op_folder, output_prefix, detection_rank_list, group_num))
+                os.system('rm -r %s/%s_%s%s_Flanking_region_plots/3_Plots_full_length_match'    % (pwd_MetaCHIP_op_folder, output_prefix, detection_rank_list, group_num))
+
+            # final report
+            time_format = '[%Y-%m-%d %H:%M:%S]'
+            print('%s All done, prediction results are in %s ' % (datetime.now().strftime(time_format), pwd_MetaCHIP_op_folder))
 
 
         # for multiple level detection
-        if len(detection_rank_list) > 1:
-
+        else:
             time_format = '[%Y-%m-%d %H:%M:%S]'
             print('%s Combine multiple level predictions' % (datetime.now().strftime(time_format)))
 
@@ -2788,6 +2804,10 @@ def BP(args, config_dict):
             # remove tmp files
             if plot_flk_region is True:
                 os.system('rm -r %s' % pwd_flanking_plot_folder_combined_tmp)
+
+            # final report
+            print('%s All done, prediction results are in %s ' % (datetime.now().strftime(time_format), pwd_combined_prediction_folder))
+
 
 
 if __name__ == '__main__':

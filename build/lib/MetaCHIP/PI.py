@@ -870,7 +870,7 @@ def PI(args, config_dict):
     ######################################## run prodigal with multiprocessing #########################################
 
     # for report and log
-    report_and_log(('Running Prodigal for %s qualified genomes with %s cores (1-3 minutes per genome per core).' % (len(genome_for_HGT_detection_list), num_threads)), pwd_log_file, keep_quiet)
+    report_and_log(('Running Prodigal for %s genomes with %s cores (1-3 minutes per genome per core).' % (len(genome_for_HGT_detection_list), num_threads)), pwd_log_file, keep_quiet)
 
     # create prodigal output folder
     os.mkdir(pwd_prodigal_output_folder)
@@ -886,6 +886,20 @@ def PI(args, config_dict):
     pool.map(prodigal_worker, list_for_multiple_arguments_Prodigal)
     pool.close()
     pool.join()
+
+    # check if prodigal succeed with all qualified genomes
+    prodigal_failed_gnm_list = []
+    for each_gnm in genome_for_HGT_detection_list:
+        pwd_gbk = '%s/%s.gbk' % (pwd_prodigal_output_folder, each_gnm)
+        pwd_ffn = '%s/%s.ffn' % (pwd_prodigal_output_folder, each_gnm)
+        pwd_faa = '%s/%s.faa' % (pwd_prodigal_output_folder, each_gnm)
+        if (os.stat(pwd_gbk).st_size == 0) or (os.stat(pwd_ffn).st_size == 0) or (os.stat(pwd_faa).st_size == 0):
+            prodigal_failed_gnm_list.append(each_gnm)
+
+    if len(prodigal_failed_gnm_list) > 0:
+        print('Prodigal failed on the following genomes, please remove them from your input genomes')
+        print(','.join(prodigal_failed_gnm_list))
+        print('MetaCHIP exited')
 
 
     ########################################### get species tree (hmmsearch) ###########################################
@@ -1000,6 +1014,13 @@ def PI(args, config_dict):
     report_and_log(('Making blast database.'), pwd_log_file, keep_quiet)
     os.system('cat %s/*.ffn > %s/%s' % (pwd_prodigal_output_folder, pwd_blast_db_folder, combined_ffn_file))
 
+    # check the size of combined_ffn_file
+    pwd_combined_ffn_file = '%s/%s' % (pwd_blast_db_folder, combined_ffn_file)
+    if os.stat(pwd_combined_ffn_file).st_size == 0:
+        print('No sequence detected in %s, please make sure Prodigal was installed properly' % combined_ffn_file)
+        print('MetaCHIP exited!')
+        exit()
+
     makeblastdb_cmd = '%s -in %s/%s -dbtype nucl -parse_seqids' % (pwd_makeblastdb_exe, pwd_blast_db_folder, combined_ffn_file)
     os.system(makeblastdb_cmd)
 
@@ -1059,3 +1080,9 @@ if __name__ == '__main__':
 
     PI(args, config_dict)
 
+'''
+
+1. check the size of combined ffn file for makeblastdb, exit if it's empty
+2. check if prodigal succeed with all qualified genomes
+
+'''

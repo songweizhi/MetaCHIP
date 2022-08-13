@@ -23,7 +23,7 @@ Publication:
 
 Change Log:
 ---
-* v1.10.10 (2022-07-24) - The plot of flanking regions of identified HGTs is disabled by default,  provide "-pfr" to the BP module to get the plot
+* v1.10.10 (2022-07-24) - The plot of flanking regions of identified HGTs is disabled by default:warning:,  provide "-pfr" to the BP module to get the plot
 * v1.10.6 (2021-09-19) - You can now designate a place for the output files with "-o" 
 * v1.10.4 (2021-06-05) - Removed the limitation that contig length need to be shorter than 22bp
 * v1.10.0 (2020-08-16) - Fixed a few bugs
