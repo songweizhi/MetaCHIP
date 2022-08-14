@@ -37,7 +37,6 @@ to_do = '''
 4. move flk plot to the last step
 5. create a SpongeEMP_c52_Flanking_region_plots_wd folder
 6. !!!!!!!!!! get file list by RE is very slow (put files to delete into a tmp folder, then delete the folder)
-7. check if db files exist in PI step
 
 '''
 
@@ -95,7 +94,7 @@ if __name__ == '__main__':
     PI_parser.add_argument('-taxon',   required=False,                      help='taxonomic classification of input genomes')
     PI_parser.add_argument('-o',       required=False, default=None,        help='output folder (default: current working directory)')
     PI_parser.add_argument('-p',       required=True,                       help='output prefix')
-    PI_parser.add_argument('-r',       required=False, default=None,        help='grouping rank, choose from p (phylum), c (class), o (order), f (family), g (genus) or any combination of them')
+    PI_parser.add_argument('-r',       required=False, default=None,        help='grouping rank, choose from p, c, o, f and g or any combination of them')
     PI_parser.add_argument('-g',       required=False, default=None,        help='grouping file')
     PI_parser.add_argument('-x',       required=False, default='fasta',     help='file extension')
     PI_parser.add_argument('-nonmeta', required=False, action="store_true", help='provide if input genomes are NOT metagenome-assembled genomes')

@@ -1588,13 +1588,11 @@ def combine_PG_output(PG_output_file_list_with_path, output_prefix, detection_ra
                         else:
                             HGT_occurence_dict[concatenated].append(taxon_rank)
 
-
     detection_ranks_all = ['d', 'p', 'c', 'o', 'f', 'g', 's']
     detection_ranks_list = []
     for each_rank in detection_ranks_all:
         if each_rank in detection_ranks:
             detection_ranks_list.append(each_rank)
-
 
     HGT_occurence_dict_0_1_format = {}
     for each_HGT in HGT_occurence_dict:

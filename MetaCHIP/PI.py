@@ -18,6 +18,7 @@
 
 import os
 import re
+import Bio
 import glob
 import shutil
 import argparse
@@ -25,10 +26,11 @@ import warnings
 import itertools
 from time import sleep
 from datetime import datetime
+from packaging import version
 from string import ascii_uppercase
-from Bio import SeqIO, AlignIO, Align
 from Bio.Seq import Seq
 from Bio import SeqFeature as SF
+from Bio import SeqIO, AlignIO, Align
 from Bio.SeqRecord import SeqRecord
 from Bio.SeqFeature import SeqFeature, FeatureLocation
 import multiprocessing as mp
@@ -599,6 +601,9 @@ def PI(args, config_dict):
 
 
     ######################################## check input file and dependencies #########################################
+
+    if version.parse(Bio.__version__) < version.parse('1.78'):
+        print('Biopython need to be >= 1.78, MetaCHIP exited!')
 
     if input_genome_folder[-1] == '/':
         input_genome_folder = input_genome_folder[:-1]

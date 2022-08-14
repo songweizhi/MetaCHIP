@@ -19,7 +19,7 @@ Publication:
 
 + :warning: MetaCHIP was designed to predict HGT among prokaryotes, please do NOT include eukaryotic genomes in your genome folder.
 + :warning: To get reliable HGT prediction results, input genomes need to be with at least **40%** completeness.
-+ :warning: Biopython has to be >= 1.78, upgrade with `pip3 install --upgrade biopython`.
+
 
 Change Log:
 ---
@@ -101,8 +101,8 @@ of your input genomes. File extension of your input genomes (e.g. fa, fasta) sho
 
     * Detect HGT among phyla, classes, orders, families and genera
 
-          MetaCHIP PI -p NorthSea -r pcofg -t 12 -i bin_folder -x fasta -taxon GTDB_classifications.tsv
-          MetaCHIP BP -p NorthSea -r pcofg -t 12
+          MetaCHIP PI -p NorthSea -r pcofg -t 12 -o path/to/output_dir -i MAG_folder -x fasta -taxon GTDB_classifications.tsv
+          MetaCHIP BP -p NorthSea -r pcofg -t 12 -o path/to/output_dir
 
     * Detect HGT among customized groups
         
