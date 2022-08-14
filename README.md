@@ -23,12 +23,10 @@ Publication:
 
 Change Log:
 ---
-* v1.10.10 (2022-07-24) - The plot of flanking regions of identified HGTs is disabled by default:warning:,  provide "-pfr" to the BP module to get the plot
-* v1.10.6 (2021-09-19) - You can now designate a place for the output files with "-o" 
+* v1.10.10 (2022-07-24) - :warning: The plot of flanking regions of identified HGTs is disabled by default,  provide "-pfr" to the BP module to get the plot
+* v1.10.6 (2021-09-19) - You can now designate a place/directory to hold the output files with "-o" 
 * v1.10.4 (2021-06-05) - Removed the limitation that contig length need to be shorter than 22bp
-* v1.10.0 (2020-08-16) - Fixed a few bugs
 * v1.9.0 (2020-06-01) - Add supplementary module: rename_seqs
-* v1.7.0 (2019-07-26) - Add supplementary modules: get_SCG_tree and SankeyTaxon
 * v1.6.0 (2019-07-23) - Support customized grouping of query genomes
 * v1.5.2 (2019-07-23) - Pfam hmm profiles updated to v32.0, TIGRFAMS db version is v14.0
 * v1.5.0 (2019-07-19) - Add supplementary module: update_hmms
@@ -43,7 +41,7 @@ Dependencies:
 ---
 
 + Python libraries: 
-[BioPython](https://github.com/biopython/biopython.github.io/) (>=1.78 :warning::warning::warning:), 
+[BioPython](https://github.com/biopython/biopython.github.io/) (>=1.78 :warning:), 
 [Numpy](http://www.numpy.org),
 [SciPy](https://www.scipy.org),
 [Matplotlib](http://matplotlib.org) and 
