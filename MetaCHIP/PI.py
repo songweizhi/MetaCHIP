@@ -633,7 +633,6 @@ def PI(args, config_dict):
         print('No input genome detected, program exited!')
         exit()
 
-
     # check the length of sequence id, exit if longer than 22bp
     # long_seq_id_genomes_list = []
     # for input_genome in input_genome_file_name_list:
@@ -650,7 +649,6 @@ def PI(args, config_dict):
     #     print('Sequence id in the above genomes are longer than 22 letters, please shorten them!')
     #     exit()
 
-
     if grouping_levels is None:
         grouping_levels = 'x'
 
@@ -664,7 +662,8 @@ def PI(args, config_dict):
     pwd_ignored_taxonomic_rank_file = '%s/ignored_taxonomic_rank.txt' % MetaCHIP_wd
 
     if (os.path.isdir(MetaCHIP_wd) is True) and (force_overwrite is False):
-        print('MetaCHIP working directory detected, program exited!')
+        print('MetaCHIP output folder already exist, please specify a different name with "-p".')
+        print('Program exited!')
         exit()
     else:
         force_create_folder(MetaCHIP_wd)
@@ -837,7 +836,6 @@ def PI(args, config_dict):
     pwd_blast_db_folder =                '%s/%s'                               % (MetaCHIP_wd, blast_db_folder)
     pwd_blast_result_folder =            '%s/%s'                               % (MetaCHIP_wd, blast_result_folder)
     pwd_blast_cmd_file =                 '%s/%s'                               % (MetaCHIP_wd, blast_cmd_file)
-
 
     ################################################### get grouping ###################################################
 
@@ -1029,8 +1027,6 @@ def PI(args, config_dict):
     makeblastdb_cmd = '%s -in %s/%s -dbtype nucl -parse_seqids' % (pwd_makeblastdb_exe, pwd_blast_db_folder, combined_ffn_file)
     os.system(makeblastdb_cmd)
 
-    # check db files
-
     # prepare arguments list for parallel_blastn_worker
     ffn_file_list = ['%s.ffn' % i for i in genome_for_HGT_detection_list]
 
@@ -1046,7 +1042,7 @@ def PI(args, config_dict):
 
     if noblast is False:
 
-        report_and_log(('Running blastn for %s qualified genomes with %s cores.' % (len(genome_for_HGT_detection_list), num_threads)), pwd_log_file, keep_quiet)
+        report_and_log(('Running blastn for %s qualified genomes with %s cores, be patient!' % (len(genome_for_HGT_detection_list), num_threads)), pwd_log_file, keep_quiet)
 
         # run blastn with multiprocessing
         pool = mp.Pool(processes=num_threads)

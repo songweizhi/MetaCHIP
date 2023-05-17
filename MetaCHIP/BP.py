@@ -1663,7 +1663,6 @@ def BP(args, config_dict):
     keep_temp                   = args['tmp']
     plot_flk_region             = args['pfr']
 
-
     # get path to current script
     flanking_length = flanking_length_kbp * 1000
     warnings.filterwarnings("ignore")
@@ -1771,7 +1770,6 @@ def BP(args, config_dict):
     if ignored_rank_num == len(grouping_levels):
         print('All specified ranks were ignored, see report from the PI module.')
         exit()
-
 
     # check whether blast results exist
     blast_result_file_re                = '%s/*.tab' % pwd_blast_result_folder
@@ -1887,7 +1885,6 @@ def BP(args, config_dict):
 
                 customized_group_num = group_num
 
-
             ############################################# define file/folder names #############################################
 
             MetaCHIP_op_folder                          = '%s_HGT_ip%s_al%sbp_c%s_ei%s_f%skbp_%s%s'         % (output_prefix, str(identity_percentile), str(align_len_cutoff), str(cover_cutoff),str(end_match_identity_cutoff), flanking_length_kbp, grouping_level, group_num)
@@ -1956,7 +1953,6 @@ def BP(args, config_dict):
 
             force_create_folder(pwd_MetaCHIP_op_folder)
 
-
             ####################################################################################################################
 
             # index grouping file
@@ -1974,7 +1970,6 @@ def BP(args, config_dict):
                 qualified_genome_list.append(bin_name)
                 name_to_group_number_dict[bin_name] = bin_group_number
                 name_to_group_dict[bin_name] = bin_group
-
 
             ############################################################################################################
             ################################## perform HGT detection with BM approach ##################################
@@ -2012,7 +2007,6 @@ def BP(args, config_dict):
             # combine g2g_files and sort it
             os.system('cat %s/*_g2g.tab > %s' % (pwd_blast_result_filtered_folder_g2g, pwd_qual_iden_file_gg))
             os.system('cat %s | sort > %s' % (pwd_qual_iden_file_gg, pwd_qual_iden_file_gg_sorted))
-
 
             ###########################################  get cutoff according to specified percentile ###########################################
 
@@ -2091,7 +2085,6 @@ def BP(args, config_dict):
             pool.map(get_HGT_worker, list_for_multiple_arguments_get_HGT)
             pool.close()
             pool.join()
-
 
             ################################ remove bidirection and add identity to output file ################################
 
@@ -2189,12 +2182,10 @@ def BP(args, config_dict):
                 full_length_match_value))
             BM_output_file_handle.close()
 
-
             ####################################### export gene clusters for PG approach #######################################
 
             os.system('cat %s/*_in_one_line.tab > %s' % (pwd_blast_result_filtered_folder_in_one_line, pwd_subjects_in_one_line))
             export_HGT_query_to_subjects(pwd_op_candidates_BM, pwd_subjects_in_one_line, pwd_HGT_query_to_subjects_file)
-
 
             ################################### export nc and aa sequence of predicted HGTs ####################################
 
@@ -2220,12 +2211,11 @@ def BP(args, config_dict):
             # report
             report_and_log(('Detect HGT among %s: done for BM approach!' % rank_abbre_dict_plural[grouping_level]), pwd_log_file, keep_quiet)
 
-
             ############################################################################################################
             ################################## perform HGT detection with PG approach ##################################
             ############################################################################################################
 
-            ###################################### store ortholog information into dictionary ######################################
+            ################################ store ortholog information into dictionary ################################
 
             # create folders
             force_create_folder(pwd_tree_folder)
@@ -2271,7 +2261,6 @@ def BP(args, config_dict):
                 bin_group_list.append(bin_group)
                 bin_group_without_underscore_list.append(bin_group_without_underscore)
 
-
             ###################################################### Get dicts #######################################################
 
             # get HGT_query_to_subjects dict
@@ -2285,7 +2274,6 @@ def BP(args, config_dict):
                     HGT_query_to_subjects_dict[query] = subjects
                     for each_subject in subjects:
                         gene_id_overall.add(each_subject)
-
 
             ################################# Prepare subset of faa_file for building gene tree ####################################
 
@@ -2316,16 +2304,9 @@ def BP(args, config_dict):
             # put multiple arguments in list
             list_for_multiple_arguments_extract_gene_tree_seq = []
             for each_to_extract in candidates_list:
-                list_for_multiple_arguments_extract_gene_tree_seq.append([each_to_extract,
-                                                                          pwd_tree_folder,
-                                                                          pwd_combined_faa_file_subset,
-                                                                          pwd_blastp_exe,
-                                                                          pwd_mafft_exe,
-                                                                          pwd_fasttree_exe,
-                                                                          name_to_group_dict,
-                                                                          genome_name_list,
-                                                                          HGT_query_to_subjects_dict,
-                                                                          pwd_newick_tree_file])
+                list_for_multiple_arguments_extract_gene_tree_seq.append([each_to_extract, pwd_tree_folder, pwd_combined_faa_file_subset,
+                                                                          pwd_blastp_exe, pwd_mafft_exe, pwd_fasttree_exe, name_to_group_dict,
+                                                                          genome_name_list, HGT_query_to_subjects_dict, pwd_newick_tree_file])
             pool = mp.Pool(processes=num_threads)
             pool.map(extract_gene_tree_seq_worker, list_for_multiple_arguments_extract_gene_tree_seq)
             pool.close()
@@ -2401,7 +2382,6 @@ def BP(args, config_dict):
                     possible_hgts = [possible_hgt_1, possible_hgt_2]
                     candidate_2_possible_direction_dict[each_ranger_prediction_concate] = possible_hgts
 
-
             #################################################### combine results ###################################################
 
             # for report and log
@@ -2409,9 +2389,7 @@ def BP(args, config_dict):
 
             # add results to output file of best blast match approach
             combined_output_handle = open(pwd_candidates_file_ET, 'w')
-            # combined_output_validated_handle = open(pwd_candidates_file_ET_validated, 'w')
             combined_output_validated_header = 'Gene_1\tGene_2\tGene_1_group\tGene_2_group\tIdentity\tend_match\tfull_length_match\tDirection\n'
-            # combined_output_validated_handle.write(combined_output_validated_header)
             combined_output_handle.write(combined_output_validated_header)
             validated_candidate_list = []
             for match_group in open(pwd_candidates_file):
@@ -2444,7 +2422,6 @@ def BP(args, config_dict):
                     combined_output_handle.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' % (recipient_gene, donor_gene, recipient_genome_id, donor_genome_id, identity, end_break, Ctg_align, validated_prediction))
             combined_output_handle.close()
 
-
             ################################################### remove tmp files ###################################################
 
             #report_and_log(('Detect HGT among %s: done for Phylogenetic approach!' % rank_abbre_dict_plural[grouping_level]), pwd_log_file, keep_quiet)
@@ -2467,7 +2444,6 @@ def BP(args, config_dict):
                 os.remove(pwd_op_candidates_only_gene_file_uniq)
                 os.remove(pwd_grouping_file_with_id)
                 os.remove(pwd_combined_faa_file_subset)
-
 
     ####################################################################################################################
     ########################################### combine BM and PG predictions ##########################################
@@ -2531,7 +2507,6 @@ def BP(args, config_dict):
                     flanking_plot_file_list.add('%s___%s.SVG' % (gene_1, gene_2))
 
         pwd_detected_HGT_txt_handle.close()
-
 
         if len(recipient_gene_list) > 0:
 
@@ -2659,7 +2634,6 @@ def BP(args, config_dict):
             else:
                 Get_circlize_plot(multi_level_detection, output_prefix, pwd_detected_HGT_txt, genome_to_taxon_dict, circos_HGT_R, pwd_plot_circos, detection_rank_list, taxon_rank_num, pwd_MetaCHIP_op_folder)
 
-
             # remove tmp files
             os.remove(pwd_detected_HGT_PG_txt)
             if plot_flk_region is True:
@@ -2712,7 +2686,6 @@ def BP(args, config_dict):
             force_create_folder(pwd_combined_prediction_folder)
             combine_PG_output(pwd_detected_HGT_txt_list, output_prefix, detection_rank_list, pwd_detected_HGT_txt_combined)
 
-
             ############################################### extract sequences ##############################################
 
             # get recipient and donor gene list
@@ -2746,7 +2719,6 @@ def BP(args, config_dict):
 
             extract_donor_recipient_sequences(pwd_combined_ffn_file, recipient_gene_list, donor_gene_list, pwd_recipient_gene_seq_ffn, pwd_recipient_gene_seq_faa, pwd_donor_gene_seq_ffn, pwd_donor_gene_seq_faa)
 
-
             ############################################ combine flanking plots ############################################
 
             if plot_flk_region is True:
@@ -2767,7 +2739,6 @@ def BP(args, config_dict):
                 for plot_file in plot_file_list:
                     pwd_plot_file = '%s/%s' % (pwd_flanking_plot_folder_combined_tmp, plot_file)
                     os.system('mv %s %s/' % (pwd_plot_file, pwd_flanking_plot_folder_combined))
-
 
             ###################################### Get_circlize_plot #######################################
 
@@ -2807,7 +2778,6 @@ def BP(args, config_dict):
             print('%s All done, prediction results are in %s ' % (datetime.now().strftime(time_format), pwd_combined_prediction_folder))
 
 
-
 if __name__ == '__main__':
 
     # initialize the options parser
@@ -2819,7 +2789,7 @@ if __name__ == '__main__':
     parser.add_argument('-cov',           required=False, type=int,     default=75,     help='coverage cutoff, default: 75')
     parser.add_argument('-al',            required=False, type=int,     default=200,    help='alignment length cutoff, default: 200')
     parser.add_argument('-flk',           required=False, type=int,     default=10,     help='the length of flanking sequences to plot (Kbp), default: 10')
-    parser.add_argument('-pfr',           required=False, action="store_true",          help='plot flanking_regions of identified HGTs')
+    parser.add_argument('-pfr',           required=False, action="store_true",          help='plot flanking regions of identified HGTs')
     parser.add_argument('-ip',            required=False, type=int,     default=90,     help='identity percentile cutoff, default: 90')
     parser.add_argument('-ei',            required=False, type=float,   default=80,     help='end match identity cutoff, default: 80')
     parser.add_argument('-t',             required=False, type=int,     default=1,      help='number of threads, default: 1')
@@ -2827,8 +2797,5 @@ if __name__ == '__main__':
     parser.add_argument('-force',         required=False, action="store_true",          help='overwrite previous results')
     parser.add_argument('-quiet',         required=False, action="store_true",          help='Do not report progress')
     parser.add_argument('-tmp',           required=False, action="store_true",          help='keep temporary files')
-
     args = vars(parser.parse_args())
-
     BP(args, config_dict)
-
